@@ -1,3 +1,34 @@
+def markStageFailure = { ->
+    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        sh 'exit 1'
+    }
+    fbfm.allSuccessful = false
+}
+
+def customLint = { directory ->
+    dir(directory) {
+        sh 'mvn -B spotless:check checkstyle:check'
+    }
+}
+
+def customTest = { directory ->
+    dir(directory) {
+        sh 'mvn -B test'
+    }
+}
+
+def customBuild = { directory ->
+    dir(directory) {
+        sh 'mvn -B package -DskipTests'
+    }
+}
+
+def customImage = { directory ->
+    dir(directory) {
+        // sh 'mvn -B test'
+    }
+}
+
 pipeline {
     agent any
 
@@ -22,135 +53,34 @@ pipeline {
             }
         }
 
-        stage('lint frontend') {
+        stage('lint') {
             steps {
-                dir('frontend') {
-                    script {
-                        def chName = 'lint / frontend'
-                        def res = null
-
-                        publishChecks name: chName, title: 'Pending', status: 'IN_PROGRESS'
-
-                        try {
-                            sh 'biome ci --colors=off --reporter=summary > frontend-code-quality.txt'
-                            res = [con: 'SUCCESS', title: 'Success']
-                        } catch (err) {
-                            markStageFailure()
-                            echo "${err}"
-                            res = [con: 'FAILURE', title: 'Failed']
-                        }
-
-                        def output = readFile file: 'frontend-code-quality.txt'
-                        echo output
-
-                        publishChecks name: chName, conclusion: res.con, title: res.title,
-                            summary: limitText(output)
-                    }
+                script {
+                    customLint(env.TARGET_DIRECTORY)
                 }
             }
         }
 
-        stage('build frontend') {
-            when {
-                not { expression { fbfm.run.skip } }
-                anyOf {
-                    expression { fbfm.run.force }
-                    allOf {
-                        anyOf {
-                            expression { fbfm.isPrToDefault }
-                            expression { fbfm.isDefault }
-                        }
-                        anyOf {
-                            expression { fbfm.changes.frontend }
-                            expression { fbfm.changes.jenkinsfile }
-                        }
-                    }
-                }
-                beforeAgent true
-            }
-
-            agent {
-                docker {
-                    image 'node:lts-alpine'
-                }
-            }
-
+        stage('test') {
             steps {
                 script {
-                    def chName = 'build / frontend'
-                    publishChecks name: chName, title: 'Pending', status: 'IN_PROGRESS'
-
-                    dir('frontend') {
-                        try {
-                            sh 'npm ci && npm run build'
-                            publishChecks name: chName, conclusion: 'SUCCESS', title: 'Success'
-                            fbfm.build.frontend = true
-                        } catch (err) {
-                            markStageFailure()
-                            echo "${err}"
-                            publishChecks name: chName, conclusion: 'FAILURE', title: 'Failed'
-                        }
-                    }
-                }
-            }
-
-            post {
-                always {
-                    // need to clean the workspace here because it's a separate workspace from the workspace that gets
-                    // cleaned at the end of this file. this installs node_modules, so it can take up a large amount of
-                    // disk
-                    cleanWs()
+                    customTest(env.TARGET_DIRECTORY)
                 }
             }
         }
 
-        stage('image frontend') {
-            when {
-                expression { fbfm.build.frontend && fbfm.canBuild }
-            }
-
+        stage('build') {
             steps {
                 script {
-                    fbfmBuildImage(name: 'frontend', directory: 'frontend', tagSeries: 'fe',
-                        dockerRepo: 'minidomo/feedbackfm', pushLatest: fbfm.isDefault
-                    )
+                    customBuild(env.TARGET_DIRECTORY)
                 }
             }
         }
 
-        stage('test build image microservices') {
+        stage('image') {
             steps {
                 script {
-                    fbfm.microservices.values().each { service ->
-                        def shouldRun = !fbfm.run.skip &&
-                            (
-                                fbfm.run.force ||
-                                (
-                                    (fbfm.isPrToDefault || fbfm.isDefault) &&
-                                    (fbfm.changes.jenkinsfile || fbfm.changes[service.name])
-                                )
-                            )
-
-                        if (shouldRun) {
-                            if (service.test) {
-                                stage("test ${service.name}") {
-                                    fbfmTestMicroservice(name: service.name, directory: service.directory)
-                                }
-                            }
-
-                            stage("build ${service.name}") {
-                                fbfmBuildMicroservice(name: service.name, directory: service.directory)
-                            }
-                        }
-
-                        if (fbfm.build[service.name] && fbfm.canBuild) {
-                            stage("image ${service.name}") {
-                                fbfmBuildImage(directory: service.directory, tagSeries: "be-${service.name}",
-                                    dockerRepo: 'minidomo/feedbackfm', pushLatest: fbfm.isDefault
-                                )
-                            }
-                        }
-                    }
+                    customImage(env.TARGET_DIRECTORY)
                 }
             }
         }
@@ -162,11 +92,11 @@ pipeline {
             // delete the workspace after to prevent large disk usage
             cleanWs()
 
-            script {
-                if (!fbfm.allSuccessful) {
-                    error 'Not all stages were successful'
-                }
-            }
+            // script {
+            //     if (!fbfm.allSuccessful) {
+            //         error 'Not all stages were successful'
+            //     }
+            // }
         }
     }
 }
