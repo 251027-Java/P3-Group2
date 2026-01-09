@@ -26,6 +26,18 @@ unclassified:
               artifactNumToKeepStr: "1"
               daysToKeepStr: "50"
               numToKeepStr: "10"
+  globalLibraries:
+    libraries:
+      - name: "primary"
+        retriever:
+          modernSCM:
+            libraryPath: ".jenkins/shared-lib/primary/"
+            scm:
+              gitSource:
+                credentialsId: "github-app-team"
+                remote: "https://github.com/251027-Java/P3-Group2"
+                traits:
+                  - "gitBranchDiscovery"
 tool:
   jdk:
     installations:

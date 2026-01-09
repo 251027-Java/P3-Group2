@@ -1,3 +1,5 @@
+@Library('primary')
+
 def markStageFailure = { ->
     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
         sh 'exit 1'
@@ -11,7 +13,7 @@ def customLint = { directory ->
     }
 }
 
-def customTest = { directory ->
+def someRandomTest = { directory ->
     dir(directory) {
         sh 'mvn -B test'
     }
@@ -49,6 +51,8 @@ pipeline {
                     sh 'printenv | sort'
 
                     currentBuild.displayName = "${currentBuild.displayName} ${shortSha()}"
+
+                    customTest()
                 }
             }
         }
@@ -64,7 +68,7 @@ pipeline {
         stage('test') {
             steps {
                 script {
-                    customTest(env.TARGET_DIRECTORY)
+                    someRandomTest(env.TARGET_DIRECTORY)
                 }
             }
         }

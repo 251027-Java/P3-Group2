@@ -1,6 +1,5 @@
 services:
   jenkins:
-    container_name: ${JENKINS_CONTAINER}
     build: .
     restart: always
     depends_on:

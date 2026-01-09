@@ -38,7 +38,7 @@ instructions:
 # Check if Jenkins is ready
 [group("Init")]
 check:
-    count=$({{ sudo }}docker compose logs | grep -i -c "Jenkins is fully up and running"); \
+    count=$({{ sudo }}docker compose -p ${COMPOSE_PROJECT_NAME} logs | grep -i -c "Jenkins is fully up and running"); \
     if [ $count -gt 0 ]; then \
         echo "Jenkins is ready"; \
     else \
@@ -55,17 +55,17 @@ init-files:
 # Start Jenkins
 [group("Docker")]
 start:
-    {{ sudo }}docker compose up --wait --build
+    {{ sudo }}docker compose -p ${COMPOSE_PROJECT_NAME} up --wait --build
 
 # Stop Jenkins
 [group("Docker")]
 stop:
-    {{ sudo }}docker compose down
+    {{ sudo }}docker compose -p ${COMPOSE_PROJECT_NAME} down
 
 # Destroy all of Jenkins, including the volumes
 [group("Docker")]
 destroy:
-    {{ sudo }}docker compose down -v --rmi all
+    {{ sudo }}docker compose -p ${COMPOSE_PROJECT_NAME} down -v --rmi all
 
 # View commands for the Jenkins server
 [group("Jenkins CLI")]
@@ -91,7 +91,7 @@ jcli *args:
 # Copies the JCasC configurations to the Jenkins container
 [group("Jenkins CLI")]
 send-local-config:
-    {{ sudo }}docker cp configs/. $JENKINS_CONTAINER:/var/jenkins_home/casc_configs/
+    {{ sudo }}docker cp configs/. ${COMPOSE_PROJECT_NAME}-jenkins-1:/var/jenkins_home/casc_configs/
 
 # Reloads the JCasC configuration on the Jenkins container
 [group("Jenkins CLI")]
@@ -165,7 +165,7 @@ ip:
 # Watch logs
 [group("Extra")]
 logs:
-    {{ sudo }}docker compose logs -f -t
+    {{ sudo }}docker compose -p ${COMPOSE_PROJECT_NAME} logs -f -t
 
 # Sort plugins.txt
 [group("Util")]

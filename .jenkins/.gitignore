@@ -3,3 +3,4 @@ creds/*.xml
 secrets/*
 !secrets/*.example
 *.pem
+.groovylintrc.json
