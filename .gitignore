@@ -5,6 +5,7 @@
 .temp
 .DS_Store
 Thumbs.db
+*.code-workspace
 
 # Spring gitignore
 HELP.md
