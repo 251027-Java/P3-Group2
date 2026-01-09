@@ -8,10 +8,7 @@ pipeline {
 
     environment {
         GITHUB_DEFAULT_BRANCH = 'main'
-        TARGET_DIRECTORY = 'sample'
-
-        // disable colored output with vite
-        NO_COLOR = 'true'
+        TARGET_DIRECTORY = 'backend/random-service'
     }
 
     stages {
@@ -21,16 +18,6 @@ pipeline {
                     sh 'printenv | sort'
 
                     currentBuild.displayName = "${currentBuild.displayName} ${shortSha()}"
-
-                    // fbfm.isDefault = env.BRANCH_IS_PRIMARY == 'true'
-                    // fbfm.isPrToDefault = env.CHANGE_TARGET == env.GITHUB_DEFAULT_BRANCH
-                    // fbfm.canBuild = fbfm.isDefault
-
-                    // def ref = determineReference()
-                    // checkForChanges(ref)
-                    // handleCommitAttributes()
-
-                    // echo "${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(fbfm))}"
                 }
             }
         }
