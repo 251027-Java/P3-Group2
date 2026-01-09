@@ -111,6 +111,11 @@ jobs:
               numToKeep(10)
             }
           }
+          factory {
+            workflowBranchProjectFactory {
+              scriptPath('jenkinsfiles/random-service.Jenkinsfile')
+            }
+          }
         }
       }
   - script: >
