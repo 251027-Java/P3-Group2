@@ -28,7 +28,8 @@ unclassified:
               numToKeepStr: "10"
   globalLibraries:
     libraries:
-      - name: "primary"
+      - defaultVersion: "main"
+        name: "primary"
         retriever:
           modernSCM:
             libraryPath: ".jenkins/shared-lib/primary/"
