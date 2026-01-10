@@ -49,7 +49,7 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     sh 'printenv | sort'
 
-                    currentBuild.displayName = "${currentBuild.displayName} ${shortSha()}"
+                    currentBuild.displayName = "${currentBuild.displayName} ${env.GIT_COMMIT.take(7)}"
 
                     customTest()
                 }
