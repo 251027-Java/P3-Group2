@@ -60,6 +60,7 @@ pipeline {
             steps {
                 script {
                     customTest()
+                    backend.test name: 'asdasd', something: 'this is something'
                     customLint(env.TARGET_DIRECTORY)
                 }
             }
@@ -68,6 +69,7 @@ pipeline {
         stage('test') {
             steps {
                 script {
+                    backend.hello
                     someRandomTest(env.TARGET_DIRECTORY)
                 }
             }
