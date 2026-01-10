@@ -1,27 +1,3 @@
-def customLint = { directory ->
-    dir(directory) {
-        sh 'mvn -B spotless:check checkstyle:check'
-    }
-}
-
-def someRandomTest = { directory ->
-    dir(directory) {
-        sh 'mvn -B test'
-    }
-}
-
-def customBuild = { directory ->
-    dir(directory) {
-        sh 'mvn -B package -DskipTests'
-    }
-}
-
-def customImage = { directory ->
-    dir(directory) {
-        // sh 'mvn -B test'
-    }
-}
-
 pipeline {
     agent any
 
@@ -41,8 +17,6 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
-
-                    customTest()
                 }
             }
         }
@@ -50,9 +24,7 @@ pipeline {
         stage('lint') {
             steps {
                 script {
-                    customTest()
-                    backend.test name: 'asdasd', something: 'this is something'
-                    customLint(env.TARGET_DIRECTORY)
+                    backend.lint path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -60,8 +32,7 @@ pipeline {
         stage('test') {
             steps {
                 script {
-                    backend.hello()
-                    someRandomTest(env.TARGET_DIRECTORY)
+                    backend.test path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -69,7 +40,7 @@ pipeline {
         stage('build') {
             steps {
                 script {
-                    customBuild(env.TARGET_DIRECTORY)
+                    backend.build path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -77,7 +48,7 @@ pipeline {
         stage('image') {
             steps {
                 script {
-                    customImage(env.TARGET_DIRECTORY)
+                    dockerUtil.image path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -85,15 +56,9 @@ pipeline {
 
     post {
         always {
-            dockerUtil.cleanup()
-            // delete the workspace after to prevent large disk usage
-            cleanWs()
-
-            // script {
-            //     if (!fbfm.allSuccessful) {
-            //         error 'Not all stages were successful'
-            //     }
-            // }
+            script {
+                pipelineUtil.cleanup()
+            }
         }
     }
 }

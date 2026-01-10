@@ -20,3 +20,8 @@ private def markStage(Map params = [:]) {
         sh "exit ${code}"
     }
 }
+
+def cleanup() {
+    dockerUtil.cleanup()
+    cleanWs()
+}

@@ -1,9 +1,5 @@
 def updateDisplayName() {
-    currentBuild.displayName = "${currentBuild.displayName} ${shortSha()}"
-}
-
-def shortSha() {
-    return env.GIT_COMMIT.take(7)
+    currentBuild.displayName = "${currentBuild.displayName} ${gitUtil.shortSha()}"
 }
 
 def showEnv() {

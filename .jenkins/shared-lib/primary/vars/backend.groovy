@@ -1,7 +1,23 @@
-void test(Map args = [:]) {
-    echo "${args}"
+def javaLint(Map params = [:]) {
+    def path = params.path
+
+    dir(path) {
+        sh 'mvn -B spotless:check checkstyle:check'
+    }
 }
 
-void hello() {
-    echo 'hello from backend'
+def javaTest(Map params = [:]) {
+    def path = params.path
+
+    dir(path) {
+        sh 'mvn -B test'
+    }
+}
+
+def javaBuild(Map params = [:]) {
+    def path = params.path
+
+    dir(path) {
+        sh 'mvn -B package -DskipTests'
+    }
 }
