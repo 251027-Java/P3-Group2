@@ -31,7 +31,6 @@ pipeline {
     }
 
     environment {
-        GITHUB_DEFAULT_BRANCH = 'main'
         TARGET_DIRECTORY = 'backend/random-service'
     }
 
@@ -86,7 +85,7 @@ pipeline {
 
     post {
         always {
-            sh '.jenkins/scripts/docker-cleanup.sh'
+            dockerUtil.cleanup()
             // delete the workspace after to prevent large disk usage
             cleanWs()
 
