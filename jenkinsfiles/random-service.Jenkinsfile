@@ -1,4 +1,4 @@
-@Library("primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}") _
+library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
 
 def markStageFailure = { ->
     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
