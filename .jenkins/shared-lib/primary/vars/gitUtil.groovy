@@ -1,0 +1,40 @@
+def isDefaultBranch() {
+    return env.BRANCH_IS_PRIMARY == 'true'
+}
+
+def isPrCreated() {
+    return currentBuild.changeSets.size() == 0
+}
+
+def getDefaultBranchName() {
+    def path = util.loadScript name: 'default-branch.sh'
+    def name = sh(script: path, returnStdout: true).trim()
+    return name
+}
+
+def isPrToDefaultBranch() {
+    return env.CHANGE_TARGET == getDefaultBranchName()
+}
+
+def getRecommendedRevspec() {
+    if (isPrToDefaultBranch() && (isPrCreated() || currentBuild.previousBuild?.result == 'FAILURE')) {
+        def path = util.loadScript name: 'fetch-latest.sh'
+        def name = getDefaultBranchName()
+
+        sh "${path} ${name}"
+
+        return "origin/${name}"
+    }
+
+    return isPrCreated() ? 'HEAD~1' : "HEAD~${changeSet.items.size()}"
+}
+
+def hasChanges(Map params = [:]) {
+    def gitPath = params.path
+
+    def path = util.loadScript name: 'changes-count.sh'
+    def revspec = getRecommendedRevspec()
+
+    def changes = sh(script: "${path} ${revspec} '^${gitPath}'", returnStdout: true).trim()
+    return changes != '0'
+}

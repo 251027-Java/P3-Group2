@@ -1,10 +1,3 @@
-def markStageFailure = { ->
-    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        sh 'exit 1'
-    }
-    fbfm.allSuccessful = false
-}
-
 def customLint = { directory ->
     dir(directory) {
         sh 'mvn -B spotless:check checkstyle:check'
@@ -47,9 +40,8 @@ pipeline {
             steps {
                 script {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
-                    sh 'printenv | sort'
-
-                    currentBuild.displayName = "${currentBuild.displayName} ${env.GIT_COMMIT.take(7)}"
+                    util.showEnv()
+                    util.updateDisplayName()
 
                     customTest()
                 }
