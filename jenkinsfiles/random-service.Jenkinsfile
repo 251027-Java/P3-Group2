@@ -69,7 +69,7 @@ pipeline {
         stage('test') {
             steps {
                 script {
-                    backend.hello
+                    backend.hello()
                     someRandomTest(env.TARGET_DIRECTORY)
                 }
             }
