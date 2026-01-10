@@ -1,5 +1,3 @@
-library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
-
 def markStageFailure = { ->
     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
         sh 'exit 1'
@@ -48,6 +46,7 @@ pipeline {
         stage('check run requirements') {
             steps {
                 script {
+                    library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     sh 'printenv | sort'
 
                     currentBuild.displayName = "${currentBuild.displayName} ${shortSha()}"
@@ -60,6 +59,7 @@ pipeline {
         stage('lint') {
             steps {
                 script {
+                    customTest()
                     customLint(env.TARGET_DIRECTORY)
                 }
             }
