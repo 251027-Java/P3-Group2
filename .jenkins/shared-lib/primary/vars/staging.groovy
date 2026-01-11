@@ -94,7 +94,7 @@ def execute(Map params = [:]) {
 
     pipelineUtil.getQualifyingDirs().each { path ->
         if (!path.startsWith(baseDirectory)) { return }
-        allSuccessful &= executeDir dockerCredentialsId: dockerCredentialsId, attributes: attributes
+        allSuccessful &= executeDir dockerCredentialsId: dockerCredentialsId, attributes: attributes, path: path
     }
 
     return allSuccessful
@@ -103,6 +103,7 @@ def execute(Map params = [:]) {
 def executeDir(Map params = [:]) {
     def dockerCredentialsId = params.dockerCredentialsId
     def attributes = params.attributes
+    def path = params.path
     def allSuccessful = true
 
     def shouldRun = (
