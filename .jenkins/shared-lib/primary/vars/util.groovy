@@ -16,15 +16,17 @@ def printMap(Map map) {
 def loadScript(Map params = [:]) {
     def name = params.name
     def path = "${env.WORKSPACE}/${name}"
+    def safeName = path.replaceAll('/', '-')
+
     echo "load script path: ${path}"
 
     if (!fileExists(path)) {
         writeFile file: "${name}", text: libraryResource("${name}")
         sh "chmod +x ${path}"
-        stash includes: path, name: path
+        stash includes: path, name: safeName
     }
 
-    unstash name: path
+    unstash name: safeName
 
     return path
 }
