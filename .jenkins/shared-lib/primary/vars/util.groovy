@@ -15,7 +15,7 @@ def printMap(Map map) {
 
 def loadScript(Map params = [:]) {
     def name = params.name
-    def path = "${env.WORKSPACE}/${name}"
+    def path = "./${name}"
     def safeName = path.replaceAll('/', '-')
 
     echo "load script path: ${path}"
