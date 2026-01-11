@@ -25,7 +25,7 @@ pipeline {
         stage('lint') {
             steps {
                 script {
-                    backend.javaLint path: env.TARGET_DIRECTORY
+                    backend.lint path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('test') {
             steps {
                 script {
-                    backend.javaTest path: env.TARGET_DIRECTORY
+                    backend.test path: env.TARGET_DIRECTORY
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         stage('build') {
             steps {
                 script {
-                    backend.javaBuild path: env.TARGET_DIRECTORY
+                    backend.build path: env.TARGET_DIRECTORY
                 }
             }
         }

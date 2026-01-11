@@ -14,18 +14,29 @@ def image(Map params = [:]) {
     def branch = gitUtil.getCurrentBranch().replaceAll('/', '-')
     def tag = "${name}-${branch}-${gitUtil.shortSha()}"
 
+    def chName = "image / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: chName
+
     dir(path) {
-        def image = docker.build(repo)
+        try {
+            def image = docker.build(repo)
 
-        docker.withRegistry('', credId) {
-            image.push(tag)
+            docker.withRegistry('', credId) {
+                image.push(tag)
 
-            if (latest) {
-                image.push("${tag}-latest")
+                if (latest) {
+                    image.push("${name}-latest")
+                }
             }
+            
+            checksUtil.success name: chName
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: chName
         }
     }
 
     def cleanUpScript = util.loadScript name: 'docker-cleanup.sh'
-    sh "${cleanUpScript}"
+    sh "${cleanUpScript} ${tag}"
 }

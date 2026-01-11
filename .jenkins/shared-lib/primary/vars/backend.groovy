@@ -1,23 +1,51 @@
-def javaLint(Map params = [:]) {
+def lint(Map params = [:]) {
     def path = params.path
+    def name = "lint / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
 
     dir(path) {
-        sh 'mvn -B spotless:check checkstyle:check'
+        try {
+            sh 'mvn -B spotless:check checkstyle:check'
+            checksUtil.success name: name
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name
+        }
     }
 }
 
-def javaTest(Map params = [:]) {
+def test(Map params = [:]) {
     def path = params.path
+    def name = "test / ${checksUtil.nameFromDirectory([path: path])}"
 
-    dir(path) {
-        sh 'mvn -B test'
+    withChecks(name: name) {
+        dir(path) {
+            try {
+                sh 'mvn -B test'
+                junit '**/target/surefire-reports/TEST-*.xml'
+            } catch (err) {
+                echo "${err}"
+                pipelineUtil.failStage()
+                checksUtil.failed name: name
+            }
+        }
     }
 }
 
-def javaBuild(Map params = [:]) {
+def build(Map params = [:]) {
     def path = params.path
+    def name = "build / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
 
     dir(path) {
-        sh 'mvn -B package -DskipTests'
+        try {
+            sh 'mvn -B package -DskipTests'
+            checksUtil.success name: name
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name
+        }
     }
 }
