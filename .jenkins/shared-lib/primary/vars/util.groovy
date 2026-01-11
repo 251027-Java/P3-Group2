@@ -15,7 +15,9 @@ def printMap(Map map) {
 
 def loadScript(Map params = [:]) {
     def name = params.name
-    def path = "${pwd()}/${name}"
+    def path = "./${name}"
+
+    echo "load script path: ${path}"
 
     if (!fileExists(path)) {
         writeFile file: "${name}", text: libraryResource("${name}")
