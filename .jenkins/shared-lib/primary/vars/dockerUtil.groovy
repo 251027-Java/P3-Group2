@@ -1,6 +1,9 @@
 def cleanup(Map params = [:]) {
     def tag = params.tag ?: ''
     def path = util.loadScript name: 'docker-cleanup.sh'
+
+    echo "ret path: ${path}"
+    echo "cur workspace: ${env.WORKSPACE} | pwd: ${pwd()} | exists: ${fileExists(path)}"
     sh "${path} ${tag}"
 }
 
@@ -39,8 +42,7 @@ def image(Map params = [:]) {
         }
     }
 
-    def cleanUpScript = util.loadScript name: 'docker-cleanup.sh'
-    sh "${cleanUpScript} ${tag}"
+    cleanup tag: tag
 
     return successRet
 }

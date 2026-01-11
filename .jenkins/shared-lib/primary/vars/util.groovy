@@ -16,7 +16,6 @@ def printMap(Map map) {
 def loadScript(Map params = [:]) {
     def name = params.name
     def path = "${env.WORKSPACE}/${name}"
-
     echo "load script path: ${path}"
 
     if (!fileExists(path)) {

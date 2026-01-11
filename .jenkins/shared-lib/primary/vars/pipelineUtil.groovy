@@ -22,8 +22,11 @@ private def markStage(Map params = [:]) {
 }
 
 def cleanup() {
-    dockerUtil.cleanup()
-    cleanWs()
+    try {
+        dockerUtil.cleanup()
+    } finally {
+        cleanWs()
+    }
 }
 
 def getSettings(Map params = [:]) {
