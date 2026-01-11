@@ -45,7 +45,8 @@ pipeline {
 
             steps {
                 script {
-                    echo 'empty'
+                    gdata.allSuccessful &= staging.execute dockerCredentialsId: 'docker-hub-cred',
+                        attributes: gdata.attributes, baseDirectory: 'frontend'
                 }
             }
 
@@ -65,8 +66,8 @@ pipeline {
 
             steps {
                 script {
-                    gdata.allSuccessful &= backend.runPipeline dockerCredentialsId: 'docker-hub-cred',
-                        attributes: gdata.attributes
+                    gdata.allSuccessful &= staging.execute dockerCredentialsId: 'docker-hub-cred',
+                        attributes: gdata.attributes, baseDirectory: 'backend'
                 }
             }
         }

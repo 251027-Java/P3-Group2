@@ -70,13 +70,14 @@ def build(Map params = [:]) {
     return successRet
 }
 
-def runPipeline(Map params = [:]) {
+def execute(Map params = [:]) {
     def dockerCredentialsId = params.dockerCredentialsId
     def attributes = params.attributes
+    def baseDirectory = params.baseDirectory
     def allSuccessful = true
 
     pipelineUtil.getQualifyingDirs().each { path ->
-        if (!path.startsWith('backend')) { return }
+        if (!path.startsWith(baseDirectory)) { return }
 
         def shouldRun = (
             !attributes['skip']
