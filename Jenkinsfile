@@ -6,6 +6,7 @@ def gdata = [
     changes: [:],
     build: [:],
     allSuccessful: true,
+    attributes: [:],
 ]
 
 pipeline {
@@ -29,6 +30,7 @@ pipeline {
                     gdata.backend = gdata.changes.any { it.startsWith('backend') }
                     gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
                     gdata.isDefault = gitUtil.isDefaultBranch()
+                    gdata.attributes.putAll(pipeline.getAttributes())
 
                     util.printMap(gdata)
                 }

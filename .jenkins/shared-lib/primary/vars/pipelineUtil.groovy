@@ -37,3 +37,22 @@ def getSettings(Map params = [:]) {
 def getQualifyingDirs() {
     return findFiles(glob: '*/*/.ci.json').collect { it.path.replace('/.ci.json', '') }
 }
+
+def getAttributes() {
+    def path = util.loadScript name: 'commit-message.sh'
+    def message = sh(script: path, returnStdout: true).trim()
+
+    // allow user to specify attributes for this run by checking the commit message for
+    // [<attribute1>,<attribute2>,...]
+    def match = message =~ /\[([^\[]+)\]/
+
+    def groups = match.collect { it[1] }
+    def last = groups ? groups.last() : null
+
+    if (last) {
+        def attributes = last.split(',').collectEntries { [(it.trim()): true ] }
+        return attributes
+    }
+
+    return [:]
+}

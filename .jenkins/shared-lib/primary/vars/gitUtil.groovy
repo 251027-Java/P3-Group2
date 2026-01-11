@@ -46,6 +46,7 @@ def getChanges() {
 
                 // https://stackoverflow.com/a/68937527
                 // get rid of the matcher object because it's not serializable
+                // otherwise, error thrown when fileExists is called
                 match = null
 
                 // directory could've been deleted so ensure it exists
