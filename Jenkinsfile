@@ -31,6 +31,7 @@ pipeline {
                         attrIncludeGit: params.INTL_ATTRIBUTES_INCLUDE_GIT
                     ]))
 
+                    util.printMap(params)
                     util.printMap(gdata)
                 }
             }
