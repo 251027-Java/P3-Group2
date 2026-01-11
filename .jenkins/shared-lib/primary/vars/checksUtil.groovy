@@ -6,27 +6,27 @@ def pending(Map params = [:]) {
 
 def success(Map params = [:]) {
     def name = params.name
-    def summary = params.summary
+    def summary = params.summary ?: ''
 
-    publishChecks name: name, title: 'Success', conclusion: 'SUCCESS', summary: summary
+    publishChecks name: name, title: 'Success', conclusion: 'SUCCESS', summary: limitText(summary)
 }
 
 def failed(Map params = [:]) {
     def name = params.name
-    def summary = params.summary
+    def summary = params.summary ?: ''
 
-    publishChecks name: name, title: 'Failed', conclusion: 'FAILURE', summary: summary
+    publishChecks name: name, title: 'Failed', conclusion: 'FAILURE', summary: limitText(summary)
 }
 
 def skipped(Map params = [:]) {
     def name = params.name
-    def summary = params.summary
+    def summary = params.summary ?: ''
 
-    publishChecks name: name, title: 'Skipped', conclusion: 'SKIPPED', summary: summary
+    publishChecks name: name, title: 'Skipped', conclusion: 'SKIPPED', summary: limitText(summary)
 }
 
 def limitText(Map params = [:]) {
-    def end = params.end
+    def end = params.end ?: true
     def text = params.text
 
     // https://github.com/jenkinsci/junit-plugin/blob/6c6699fb25df1b7bae005581d9af2ed698c47a4c/src/main/java/io/jenkins/plugins/junit/checks/JUnitChecksPublisher.java#L72
