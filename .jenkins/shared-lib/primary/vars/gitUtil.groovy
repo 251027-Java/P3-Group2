@@ -32,7 +32,7 @@ def getRecommendedRevspec() {
 def getChanges() {
     def path = util.loadScript name: 'git-changes.sh'
     // def revspec = getRecommendedRevspec()
-    def revspec = '8e8756a'
+    def revspec = '80470b7'
 
     def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()
 
@@ -54,7 +54,7 @@ def getChanges() {
                 }
             }
 
-            echo "    GET_CHANGES: ${filepath} | found: ${} | final: ${ret}"
+            echo "    GET_CHANGES: ${filepath} | matched: ${inter} | final: ${ret}"
             return ret
         }
         .findAll { it } as Set
