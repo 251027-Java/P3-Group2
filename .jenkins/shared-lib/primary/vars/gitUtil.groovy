@@ -31,8 +31,7 @@ def getRecommendedRevspec() {
 
 def getChanges() {
     def path = util.loadScript name: 'git-changes.sh'
-    // def revspec = getRecommendedRevspec()
-    def revspec = '80470b7'
+    def revspec = getRecommendedRevspec()
 
     def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()
 
@@ -49,7 +48,9 @@ def getChanges() {
                 // get rid of the matcher object because it's not serializable
                 match = null
 
-                if (fileExists(inter)) {
+                // directory could've been deleted so ensure it exists
+                // also only include directories that have .ci.json
+                if (fileExists("${inter}/.ci.json")) {
                     ret = inter
                 }
             }

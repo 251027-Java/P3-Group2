@@ -25,3 +25,11 @@ def cleanup() {
     dockerUtil.cleanup()
     cleanWs()
 }
+
+def getSettings(Map params = [:]) {
+    def path = params.path
+    def filepath = "${path}/.ci.json"
+
+    def settings = readJSON file: filepath
+    return settings
+}

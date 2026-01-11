@@ -1,4 +1,18 @@
 {
-    "lint": true,
-    "test": true
+    "lint": {
+        "enabled": true,
+        "command": "./mvnw -B spotless:check checkstyle:check"
+    },
+    "test": {
+        "enabled": true,
+        "command": "./mvnw -B test"
+    },
+    "build": {
+        "enabled": true,
+        "command": "./mvnw -B package -DskipTests"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "be-jenkins-test"
+    }
 }

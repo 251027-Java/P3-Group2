@@ -1,0 +1,91 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Service Pipeline Config",
+    "description": "Configuration file controlling linting, testing, building, and image tagging for a service.",
+    "type": "object",
+    "properties": {
+        "lint": {
+            "type": "object",
+            "description": "Configuration for linting and static analysis.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether linting should run for this service."
+                },
+                "command": {
+                    "type": "string",
+                    "description": "The command executed to perform linting."
+                }
+            },
+            "required": [
+                "enabled",
+                "command"
+            ],
+            "additionalProperties": false
+        },
+        "test": {
+            "type": "object",
+            "description": "Configuration for running unit or integration tests.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether tests should run for this service."
+                },
+                "command": {
+                    "type": "string",
+                    "description": "The command executed to run tests."
+                }
+            },
+            "required": [
+                "enabled",
+                "command"
+            ],
+            "additionalProperties": false
+        },
+        "build": {
+            "type": "object",
+            "description": "Configuration for building the service artifact.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether the build step should run for this service."
+                },
+                "command": {
+                    "type": "string",
+                    "description": "The command executed to build the service."
+                }
+            },
+            "required": [
+                "enabled",
+                "command"
+            ],
+            "additionalProperties": false
+        },
+        "image": {
+            "type": "object",
+            "description": "Configuration for building and tagging container images.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether a container image should be built for this service."
+                },
+                "tagSeries": {
+                    "type": "string",
+                    "description": "The base tag or tag prefix used when generating image tags."
+                }
+            },
+            "required": [
+                "enabled",
+                "tagSeries"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "lint",
+        "test",
+        "build",
+        "image"
+    ],
+    "additionalProperties": false
+}

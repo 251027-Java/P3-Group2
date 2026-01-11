@@ -1,4 +1,18 @@
 {
-    "lint": true,
-    "test": false
+    "lint": {
+        "enabled": true,
+        "command": "./mvnw -B spotless:check checkstyle:check"
+    },
+    "test": {
+        "enabled": false,
+        "command": "./mvnw -B test"
+    },
+    "build": {
+        "enabled": true,
+        "command": "./mvnw -B package -DskipTests"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "be-random-service"
+    }
 }
