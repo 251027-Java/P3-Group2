@@ -20,8 +20,6 @@ pipeline {
                     util.updateDisplayName()
 
                     gdata.attributes.putAll(gitUtil.getChanges())
-                    gdata.attributes['frontend'] = gdata.changes.any { it.startsWith('frontend') }
-                    gdata.attributes['backend'] = gdata.changes.any { it.startsWith('backend') }
                     gdata.attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
                     gdata.attributes['default'] = gitUtil.isDefaultBranch()
                     gdata.attributes.putAll(pipelineUtil.getAttributes())
@@ -32,11 +30,6 @@ pipeline {
         }
 
         stage('frontend') {
-            when {
-                expression { gdata.attributes['frontend'] }
-                beforeAgent true
-            }
-
             agent {
                 docker {
                     image 'node:lts-alpine'
@@ -51,10 +44,6 @@ pipeline {
         }
 
         stage('backend') {
-            when {
-                expression { gdata.attributes['backend'] }
-            }
-
             steps {
                 script {
                     pipelineUtil.getQualifyingDirs().each { path ->
