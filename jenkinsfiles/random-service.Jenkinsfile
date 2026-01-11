@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        stage('check run requirements') {
+        stage('setup') {
             steps {
                 script {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"

@@ -85,7 +85,7 @@ credentials:
 # More specific Job DSL API catered to your installed plugins: <jenkins-url>/plugin/job-dsl/api-viewer/index.html
 jobs:
   - script: >
-      multibranchPipelineJob('primary') {
+      multibranchPipelineJob('random-service') {
         branchSources {
           branchSource {
             source {
@@ -115,6 +115,41 @@ jobs:
           factory {
             workflowBranchProjectFactory {
               scriptPath('jenkinsfiles/random-service.Jenkinsfile')
+            }
+          }
+        }
+      }
+  - script: >
+      multibranchPipelineJob('jenkins-test') {
+        branchSources {
+          branchSource {
+            source {
+              github {
+                id('primary-github')
+                credentialsId('github-app-team')
+                configuredByUrl(true)
+                repoOwner('251027-Java')
+                repository('P3-Group2')
+                repositoryUrl('https://github.com/251027-Java/P3-Group2')
+                traits {
+                  gitHubPullRequestDiscovery {
+                    strategyId(2)
+                  }
+                  gitHubBranchDiscovery {
+                    strategyId(1)
+                  }
+                }
+              }
+            }
+          }
+          orphanedItemStrategy {
+            discardOldItems {
+              numToKeep(10)
+            }
+          }
+          factory {
+            workflowBranchProjectFactory {
+              scriptPath('jenkinsfiles/jenkins-test.Jenkinsfile')
             }
           }
         }
