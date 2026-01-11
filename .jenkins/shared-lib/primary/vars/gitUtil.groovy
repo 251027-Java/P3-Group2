@@ -26,7 +26,7 @@ def getRecommendedRevspec() {
         return "origin/${name}"
     }
 
-    return isPrCreated() ? 'HEAD~1' : "HEAD~${changeSet.items.size()}"
+    return isPrCreated() ? 'HEAD~1' : "HEAD~${currentBuild.changeSet.items.size()}"
 }
 
 def hasChanges(Map params = [:]) {
