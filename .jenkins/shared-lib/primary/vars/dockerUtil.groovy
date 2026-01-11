@@ -10,7 +10,7 @@ def image(Map params = [:]) {
     def credId = params.credId
     def latest = params.latest ?: false
 
-    def name = util.getLastDir(path)
+    def name = util.getLastDir path: path
     def branch = gitUtil.getCurrentBranch().replaceAll('/', '-')
     def tag = "${name}-${branch}-${gitUtil.shortSha()}"
 
