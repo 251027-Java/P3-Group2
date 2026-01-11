@@ -6,23 +6,23 @@ def pending(Map params = [:]) {
 
 def success(Map params = [:]) {
     def name = params.name
-    def summary = params.summary ?: ''
+    def summary = limitText text: params.summary ?: ''
 
-    publishChecks name: name, title: 'Success', conclusion: 'SUCCESS', summary: limitText(summary)
+    publishChecks name: name, title: 'Success', conclusion: 'SUCCESS', summary: summary
 }
 
 def failed(Map params = [:]) {
     def name = params.name
-    def summary = params.summary ?: ''
+    def summary = limitText text: params.summary ?: ''
 
-    publishChecks name: name, title: 'Failed', conclusion: 'FAILURE', summary: limitText(summary)
+    publishChecks name: name, title: 'Failed', conclusion: 'FAILURE', summary: summary
 }
 
 def skipped(Map params = [:]) {
     def name = params.name
-    def summary = params.summary ?: ''
+    def summary = limitText text: params.summary ?: ''
 
-    publishChecks name: name, title: 'Skipped', conclusion: 'SKIPPED', summary: limitText(summary)
+    publishChecks name: name, title: 'Skipped', conclusion: 'SKIPPED', summary: summary
 }
 
 def limitText(Map params = [:]) {
