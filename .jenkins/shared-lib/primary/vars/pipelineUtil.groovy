@@ -33,3 +33,7 @@ def getSettings(Map params = [:]) {
     def settings = readJSON file: filepath
     return settings
 }
+
+def getQualifyingDirs() {
+    return findFiles(glob: '*/*/.ci.json').collect { it.path.replace('/.ci.json', '') }
+}

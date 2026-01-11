@@ -34,6 +34,8 @@ pipeline {
                     gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
                     gdata.isDefault = gitUtil.isDefaultBranch()
 
+                    echo "${pipelineUtil.getQualifyingDirs()}"
+
                     util.printMap(gdata)
                 }
             }
