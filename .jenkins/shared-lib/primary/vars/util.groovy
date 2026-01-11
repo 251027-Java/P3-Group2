@@ -29,6 +29,8 @@ def loadScript(Map params = [:]) {
     unstash name: safeName
 
     sh 'ls -la'
+    sh "cat ${path}"
+    sh "cat ${path} | sh"
 
     return path
 }
