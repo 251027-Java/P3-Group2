@@ -55,6 +55,7 @@ pipeline {
 
             steps {
                 script {
+                    echo 'empty'
                 }
             }
         }
