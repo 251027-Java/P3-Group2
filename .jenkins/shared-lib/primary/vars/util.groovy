@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 def updateDisplayName() {
     currentBuild.displayName = "${currentBuild.displayName} ${gitUtil.shortSha()}"
 }
@@ -8,7 +10,7 @@ def showEnv() {
 }
 
 def printMap(Map map) {
-    echo "${groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(map))}"
+    echo "${JsonOutput.prettyPrint(JsonOutput.toJson(map))}"
 }
 
 def loadScript(Map params = [:]) {
