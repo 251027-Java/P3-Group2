@@ -1,10 +1,4 @@
 def gdata = [
-    frontend: false,
-    backend: false,
-    isPrToDefault: false,
-    isDefault: false,
-    changes: [:],
-    build: [:],
     allSuccessful: true,
     attributes: [:],
 ]
@@ -25,11 +19,11 @@ pipeline {
                     util.showEnv()
                     util.updateDisplayName()
 
-                    gdata.changes.putAll(gitUtil.getChanges())
-                    gdata.frontend = gdata.changes.any { it.startsWith('frontend') }
-                    gdata.backend = gdata.changes.any { it.startsWith('backend') }
-                    gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
-                    gdata.isDefault = gitUtil.isDefaultBranch()
+                    gdata.attributes.putAll(gitUtil.getChanges())
+                    gdata.attributes['frontend'] = gdata.changes.any { it.startsWith('frontend') }
+                    gdata.attributes['backend'] = gdata.changes.any { it.startsWith('backend') }
+                    gdata.attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
+                    gdata.attributes['default'] = gitUtil.isDefaultBranch()
                     gdata.attributes.putAll(pipelineUtil.getAttributes())
 
                     util.printMap(gdata)
@@ -39,7 +33,7 @@ pipeline {
 
         stage('frontend') {
             when {
-                expression { gdata.frontend }
+                expression { gdata.attributes['frontend'] }
                 beforeAgent true
             }
 
@@ -58,43 +52,59 @@ pipeline {
 
         stage('backend') {
             when {
-                expression { gdata.backend }
+                expression { gdata.attributes['backend'] }
             }
 
             steps {
                 script {
                     pipelineUtil.getQualifyingDirs().each { path ->
                         if (!path.startsWith('backend')) { return }
-                        if (!gdata.changes.contains(path)) { return }
+
+                        def shouldRun = (
+                            !gdata.attributes['skip']
+                            && (
+                                gdata.attributes['run']
+                                || (
+                                    (gdata.attributes['pr:default'] || gdata.attributes['default'])
+                                    && (gdata.attributes["change:${path}".toString()])
+                                )
+                            )
+                        )
 
                         def settings = pipelineUtil.getSettings path: path
 
-                        if (settings.lint.enabled) {
+                        if (settings.lint.enabled && shouldRun) {
                             stage("lint ${path}") {
                                 def success = backend.lint path: path, settings: settings
                                 gdata.allSuccessful &= success
                             }
                         }
 
-                        if (settings.test.enabled) {
+                        if (settings.test.enabled && shouldRun) {
                             stage("test ${path}") {
                                 def success = backend.test path: path, settings: settings
                                 gdata.allSuccessful &= success
                             }
                         }
 
-                        if (settings.build.enabled) {
+                        if (settings.build.enabled && shouldRun) {
                             stage("build ${path}") {
                                 def success = backend.build path: path, settings: settings
                                 gdata.allSuccessful &= success
-                                gdata.build[path] = success
+                                gdata.attributes["build:${path}".toString()] = success
                             }
                         }
 
-                        if (settings.image.enabled && gdata.build[path]) {
+                        def shouldBuildImage = (
+                            gdata.attributes["build:${path}".toString()]
+                            || gdata.attributes['imageall']
+                            || gdata.attributes["image:${path}".toString()]
+                        )
+
+                        if (settings.image.enabled && shouldBuildImage) {
                             stage("image ${path}") {
                                 def success = dockerUtil.image path: path, settings: settings,
-                                    credId: 'docker-hub-cred', latest: gdata.isDefault
+                                    credId: 'docker-hub-cred', latest: gdata.attributes['default']
                                 gdata.allSuccessful &= success
                             }
                         }

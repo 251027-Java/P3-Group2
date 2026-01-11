@@ -60,7 +60,7 @@ def getChanges() {
             return ret
         }
         .findAll { it }
-        .collectEntries { [(it): true ] }
+        .collectEntries { [("change:${it}".toString()): true ] }
 
     return dirs
 }
