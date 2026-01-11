@@ -9,6 +9,7 @@ pipeline {
     tools {
         jdk 'java25'
         maven 'maven3'
+        nodejs 'node-lts'
     }
 
     stages {
@@ -34,13 +35,6 @@ pipeline {
         stage('frontend') {
             when {
                 expression { gdata.attributes['frontend'] }
-                beforeAgent true
-            }
-
-            agent {
-                docker {
-                    image 'node:lts-alpine'
-                }
             }
 
             steps {
@@ -53,7 +47,7 @@ pipeline {
             post {
                 always {
                     script {
-                        pipelineUtil.cleanup()
+                        sh 'du -sh *'
                     }
                 }
             }
@@ -68,6 +62,14 @@ pipeline {
                 script {
                     gdata.allSuccessful &= staging.execute dockerCredentialsId: 'docker-hub-cred',
                         attributes: gdata.attributes, baseDirectory: 'backend'
+                }
+            }
+
+            post {
+                always {
+                    script {
+                        sh 'du -sh *'
+                    }
                 }
             }
         }

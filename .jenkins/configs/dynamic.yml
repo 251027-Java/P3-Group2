@@ -56,6 +56,15 @@ tool:
               installers:
                 - maven:
                     id: "3.9.12"
+  nodejs:
+    installations:
+      - name: "node-lts"
+        properties:
+          - installSource:
+              installers:
+                - nodeJSInstaller:
+                    id: "24.12.0"
+                    npmPackagesRefreshHours: 72
 credentials:
   system:
     domainCredentials:
