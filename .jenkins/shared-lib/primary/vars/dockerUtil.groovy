@@ -13,7 +13,7 @@ def image(Map params = [:]) {
     def branch = gitUtil.getCurrentBranch().replaceAll('/', '-')
     def tag = "${settings.image.tagSeries}-${branch}-${gitUtil.shortSha()}"
 
-    def name = "image / ${checksUtil.nameFromDirectory([path: path])}"
+    def name = "image / ${settings.image.tagSeries}"
     checksUtil.pending name: name
 
     def successRet = false
