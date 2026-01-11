@@ -72,7 +72,7 @@ pipeline {
             post {
                 always {
                     script {
-                        pipelineUtil.postStage()
+                        pipelineUtil.postStage path: 'backend'
                     }
                 }
             }
