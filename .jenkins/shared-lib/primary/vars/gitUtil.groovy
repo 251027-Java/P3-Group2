@@ -82,3 +82,9 @@ def shortSha() {
 def getCurrentBranch() {
     return env.CHANGE_BRANCH ?: env.GIT_BRANCH
 }
+
+def getCommitMessage() {
+    def path = util.loadScript name: 'commit-message.sh'
+    def message = sh(script: path, returnStdout: true).trim()
+    return message
+}

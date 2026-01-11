@@ -25,7 +25,7 @@ pipeline {
                     gdata.attributes['backend'] = gdata.changes.any { it.startsWith('backend') }
                     gdata.attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
                     gdata.attributes['default'] = gitUtil.isDefaultBranch()
-                    gdata.attributes.putAll(pipelineUtil.getAttributes())
+                    gdata.attributes.putAll(pipelineUtil.parseAttributes(gitUtil.getCommitMessage()))
 
                     util.printMap(gdata)
                 }
@@ -47,7 +47,7 @@ pipeline {
             post {
                 always {
                     script {
-                        sh 'du -sh *'
+                        pipelineUtil.postStage()
                     }
                 }
             }
@@ -68,7 +68,7 @@ pipeline {
             post {
                 always {
                     script {
-                        sh 'du -sh *'
+                        pipelineUtil.postStage()
                     }
                 }
             }

@@ -25,7 +25,9 @@ def cleanup() {
     try {
         dockerUtil.cleanup()
     } finally {
+        viewDirSizes()
         cleanWs()
+        viewDirSizes()
     }
 }
 
@@ -41,13 +43,12 @@ def getQualifyingDirs() {
     return findFiles(glob: '*/*/.ci.json').collect { it.path.replace('/.ci.json', '') }
 }
 
-def getAttributes() {
-    def path = util.loadScript name: 'commit-message.sh'
-    def message = sh(script: path, returnStdout: true).trim()
+def parseAttributes(Map params = [:]) {
+    def content = params.content
 
     // allow user to specify attributes for this run by checking the commit message for
     // [<attribute1>,<attribute2>,...]
-    def match = message =~ /\[([^\[]+)\]/
+    def match = content =~ /\[([^\[]+)\]/
 
     def groups = match.collect { it[1] }
     def last = groups ? groups.last() : null
@@ -58,4 +59,20 @@ def getAttributes() {
     }
 
     return [:]
+}
+
+def viewDirSizes() {
+    def path = util.loadScript name: 'display-size.sh'
+    def output = sh(script: path, returnStdout: true).trim()
+    echo "${output}"
+}
+
+def postStage(Map params = [:]) {
+    def path = params.path
+
+    viewDirSizes()
+    dir(path) {
+        deleteDir()
+    }
+    viewDirSizes()
 }
