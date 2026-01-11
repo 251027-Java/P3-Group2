@@ -18,6 +18,7 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
+                    globalVars.get()['asd'] = 'hello'
                 }
             }
         }
@@ -25,35 +26,37 @@ pipeline {
         stage('lint') {
             steps {
                 script {
-                    backend.lint path: env.TARGET_DIRECTORY
+                    echo "${globalVars.get()['asd']}"
+                    util.printMap(globalVars.get())
+                    // backend.lint path: env.TARGET_DIRECTORY
                 }
             }
         }
 
-        stage('test') {
-            steps {
-                script {
-                    backend.test path: env.TARGET_DIRECTORY
-                }
-            }
-        }
+        // stage('test') {
+        //     steps {
+        //         script {
+        //             backend.test path: env.TARGET_DIRECTORY
+        //         }
+        //     }
+        // }
 
-        stage('build') {
-            steps {
-                script {
-                    backend.build path: env.TARGET_DIRECTORY
-                }
-            }
-        }
+        // stage('build') {
+        //     steps {
+        //         script {
+        //             backend.build path: env.TARGET_DIRECTORY
+        //         }
+        //     }
+        // }
 
-        stage('image') {
-            steps {
-                script {
-                    dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
-                        credId: 'docker-hub-cred', latest: true
-                }
-            }
-        }
+        // stage('image') {
+        //     steps {
+        //         script {
+        //             dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
+        //                 credId: 'docker-hub-cred', latest: true
+        //         }
+        //     }
+        // }
     }
 
     post {
