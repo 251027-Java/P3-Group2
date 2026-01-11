@@ -12,6 +12,17 @@ pipeline {
         nodejs 'node-lts'
     }
 
+    parameters {
+        string description: 'Comma-separated attributes.', name: 'INTL_ATTRIBUTES_LINE', trim: true
+        text description: 'Attributes separated by a newline. Overrides `INTL_ATTRIBUTES_LINE` if both are provided.',
+            name: 'INTL_ATTRIBUTES'
+        booleanParam description: [
+            'If enabled, uses the git commit message to obtain attributes and merges with any provided attributes',
+            'through params. The order in which attributes are inserted: Git, Parameters.'
+        ].join(' '),
+            name: 'INTL_ATTRIBUTES_INCLUDE_GIT'
+    }
+
     stages {
         stage('setup') {
             steps {
@@ -20,12 +31,7 @@ pipeline {
                     util.showEnv()
                     util.updateDisplayName()
 
-                    gdata.attributes.putAll(gitUtil.getChanges())
-                    gdata.attributes['frontend'] = gdata.changes.any { it.startsWith('frontend') }
-                    gdata.attributes['backend'] = gdata.changes.any { it.startsWith('backend') }
-                    gdata.attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
-                    gdata.attributes['default'] = gitUtil.isDefaultBranch()
-                    gdata.attributes.putAll(pipelineUtil.parseAttributes([content: gitUtil.getCommitMessage()]))
+                    gdata.attributes.putAll(pipelineUtil.initAttributes())
 
                     util.printMap(gdata)
                 }

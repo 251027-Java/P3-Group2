@@ -27,7 +27,6 @@ def cleanup() {
     } finally {
         viewDirSizes()
         cleanWs()
-        viewDirSizes()
     }
 }
 
@@ -61,6 +60,27 @@ def parseAttributes(Map params = [:]) {
     return [:]
 }
 
+def initAttributes(Map params = [:]) {
+    def attrSource = params.attrSource ?: ''
+    def attrIncludeGit = params.attrIncludeGit
+
+    def attributes = [:]
+
+    attributes.putAll(gitUtil.getChanges())
+    attributes['frontend'] = attributes.keySet().any { it.startsWith('change:frontend') }
+    attributes['backend'] = attributes.keySet().any { it.startsWith('change:backend') }
+    attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
+    attributes['default'] = gitUtil.isDefaultBranch()
+
+    if (attrIncludeGit) {
+        attributes.putAll(parseAttributes([content: gitUtil.getCommitMessage()]))
+    }
+
+    attributes.putAll(parseAttributes([content: attrSource]))
+
+    return attributes
+}
+
 def viewDirSizes() {
     def path = util.loadScript name: 'display-size.sh'
     def output = sh(script: path, returnStdout: true).trim()
@@ -74,5 +94,4 @@ def postStage(Map params = [:]) {
     dir(path) {
         deleteDir()
     }
-    viewDirSizes()
 }
