@@ -31,12 +31,14 @@ def getRecommendedRevspec() {
 
 def getChanges() {
     def path = util.loadScript name: 'git-changes.sh'
-    def revspec = getRecommendedRevspec()
+    // def revspec = getRecommendedRevspec()
+    def revspec = '8e8756a'
 
     def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()
 
     def dirs = output.readLines()
         .collect { filepath ->
+            echo "${filepath}"
             def match = filepath.trim().find(/^((?:backend|frontend)\/[^\/]+)\//) { m, dir -> dir }
             return match && fileExists(match) ? match : null
         }
