@@ -1,5 +1,7 @@
 def lint(Map params = [:]) {
     def path = params.path
+    def settings = params.settings
+
     def name = "lint / ${checksUtil.nameFromDirectory([path: path])}"
     checksUtil.pending name: name
 
@@ -7,7 +9,7 @@ def lint(Map params = [:]) {
 
     dir(path) {
         try {
-            sh 'mvn -B spotless:check checkstyle:check'
+            sh "${settings.lint.command}"
             checksUtil.success name: name
             successRet = true
         } catch (err) {
@@ -22,13 +24,15 @@ def lint(Map params = [:]) {
 
 def test(Map params = [:]) {
     def path = params.path
+    def settings = params.settings
+
     def name = "test / ${checksUtil.nameFromDirectory([path: path])}"
     def successRet = false
 
     withChecks(name: name) {
         dir(path) {
             try {
-                sh 'mvn -B test'
+                sh "${settings.test.command}"
                 junit '**/target/surefire-reports/TEST-*.xml'
                 successRet = true
             } catch (err) {
@@ -44,6 +48,8 @@ def test(Map params = [:]) {
 
 def build(Map params = [:]) {
     def path = params.path
+    def settings = params.settings
+
     def name = "build / ${checksUtil.nameFromDirectory([path: path])}"
     checksUtil.pending name: name
 
@@ -51,7 +57,7 @@ def build(Map params = [:]) {
 
     dir(path) {
         try {
-            sh 'mvn -B package -DskipTests'
+            sh "${settings.build.command}"
             checksUtil.success name: name
             successRet = true
         } catch (err) {

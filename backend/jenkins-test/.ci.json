@@ -13,6 +13,7 @@
     },
     "image": {
         "enabled": true,
-        "tagSeries": "be-jenkins-test"
+        "tagSeries": "be-jenkins-test",
+        "repository": "minidomo/gemdeck"
     }
 }

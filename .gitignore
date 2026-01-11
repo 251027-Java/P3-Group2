@@ -6,6 +6,7 @@
 .DS_Store
 Thumbs.db
 *.code-workspace
+.groovylintrc.json
 
 # Spring gitignore
 HELP.md

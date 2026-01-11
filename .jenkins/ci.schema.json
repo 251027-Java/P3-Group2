@@ -72,11 +72,16 @@
                 "tagSeries": {
                     "type": "string",
                     "description": "The base tag or tag prefix used when generating image tags."
+                },
+                "repository": {
+                    "type": "string",
+                    "description": "The container registry repository where the built image will be pushed."
                 }
             },
             "required": [
                 "enabled",
-                "tagSeries"
+                "tagSeries",
+                "repository"
             ],
             "additionalProperties": false
         }

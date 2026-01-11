@@ -6,22 +6,21 @@ def cleanup(Map params = [:]) {
 
 def image(Map params = [:]) {
     def path = params.path
-    def repo = params.repo
     def credId = params.credId
     def latest = params.latest ?: false
+    def settings = params.settings
 
-    def name = util.getLastDir path: path
     def branch = gitUtil.getCurrentBranch().replaceAll('/', '-')
-    def tag = "${name}-${branch}-${gitUtil.shortSha()}"
+    def tag = "${settings.image.tagSeries}-${branch}-${gitUtil.shortSha()}"
 
-    def chName = "image / ${checksUtil.nameFromDirectory([path: path])}"
-    checksUtil.pending name: chName
+    def name = "image / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
 
     def successRet = false
 
     dir(path) {
         try {
-            def image = docker.build(repo)
+            def image = docker.build(settings.image.repository)
 
             docker.withRegistry('', credId) {
                 image.push(tag)
@@ -30,13 +29,13 @@ def image(Map params = [:]) {
                     image.push("${name}-latest")
                 }
             }
-            
-            checksUtil.success name: chName
+
+            checksUtil.success name: name
             successRet = true
         } catch (err) {
             echo "${err}"
             pipelineUtil.failStage()
-            checksUtil.failed name: chName
+            checksUtil.failed name: name
         }
     }
 

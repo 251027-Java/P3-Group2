@@ -1,5 +1,9 @@
 def gdata = [
-    changes: [:],
+    frontend: false,
+    backend: false,
+    isPrToDefault: false,
+    isDefault: false,
+    changes: [] as Set,
     build: [:],
     allSuccessful: true,
 ]
@@ -13,7 +17,6 @@ pipeline {
     }
 
     environment {
-        INT_DIR = 'backend/random-service'
         INT_DOCKER_REPO = 'minidomo/gemdeck'
     }
 
@@ -24,69 +27,79 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
-                    gdata.changes[env.INT_DIR] = gitUtil.hasChanges path: env.INT_DIR
 
-                    def temp = gitUtil.getChanges()
-                    echo "${temp}"
+                    gdata.changes.addAll(gitUtil.getChanges())
+                    gdata.frontend = gdata.changes.any { it.startsWith('frontend') }
+                    gdata.backend = gdata.changes.any { it.startsWith('backend') }
+                    gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
+                    gdata.isDefault = gitUtil.isDefaultBranch()
 
                     util.printMap(gdata)
                 }
             }
         }
 
-        // stage('lint') {
-        //     when {
-        //         expression { gdata.changes[env.INT_DIR] }
-        //     }
+        stage('frontend') {
+            when {
+                expression { gdata.frontend }
+                beforeAgent true
+            }
 
-        //     steps {
-        //         script {
-        //             def ret = backend.lint path: env.INT_DIR
-        //             gdata.allSuccessful &= ret
-        //         }
-        //     }
-        // }
+            agent {
+                docker {
+                    image 'node:lts-alpine'
+                }
+            }
 
-        // stage('test') {
-        //     when {
-        //         expression { gdata.changes[env.INT_DIR] }
-        //     }
+            steps {
+                script {
+                }
+            }
+        }
 
-        //     steps {
-        //         script {
-        //             def ret = backend.test path: env.INT_DIR
-        //             gdata.allSuccessful &= ret
-        //         }
-        //     }
-        // }
+        stage('backend') {
+            when {
+                expression { gdata.backend }
+            }
 
-        // stage('build') {
-        //     when {
-        //         expression { gdata.changes[env.INT_DIR] }
-        //     }
+            steps {
+                script {
+                    gdata.changes.findAll { it.startsWith('backend') }.each { path ->
+                        def settings = pipelineUtil.getSettings path: path
 
-        //     steps {
-        //         script {
-        //             def ret = backend.build path: env.INT_DIR
-        //             gdata.allSuccessful &= ret
-        //             gdata.build[env.INT_DIR] = ret
-        //         }
-        //     }
-        // }
+                        if (settings.lint.enabled) {
+                            stage("lint ${path}") {
+                                def success = backend.lint path: path, settings: settings
+                                gdata.allSuccessful &= success
+                            }
+                        }
 
-        // stage('image') {
-        //     when {
-        //         expression { gdata.build[env.INT_DIR] }
-        //     }
+                        if (settings.test.enabled) {
+                            stage("test ${path}") {
+                                def success = backend.test path: path, settings: settings
+                                gdata.allSuccessful &= success
+                            }
+                        }
 
-        //     steps {
-        //         script {
-        //             def ret = dockerUtil.image path: env.INT_DIR, repo: env.INT_DOCKER_REPO,
-        //                 credId: 'docker-hub-cred', latest: true
-        //             gdata.allSuccessful &= ret
-        //         }
-        //     }
-        // }
+                        if (settings.build.enabled) {
+                            stage("build ${path}") {
+                                def success = backend.build path: path, settings: settings
+                                gdata.allSuccessful &= success
+                                gdata.build[path] = success
+                            }
+                        }
+
+                        if (settings.image.enabled && gdata.build[path]) {
+                            stage("image ${path}") {
+                                def success = dockerUtil.image path: path, settings: settings,
+                                    credId: 'docker-hub-cred', latest: gdata.isDefault
+                                gdata.allSuccessful &= success
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     post {
