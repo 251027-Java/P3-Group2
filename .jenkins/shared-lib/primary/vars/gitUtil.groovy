@@ -40,6 +40,7 @@ def getChanges() {
         .collect { filepath ->
             echo "${filepath}"
             def match = filepath.trim().find(/^((?:backend|frontend)\/[^\/]+)\//) { m, dir -> dir }
+            echo "| ${match} ${fileExists(match)}"
             return match && fileExists(match) ? match : null
         }
         .findAll { it } as Set
