@@ -21,7 +21,10 @@ def loadScript(Map params = [:]) {
     if (!fileExists(path)) {
         writeFile file: "${name}", text: libraryResource("${name}")
         sh "chmod +x ${path}"
+        stash includes: path, name: path
     }
+
+    unstash name: path
 
     return path
 }
