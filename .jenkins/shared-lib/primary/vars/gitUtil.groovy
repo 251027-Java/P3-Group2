@@ -38,10 +38,19 @@ def getChanges() {
 
     def dirs = output.readLines()
         .collect { filepath ->
-            echo "${filepath}"
-            def match = filepath.trim().find(/^((?:backend|frontend)\/[^\/]+)\//) { m, dir -> dir }
-            echo "| ${match} ${fileExists(match)}"
-            return match && fileExists(match) ? match : null
+            def match = filepath.trim() =~ /^((?:backend|frontend)\/[^\/]+)\//
+            def ret = null
+
+            if (match.find()) {
+                def res = match.group(1)
+                echo "res: ${res}"
+                if (fileExists(res)) {
+                    ret = res
+                }
+            }
+
+            echo "${filepath} | ${ret}"
+            return ret
         }
         .findAll { it } as Set
 
