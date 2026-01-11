@@ -15,7 +15,7 @@ pipeline {
     parameters {
         string name: 'INTL_ATTRIBUTES_LINE', description: 'Comma-separated attributes.', trim: true
         text name: 'INTL_ATTRIBUTES', description: 'Attributes separated by a newline. Overrides `INTL_ATTRIBUTES_LINE` if both are provided.'
-        booleanParam name: 'INTL_ATTRIBUTES_INCLUDE_GIT', description: 'If enabled, uses the git commit message to obtain attributes and merges with any provided attributes through params. The order in which attributes are inserted: Git, Parameters.'
+        booleanParam name: 'INTL_ATTRIBUTES_INCLUDE_GIT', defaultValue: true, description: 'If enabled, uses the git commit message to obtain attributes and merges with any provided attributes through params. The order in which attributes are inserted: Git, Parameters.'
     }
 
     stages {

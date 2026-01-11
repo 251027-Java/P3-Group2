@@ -74,9 +74,12 @@ def initAttributes(Map params = [:]) {
     attributes['default'] = gitUtil.isDefaultBranch()
 
     if (attrIncludeGit) {
-        attributes.putAll(parseAttributes([content: gitUtil.getCommitMessage()]))
+        def message = gitUtil.getCommitMessage()
+        echo "INIT_ATTRIBUTES: git message: ${message}"
+        attributes.putAll(parseAttributes([content: message]))
     }
 
+    echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
     attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
 
     return attributes
