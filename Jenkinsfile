@@ -3,7 +3,7 @@ def gdata = [
     backend: false,
     isPrToDefault: false,
     isDefault: false,
-    changes: [] as Set,
+    changes: [:],
     build: [:],
     allSuccessful: true,
 ]
@@ -16,10 +16,6 @@ pipeline {
         maven 'maven3'
     }
 
-    environment {
-        INT_DOCKER_REPO = 'minidomo/gemdeck'
-    }
-
     stages {
         stage('setup') {
             steps {
@@ -28,13 +24,11 @@ pipeline {
                     util.showEnv()
                     util.updateDisplayName()
 
-                    gdata.changes.addAll(gitUtil.getChanges())
+                    gdata.changes.putAll(gitUtil.getChanges())
                     gdata.frontend = gdata.changes.any { it.startsWith('frontend') }
                     gdata.backend = gdata.changes.any { it.startsWith('backend') }
                     gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
                     gdata.isDefault = gitUtil.isDefaultBranch()
-
-                    echo "${pipelineUtil.getQualifyingDirs()}"
 
                     util.printMap(gdata)
                 }
@@ -67,7 +61,10 @@ pipeline {
 
             steps {
                 script {
-                    gdata.changes.findAll { it.startsWith('backend') }.each { path ->
+                    pipelineUtil.getQualifyingDirs().each { path ->
+                        if (!path.startsWith('backend')) { return }
+                        if (!gdata.changes.contains(path)) { return }
+
                         def settings = pipelineUtil.getSettings path: path
 
                         if (settings.lint.enabled) {

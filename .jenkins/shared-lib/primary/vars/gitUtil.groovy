@@ -58,7 +58,8 @@ def getChanges() {
             echo "    GET_CHANGES: ${filepath} | matched: ${inter} | final: ${ret}"
             return ret
         }
-        .findAll { it } as Set
+        .findAll { it }
+        .collectEntries { [(it): true ] }
 
     return dirs
 }
