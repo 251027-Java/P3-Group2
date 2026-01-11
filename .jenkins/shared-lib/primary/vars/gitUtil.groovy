@@ -40,18 +40,21 @@ def getChanges() {
         .collect { filepath ->
             def match = filepath.trim() =~ /^((?:backend|frontend)\/[^\/]+)\//
             def ret = null
+            def inter = null
 
             if (match.find()) {
-                def res = match.group(1)
+                inter = match.group(1)
+
                 // https://stackoverflow.com/a/68937527
+                // get rid of the matcher object because it's not serializable
                 match = null
-                echo "res: ${res}"
-                if (fileExists(res)) {
-                    ret = res
+
+                if (fileExists(inter)) {
+                    ret = inter
                 }
             }
 
-            echo "${filepath} | ${ret}"
+            echo "    GET_CHANGES: ${filepath} | found: ${} | final: ${ret}"
             return ret
         }
         .findAll { it } as Set
