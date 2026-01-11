@@ -1,3 +1,7 @@
+def gdata = [
+    changes: [:]
+]
+
 pipeline {
     agent any
 
@@ -18,45 +22,57 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
-                    globalVars.get()['asd'] = 'hello'
+                    gdata.changes[env.TARGET_DIRECTORY] = gitUtil.hasChanges path: env.TARGET_DIRECTORY
+
+                    util.printMap(gdata)
                 }
             }
         }
 
         stage('lint') {
+            when {
+                expression { gdata.changes[env.TARGET_DIRECTORY] }
+            }
+
             steps {
                 script {
-                    echo "${globalVars.get()['asd']}"
-                    util.printMap(globalVars.get())
-                    // backend.lint path: env.TARGET_DIRECTORY
+                    backend.lint path: env.TARGET_DIRECTORY
                 }
             }
         }
 
-        // stage('test') {
-        //     steps {
-        //         script {
-        //             backend.test path: env.TARGET_DIRECTORY
-        //         }
-        //     }
-        // }
+        stage('test') {
+            when {
+                expression { gdata.changes[env.TARGET_DIRECTORY] }
+            }
 
-        // stage('build') {
-        //     steps {
-        //         script {
-        //             backend.build path: env.TARGET_DIRECTORY
-        //         }
-        //     }
-        // }
+            steps {
+                script {
+                    backend.test path: env.TARGET_DIRECTORY
+                }
+            }
+        }
 
-        // stage('image') {
-        //     steps {
-        //         script {
-        //             dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
-        //                 credId: 'docker-hub-cred', latest: true
-        //         }
-        //     }
-        // }
+        stage('build') {
+            when {
+                expression { gdata.changes[env.TARGET_DIRECTORY] }
+            }
+
+            steps {
+                script {
+                    backend.build path: env.TARGET_DIRECTORY
+                }
+            }
+        }
+
+    // stage('image') {
+    //     steps {
+    //         script {
+    //             dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
+    //                 credId: 'docker-hub-cred', latest: true
+    //         }
+    //     }
+    // }
     }
 
     post {

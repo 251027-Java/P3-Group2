@@ -17,6 +17,8 @@ def image(Map params = [:]) {
     def chName = "image / ${checksUtil.nameFromDirectory([path: path])}"
     checksUtil.pending name: chName
 
+    def successRet = false
+
     dir(path) {
         try {
             def image = docker.build(repo)
@@ -30,6 +32,7 @@ def image(Map params = [:]) {
             }
             
             checksUtil.success name: chName
+            successRet = true
         } catch (err) {
             echo "${err}"
             pipelineUtil.failStage()
@@ -39,4 +42,6 @@ def image(Map params = [:]) {
 
     def cleanUpScript = util.loadScript name: 'docker-cleanup.sh'
     sh "${cleanUpScript} ${tag}"
+
+    return successRet
 }
