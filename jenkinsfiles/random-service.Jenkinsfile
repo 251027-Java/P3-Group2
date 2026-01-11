@@ -26,64 +26,67 @@ pipeline {
                     util.updateDisplayName()
                     gdata.changes[env.INT_DIR] = gitUtil.hasChanges path: env.INT_DIR
 
+                    def temp = gitUtil.getChanges()
+                    echo "${temp}"
+
                     util.printMap(gdata)
                 }
             }
         }
 
-        stage('lint') {
-            when {
-                expression { gdata.changes[env.INT_DIR] }
-            }
+        // stage('lint') {
+        //     when {
+        //         expression { gdata.changes[env.INT_DIR] }
+        //     }
 
-            steps {
-                script {
-                    def ret = backend.lint path: env.INT_DIR
-                    gdata.allSuccessful &= ret
-                }
-            }
-        }
+        //     steps {
+        //         script {
+        //             def ret = backend.lint path: env.INT_DIR
+        //             gdata.allSuccessful &= ret
+        //         }
+        //     }
+        // }
 
-        stage('test') {
-            when {
-                expression { gdata.changes[env.INT_DIR] }
-            }
+        // stage('test') {
+        //     when {
+        //         expression { gdata.changes[env.INT_DIR] }
+        //     }
 
-            steps {
-                script {
-                    def ret = backend.test path: env.INT_DIR
-                    gdata.allSuccessful &= ret
-                }
-            }
-        }
+        //     steps {
+        //         script {
+        //             def ret = backend.test path: env.INT_DIR
+        //             gdata.allSuccessful &= ret
+        //         }
+        //     }
+        // }
 
-        stage('build') {
-            when {
-                expression { gdata.changes[env.INT_DIR] }
-            }
+        // stage('build') {
+        //     when {
+        //         expression { gdata.changes[env.INT_DIR] }
+        //     }
 
-            steps {
-                script {
-                    def ret = backend.build path: env.INT_DIR
-                    gdata.allSuccessful &= ret
-                    gdata.build[env.INT_DIR] = ret
-                }
-            }
-        }
+        //     steps {
+        //         script {
+        //             def ret = backend.build path: env.INT_DIR
+        //             gdata.allSuccessful &= ret
+        //             gdata.build[env.INT_DIR] = ret
+        //         }
+        //     }
+        // }
 
-        stage('image') {
-            when {
-                expression { gdata.build[env.INT_DIR] }
-            }
+        // stage('image') {
+        //     when {
+        //         expression { gdata.build[env.INT_DIR] }
+        //     }
 
-            steps {
-                script {
-                    def ret = dockerUtil.image path: env.INT_DIR, repo: env.INT_DOCKER_REPO,
-                        credId: 'docker-hub-cred', latest: true
-                    gdata.allSuccessful &= ret
-                }
-            }
-        }
+        //     steps {
+        //         script {
+        //             def ret = dockerUtil.image path: env.INT_DIR, repo: env.INT_DOCKER_REPO,
+        //                 credId: 'docker-hub-cred', latest: true
+        //             gdata.allSuccessful &= ret
+        //         }
+        //     }
+        // }
     }
 
     post {

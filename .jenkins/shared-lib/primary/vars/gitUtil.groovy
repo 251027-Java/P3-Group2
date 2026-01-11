@@ -29,6 +29,22 @@ def getRecommendedRevspec() {
     return isPrCreated() ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
 }
 
+def getChanges() {
+    def path = util.loadScript name: 'git-changes.sh'
+    def revspec = getRecommendedRevspec()
+
+    def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()
+
+    def dirs = output.readLines()
+        .collect { filepath ->
+            def match = filepath.trim().find(/^((?:backend|frontend)\/[^\/]+)\//) { m, dir -> dir }
+            return match && fileExists(match) ? match : null
+        }
+        .findAll { it } as Set
+
+    return dirs
+}
+
 def hasChanges(Map params = [:]) {
     def gitPath = params.path
 
