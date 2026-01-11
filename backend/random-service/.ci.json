@@ -1,15 +1,15 @@
 {
     "lint": {
         "enabled": true,
-        "command": "./mvnw -B spotless:check checkstyle:check"
+        "command": "mvn -B spotless:check checkstyle:check"
     },
     "test": {
         "enabled": false,
-        "command": "./mvnw -B test"
+        "command": "mvn -B test"
     },
     "build": {
         "enabled": true,
-        "command": "./mvnw -B package -DskipTests"
+        "command": "mvn -B package -DskipTests"
     },
     "image": {
         "enabled": true,
