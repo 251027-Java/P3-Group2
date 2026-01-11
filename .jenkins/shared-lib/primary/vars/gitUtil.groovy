@@ -43,8 +43,10 @@ def getChanges() {
 
             if (match.find()) {
                 def res = match.group(1)
-                echo "res: ${res} ${res.class.name}"
-                if (fileExists("${res}")) {
+                // https://stackoverflow.com/a/68937527
+                match = null
+                echo "res: ${res}"
+                if (fileExists(res)) {
                     ret = res
                 }
             }
