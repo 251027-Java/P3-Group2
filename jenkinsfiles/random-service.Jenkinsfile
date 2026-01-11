@@ -1,5 +1,7 @@
 def gdata = [
-    changes: [:]
+    changes: [:],
+    build: [:],
+    allSuccessful: true,
 ]
 
 pipeline {
@@ -11,8 +13,8 @@ pipeline {
     }
 
     environment {
-        TARGET_DIRECTORY = 'backend/random-service'
-        DOCKER_REPO = 'minidomo/gemdeck'
+        INT_DIR = 'backend/random-service'
+        INT_DOCKER_REPO = 'minidomo/gemdeck'
     }
 
     stages {
@@ -22,7 +24,7 @@ pipeline {
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
-                    gdata.changes[env.TARGET_DIRECTORY] = gitUtil.hasChanges path: env.TARGET_DIRECTORY
+                    gdata.changes[env.INT_DIR] = gitUtil.hasChanges path: env.INT_DIR
 
                     util.printMap(gdata)
                 }
@@ -31,54 +33,67 @@ pipeline {
 
         stage('lint') {
             when {
-                expression { gdata.changes[env.TARGET_DIRECTORY] }
+                expression { gdata.changes[env.INT_DIR] }
             }
 
             steps {
                 script {
-                    backend.lint path: env.TARGET_DIRECTORY
+                    def ret = backend.lint path: env.INT_DIR
+                    gdata.allSuccessful &= ret
                 }
             }
         }
 
         stage('test') {
             when {
-                expression { gdata.changes[env.TARGET_DIRECTORY] }
+                expression { gdata.changes[env.INT_DIR] }
             }
 
             steps {
                 script {
-                    backend.test path: env.TARGET_DIRECTORY
+                    def ret = backend.test path: env.INT_DIR
+                    gdata.allSuccessful &= ret
                 }
             }
         }
 
         stage('build') {
             when {
-                expression { gdata.changes[env.TARGET_DIRECTORY] }
+                expression { gdata.changes[env.INT_DIR] }
             }
 
             steps {
                 script {
-                    backend.build path: env.TARGET_DIRECTORY
+                    def ret = backend.build path: env.INT_DIR
+                    gdata.allSuccessful &= ret
+                    gdata.build[env.INT_DIR] = ret
                 }
             }
         }
 
-    // stage('image') {
-    //     steps {
-    //         script {
-    //             dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
-    //                 credId: 'docker-hub-cred', latest: true
-    //         }
-    //     }
-    // }
+        stage('image') {
+            when {
+                expression { gdata.build[env.INT_DIR] }
+            }
+
+            steps {
+                script {
+                    def ret = dockerUtil.image path: env.INT_DIR, repo: env.INT_DOCKER_REPO,
+                        credId: 'docker-hub-cred', latest: true
+                    gdata.allSuccessful &= ret
+                }
+            }
+        }
     }
 
     post {
         always {
             script {
                 pipelineUtil.cleanup()
+
+                if (!gdata.allSuccessful) {
+                    error 'Failed'
+                }
             }
         }
     }
