@@ -25,7 +25,7 @@ pipeline {
                     gdata.attributes['backend'] = gdata.changes.any { it.startsWith('backend') }
                     gdata.attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
                     gdata.attributes['default'] = gitUtil.isDefaultBranch()
-                    gdata.attributes.putAll(pipelineUtil.parseAttributes(gitUtil.getCommitMessage()))
+                    gdata.attributes.putAll(pipelineUtil.parseAttributes([content: gitUtil.getCommitMessage()]))
 
                     util.printMap(gdata)
                 }
