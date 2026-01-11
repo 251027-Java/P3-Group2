@@ -63,6 +63,7 @@ def parseAttributes(Map params = [:]) {
 def initAttributes(Map params = [:]) {
     def attrSource = params.attrSource ?: ''
     def attrIncludeGit = params.attrIncludeGit
+    def adjustedSrc = attrSource.contains(',') ? attrSource : attrSource.split('\n').join(',')
 
     def attributes = [:]
 
@@ -76,7 +77,7 @@ def initAttributes(Map params = [:]) {
         attributes.putAll(parseAttributes([content: gitUtil.getCommitMessage()]))
     }
 
-    attributes.putAll(parseAttributes([content: attrSource]))
+    attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
 
     return attributes
 }

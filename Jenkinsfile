@@ -13,14 +13,9 @@ pipeline {
     }
 
     parameters {
-        string description: 'Comma-separated attributes.', name: 'INTL_ATTRIBUTES_LINE', trim: true
-        text description: 'Attributes separated by a newline. Overrides `INTL_ATTRIBUTES_LINE` if both are provided.',
-            name: 'INTL_ATTRIBUTES'
-        booleanParam description: [
-            'If enabled, uses the git commit message to obtain attributes and merges with any provided attributes',
-            'through params. The order in which attributes are inserted: Git, Parameters.'
-        ].join(' '),
-            name: 'INTL_ATTRIBUTES_INCLUDE_GIT'
+        string name: 'INTL_ATTRIBUTES_LINE', description: 'Comma-separated attributes.', trim: true
+        text name: 'INTL_ATTRIBUTES', description: 'Attributes separated by a newline. Overrides `INTL_ATTRIBUTES_LINE` if both are provided.'
+        booleanParam name: 'INTL_ATTRIBUTES_INCLUDE_GIT', description: 'If enabled, uses the git commit message to obtain attributes and merges with any provided attributes through params. The order in which attributes are inserted: Git, Parameters.'
     }
 
     stages {
@@ -31,7 +26,10 @@ pipeline {
                     util.showEnv()
                     util.updateDisplayName()
 
-                    gdata.attributes.putAll(pipelineUtil.initAttributes())
+                    gdata.attributes.putAll(pipelineUtil.initAttributes([
+                        attrSource: params.INTL_ATTRIBUTES ?: params.INTL_ATTRIBUTES_LINE,
+                        attrIncludeGit: params.INTL_ATTRIBUTES_INCLUDE_GIT
+                    ]))
 
                     util.printMap(gdata)
                 }
