@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         TARGET_DIRECTORY = 'backend/random-service'
+        DOCKER_REPO = 'minidomo/gemdeck'
     }
 
     stages {
@@ -48,7 +49,8 @@ pipeline {
         stage('image') {
             steps {
                 script {
-                    dockerUtil.image path: env.TARGET_DIRECTORY
+                    dockerUtil.image path: env.TARGET_DIRECTORY, repo: env.DOCKER_REPO,
+                        credId: 'docker-hub-cred', latest: true
                 }
             }
         }

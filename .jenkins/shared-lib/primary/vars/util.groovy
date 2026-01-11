@@ -22,3 +22,8 @@ def loadScript(Map params = [:]) {
 
     return path
 }
+
+def getLastDir(Map params = [:]) {
+    def path = params.path
+    return path.replaceAll('/+$', '').tokenize('/').last()
+}
