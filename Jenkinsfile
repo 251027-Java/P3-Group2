@@ -30,7 +30,7 @@ pipeline {
                     gdata.backend = gdata.changes.any { it.startsWith('backend') }
                     gdata.isPrToDefault = gitUtil.isPrToDefaultBranch()
                     gdata.isDefault = gitUtil.isDefaultBranch()
-                    gdata.attributes.putAll(pipeline.getAttributes())
+                    gdata.attributes.putAll(pipelineUtil.getAttributes())
 
                     util.printMap(gdata)
                 }
