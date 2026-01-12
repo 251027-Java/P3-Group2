@@ -1,4 +1,5 @@
 {
+    "$schema": "../../.jenkins/ci.schema.json",
     "lint": {
         "enabled": true,
         "command": "mvn -B spotless:check checkstyle:check"
@@ -14,6 +15,13 @@
     "image": {
         "enabled": true,
         "tagSeries": "be-random-service",
-        "repository": "minidomo/gemdeck"
+        "repository": "minidomo/gemdeck",
+        "platform": {
+            "single": true,
+            "multi": [
+                "linux/amd64",
+                "linux/arm64"
+            ]
+        }
     }
 }

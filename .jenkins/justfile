@@ -51,6 +51,7 @@ init-files:
     file="./secrets/secrets.properties"; if [ ! -f "$file" ]; then cp ${file}.example $file; echo "Created $file"; fi
     file="./secrets/github_app_team_key.pem"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
     file="./secrets/kubeconfig.yml"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
+    file="./ssh/config"; if [ ! -f "$file" ]; then cp ${file}.example $file; echo "Created $file"; fi
 
 # Start Jenkins
 [group("Docker")]
@@ -184,3 +185,8 @@ cdocker:
     {{ sudo }}docker container prune -f
     {{ sudo }}docker volume prune -f
     {{ sudo }}docker image prune -af
+
+# Generate an ssh key for docker builders
+[group("Util")]
+gen-docker-ssh-key:
+    ssh-keygen -t ed25519 -a 100 -f ssh/docker-ssh-key -C "docker-ssh-key" -N ""

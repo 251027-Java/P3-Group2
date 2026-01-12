@@ -1,0 +1,9 @@
+Host docker-arm64
+  HostName some.ip
+  User some.user
+  IdentityFile ~/.ssh/docker-ssh-key
+
+Host docker-amd64
+  HostName some.ip
+  User some.user
+  IdentityFile ~/.ssh/docker-ssh-key

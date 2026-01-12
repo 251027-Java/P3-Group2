@@ -4,6 +4,10 @@
     "description": "Configuration file controlling linting, testing, building, and image tagging for a service.",
     "type": "object",
     "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Optional JSON Schema reference URI for tooling or validation."
+        },
         "lint": {
             "type": "object",
             "description": "Configuration for linting and static analysis.",
@@ -76,12 +80,39 @@
                 "repository": {
                     "type": "string",
                     "description": "The container registry repository where the built image will be pushed."
+                },
+                "platform": {
+                    "type": "object",
+                    "description": "Platform configuration for single or multi-architecture builds.",
+                    "properties": {
+                        "single": {
+                            "type": "boolean",
+                            "description": "Whether to build a single-architecture image. When true, the build will automatically use the host machine's native CPU architecture."
+                        },
+                        "multi": {
+                            "type": "array",
+                            "description": "List of target platforms for multi-architecture builds. This list is ignored when 'single' is true.",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "linux/amd64",
+                                    "linux/arm64"
+                                ]
+                            }
+                        }
+                    },
+                    "required": [
+                        "single",
+                        "multi"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
                 "enabled",
                 "tagSeries",
-                "repository"
+                "repository",
+                "platform"
             ],
             "additionalProperties": false
         }
