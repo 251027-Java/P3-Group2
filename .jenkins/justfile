@@ -14,7 +14,9 @@ alias a := apply-config
 
 # Initialize Jenkins
 [group("Init")]
-init-jenkins: start instructions
+init-jenkins:
+    just start
+    just instructions
 
 # Instructions after initializing Jenkins
 [group("Init")]
@@ -190,3 +192,37 @@ cdocker:
 [group("Util")]
 gen-docker-ssh-key:
     ssh-keygen -t ed25519 -a 100 -f ssh/docker-ssh-key -C "docker-ssh-key" -N ""
+
+# Add all hosts in the ./ssh/config file to known hosts
+[group("Init")]
+add-all-known-hosts:
+    #!/usr/bin/bash
+
+    config_file="./ssh/config"
+
+    if [ ! -f "$config_file" ]; then
+        echo "{{ BG_RED }} WARNING {{ NORMAL }} No config file found: $config_file"
+        exit 0
+    fi
+
+    rm -rf ./ssh/known_hosts
+    touch ./ssh/known_hosts
+    hosts=$(just _get-all-hosts)
+
+    for host in "${hosts[@]}"; do
+        hostname=$(just _get-hostname $host)
+        port=$(just _get-port $host)
+        just _add-known-host $hostname $port
+    done
+
+_get-all-hosts:
+    grep -E '^Host ' ./ssh/config | awk '{print $2}'
+
+_get-port host:
+    ssh -G {{ host }} -F ./ssh/config | awk '/^port / {print $2}'
+
+_get-hostname host:
+    ssh -G {{ host }} -F ./ssh/config | awk '/^hostname / {print $2}'
+
+_add-known-host hostname port:
+    ssh-keyscan -H -p {{ port }} {{ hostname }} >> ./ssh/known_hosts

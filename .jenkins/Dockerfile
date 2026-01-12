@@ -40,8 +40,16 @@ RUN apt-get install -y helm
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ENV JAVA_OPTS=
+ENV CASC_JENKINS_CONFIG=
+
+RUN mkdir -p $JENKINS_HOME/casc_configs
+VOLUME [ "$JENKINS_HOME/casc_configs" ]
+
+RUN mkdir -p $JENKINS_HOME/.ssh
+VOLUME [ "$JENKINS_HOME/.ssh" ]
+
 USER jenkins
 
-COPY ./plugins.txt /usr/share/jenkins/ref/plugins.txt
-
-RUN jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt
+COPY ./plugins.txt $REF/plugins.txt
+RUN jenkins-plugin-cli -f $REF/plugins.txt
