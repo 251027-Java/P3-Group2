@@ -46,7 +46,7 @@ ENV CASC_JENKINS_CONFIG=
 RUN mkdir -p /custom
 VOLUME [ "/custom/ssh" ]
 
-COPY scripts /custom/scripts
+COPY --chmod=0755 scripts /custom/scripts
 
 USER jenkins
 
