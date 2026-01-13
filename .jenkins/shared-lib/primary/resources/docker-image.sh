@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+# Generated with assistance from Copilot
+# Reviewed and modified by JB Ladera
+
 # https://packagemain.tech/p/optimizing-multi-platform-docker
 
 clean-platform() {
@@ -149,16 +152,13 @@ fi
 
 docker build --builder $builderName "${tagFlags[@]}" --platform $platformString "${cacheFromFlags[@]}" --push $dockerLocation
 
-# clean up contexts - for each (except host if not TLS)
-for platform in "${platforms[@]}"; do
-    if [[ "$platform" != "$curPlatform" || "$DOCKER_TLS_VERIFY" == "1" ]]; then
-        safePlatform=$(clean-platform "$platform")
-        contextName="${contextMap[$safePlatform]}"
+# clean up created contexts - for each
+for key in "${!contextMap[@]}"; do
+    contextName="${contextMap[$key]}"
 
-        docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' | grep "$builderName" | awk '{print $1}' | xargs -r docker --context $contextName rm -f -v
-        docker --context $contextName volume ls --format '{{.Name}}' | grep "$builderName" | xargs -r docker --context $contextName volume rm -f
-        docker context rm $contextName
-    fi
+    docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' | grep "$builderName" | awk '{print $1}' | xargs -r docker --context $contextName rm -f -v
+    docker --context $contextName volume ls --format '{{.Name}}' | grep "$builderName" | xargs -r docker --context $contextName volume rm -f
+    docker context rm $contextName
 done
 
 # clean up local
