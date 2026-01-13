@@ -91,7 +91,17 @@ for platform in "${platforms[@]}"; do
 done
 
 # create builder
-docker builder create --name $builderName --platform $curPlatform default
+builderFlags=()
+
+if [[ "$CI" == "true" ]]; then
+    builderFlags+=(
+        --driver-opt "env.DOCKER_HOST=$DOCKER_HOST"
+        --driver-opt "env.DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
+        --driver-opt "env.DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
+    )
+fi
+
+docker builder create --name $builderName --platform $curPlatform "${builderFlags[@]}" default
 
 # append to builder - for each (except host)
 for platform in "${platforms[@]}"; do
