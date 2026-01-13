@@ -1,8 +1,24 @@
 #!/usr/bin/bash
 
 # https://packagemain.tech/p/optimizing-multi-platform-docker
+
+clean-platform() {
+    local input="$1"
+    echo "${input//\//-}"
+}
+
+get-external-hosts() {
+    local exclude="$1"
+    awk -v ex="$exclude" '/^Host / && $2 != ex {print $2}' "$ssh_config_file"
+}
+
+get-random-string() {
+    tr -dc 'a-z' </dev/urandom | head -c 32
+}
+
 curPlatform=$(docker version --format '{{.Server.Os}}/{{.Server.Arch}}')
-builderName=$(tr -dc 'a-z' </dev/urandom | head -c 32)
+curSafePlatform=$(docker version --format '{{.Server.Os}}-{{.Server.Arch}}')
+builderName=$(get-random-string)
 ssh_config_file="$HOME/.ssh/config"
 
 givenPlatforms=("$curPlatform")
@@ -51,27 +67,18 @@ if [ ! -e "$dockerLocation" ]; then
     exit 1
 fi
 
-cleanPlatform() {
-    local input="$1"
-    echo "${input//\//-}"
-}
-
-get-external-hosts() {
-    local exclude=$(cleanPlatform "$curPlatform")
-    awk -v ex="$exclude" '/^Host / && $2 != ex {print $2}' "$ssh_config_file"
-}
-
 # ensure platforms only consists of ones that are supported
-supportedPlatforms=($(cleanPlatform "$curPlatform"))
+supportedPlatforms=("$curSafePlatform")
 
 if [ -f "$ssh_config_file" ]; then
-    supportedPlatforms+=($(get-external-hosts))
+    supportedPlatforms+=($(get-external-hosts $curSafePlatform))
 fi
 
 platforms=()
 
 for p in "${givenPlatforms[@]}"; do
-    cleaned=$(cleanPlatform "$p")
+    cleaned=$(clean-platform "$p")
+
     for a in "${supportedPlatforms[@]}"; do
         if [[ "$cleaned" == "$a" ]]; then
             platforms+=("$p")
@@ -82,38 +89,47 @@ done
 
 echo "finalized platforms: ${platforms[@]}"
 
-# create context - for each (except host)
+# create context - for each (except host if not TLS)
+declare -A contextMap
+
 for platform in "${platforms[@]}"; do
     if [[ "$platform" != "$curPlatform" ]]; then
-        safePlatform=$(cleanPlatform "$platform")
-        docker context create $safePlatform --docker "host=ssh://$safePlatform"
+        safePlatform=$(clean-platform "$platform")
+        contextName=$(get-random-string)
+        contextMap["$safePlatform"]="$contextName"
+
+        docker context create $contextName --docker "host=ssh://$safePlatform"
     fi
 done
 
-# create builder
-builderFlags=()
+mainBuilderContext="default"
 
-if [[ "$CI" == "true" ]]; then
-    builderFlags+=(
-        --driver-opt "env.DOCKER_HOST=$DOCKER_HOST"
-        --driver-opt "env.DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
-        --driver-opt "env.DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
-    )
+# TLS needs its own context
+if [[ "$DOCKER_TLS_VERIFY" == "1" ]]; then
+    contextName=$(get-random-string)
+    contextMap["$curSafePlatform"]="$contextName"
+    mainBuilderContext="$contextName"
+
+    docker context create $contextName --docker "host=$DOCKER_HOST,ca=$DOCKER_CERT_PATH/ca.pem,cert=$DOCKER_CERT_PATH/cert.pem,key=$DOCKER_CERT_PATH/key.pem"
 fi
 
-docker builder create --name $builderName --platform $curPlatform "${builderFlags[@]}" default
+# create builder
+docker builder create --name $builderName --platform $curPlatform $mainBuilderContext
 
 # append to builder - for each (except host)
 for platform in "${platforms[@]}"; do
     if [[ "$platform" != "$curPlatform" ]]; then
-        safePlatform=$(cleanPlatform "$platform")
-        docker builder create --name $builderName --platform $platform --append $safePlatform
+        safePlatform=$(clean-platform "$platform")
+        contextName="${contextMap[$safePlatform]}"
+
+        docker builder create --name $builderName --platform $platform --append $contextName
     fi
 done
 
 # build cache - for each
 for platform in "${platforms[@]}"; do
-    safePlatform=$(cleanPlatform "$platform")
+    safePlatform=$(clean-platform "$platform")
+
     docker build --builder $builderName -t $builderName:$safePlatform --platform $platform --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries --load $dockerLocation
 done
 
@@ -122,7 +138,7 @@ platformString=$(IFS=,; echo "${platforms[*]}")
 cacheFromFlags=()
 
 for platform in "${platforms[@]}"; do
-    safePlatform=$(cleanPlatform "$platform")
+    safePlatform=$(clean-platform "$platform")
     cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries")
 done
 
@@ -133,13 +149,15 @@ fi
 
 docker build --builder $builderName "${tagFlags[@]}" --platform $platformString "${cacheFromFlags[@]}" --push $dockerLocation
 
-# clean up - for each (except host)
+# clean up contexts - for each (except host if not TLS)
 for platform in "${platforms[@]}"; do
-    if [[ "$platform" != "$curPlatform" ]]; then
-        safePlatform=$(cleanPlatform "$platform")
-        docker --context $safePlatform container ls -a --format '{{.ID}} {{.Names}}' | grep "$builderName" | awk '{print $1}' | xargs -r docker --context $safePlatform rm -f -v
-        docker --context $safePlatform volume ls --format '{{.Name}}' | grep "$builderName" | xargs -r docker --context $safePlatform volume rm -f
-        docker context rm $safePlatform
+    if [[ "$platform" != "$curPlatform" || "$DOCKER_TLS_VERIFY" == "1" ]]; then
+        safePlatform=$(clean-platform "$platform")
+        contextName="${contextMap[$safePlatform]}"
+
+        docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' | grep "$builderName" | awk '{print $1}' | xargs -r docker --context $contextName rm -f -v
+        docker --context $contextName volume ls --format '{{.Name}}' | grep "$builderName" | xargs -r docker --context $contextName volume rm -f
+        docker context rm $contextName
     fi
 done
 
