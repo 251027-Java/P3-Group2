@@ -8,8 +8,16 @@ This service collects and manages Trading Card Game data.
 - Persists data to database.
 - Provides search API.
 
+## Setup
+
+As of right now, there is no seeding of the database. To actually use the service, you will need to populate the database with card data. This can be done by running the sync endpoint:
+
+`POST /api/cards/sync/{categoryId}/{setId}`
+
+Where `categoryId` is the category ID (e.g. 3 for Pokemon) and `setId` is the Set ID (24325 for Scarlet & Violet: Black Bolt).
+
 ## Configuration
-- Database connection can be configured in `application.yml`.
+- Database connection can be configured in `application.yaml`.
 - Default: PostgreSQL .
 
 ## API
