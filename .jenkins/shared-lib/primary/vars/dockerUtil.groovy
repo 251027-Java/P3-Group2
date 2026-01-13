@@ -24,7 +24,7 @@ def image(Map params = [:]) {
                 "--repo \"${settings.image.repository}\"",
                 "--series \"${settings.image.tagSeries}\"",
                 "--branch \"${branch}\"",
-                "--sha \"${branch}\"",
+                "--sha \"${gitUtil.shortSha()}\"",
             ]
 
             if (!settings.image.platform.single) {

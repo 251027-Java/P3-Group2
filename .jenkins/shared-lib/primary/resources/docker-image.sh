@@ -141,7 +141,7 @@ for platform in "${platforms[@]}"; do
     safePlatform=$(clean-platform "$platform")
 
     docker build --builder $builderName -t $builderName:$safePlatform --platform $platform \
-        --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries-$branch \
+        --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries \
         --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries,mode=max \
         --load $dockerLocation
 done
@@ -152,7 +152,7 @@ cacheFromFlags=()
 
 for platform in "${platforms[@]}"; do
     safePlatform=$(clean-platform "$platform")
-    cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries-$branch")
+    cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries")
 done
 
 tagFlags=("-t" "$dockerRepo:$tagSeries-$branch-$sha")
