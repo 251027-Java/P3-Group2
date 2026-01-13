@@ -192,7 +192,7 @@ cdocker:
 [group("Util")]
 gen-docker-ssh-key:
     ssh-keygen -t ed25519 -a 100 -f ssh/docker-ssh-key -C "docker-ssh-key" -N ""
-    chmod 600 ssh/docker-ssh-key*
+    chmod +rw ssh/docker-ssh-key*
 
 # Regenerate the ssh files in the container with the local ssh files
 [group("Init")]
