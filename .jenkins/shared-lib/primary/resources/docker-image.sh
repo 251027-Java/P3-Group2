@@ -4,6 +4,7 @@
 # Reviewed and modified by JB Ladera
 
 # https://packagemain.tech/p/optimizing-multi-platform-docker
+# https://depot.dev/blog/how-to-use-cache-mount-to-speed-up-docker-builds
 
 clean-platform() {
     local input="$1"
@@ -28,7 +29,8 @@ givenPlatforms=("$curPlatform")
 dockerLocation="."
 dockerRepo=""
 tagSeries=""
-tagMeta=""
+branch=""
+sha=""
 latest="false"
 
 # parse args
@@ -50,8 +52,12 @@ while [[ $# -gt 0 ]]; do
             tagSeries="$2"
             shift 2
             ;;
-        --meta)
-            tagMeta="$2"
+        --branch)
+            branch="$2"
+            shift 2
+            ;;
+        --sha)
+            sha="$2"
             shift 2
             ;;
         --latest)
@@ -134,7 +140,10 @@ done
 for platform in "${platforms[@]}"; do
     safePlatform=$(clean-platform "$platform")
 
-    docker build --builder $builderName -t $builderName:$safePlatform --platform $platform --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries --load $dockerLocation
+    docker build --builder $builderName -t $builderName:$safePlatform --platform $platform \
+        --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries-$branch \
+        --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries,mode=max \
+        --load $dockerLocation
 done
 
 # final push
@@ -143,10 +152,10 @@ cacheFromFlags=()
 
 for platform in "${platforms[@]}"; do
     safePlatform=$(clean-platform "$platform")
-    cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries")
+    cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries-$branch")
 done
 
-tagFlags=("-t" "$dockerRepo:$tagSeries-$tagMeta")
+tagFlags=("-t" "$dockerRepo:$tagSeries-$branch-$sha")
 if [[ "$latest" == "true" ]]; then
     tagFlags+=("-t" "$dockerRepo:$tagSeries-latest")
 fi
@@ -157,11 +166,18 @@ docker build --builder $builderName "${tagFlags[@]}" --platform $platformString 
 for key in "${!contextMap[@]}"; do
     contextName="${contextMap[$key]}"
 
-    docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' | grep "$builderName" | awk '{print $1}' | xargs -r docker --context $contextName rm -f -v
-    docker --context $contextName volume ls --format '{{.Name}}' | grep "$builderName" | xargs -r docker --context $contextName volume rm -f
+    docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' \
+        | grep "$builderName" | awk '{print $1}' \
+        | xargs -r docker --context $contextName rm -f -v
+    docker --context $contextName volume ls --format '{{.Name}}' \
+        | grep "$builderName" \
+        | xargs -r docker --context $contextName volume rm -f
     docker context rm $contextName
 done
 
 # clean up local
 docker builder rm $builderName
-docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' | grep "$builderName" | awk '{print $2}' | xargs -r docker rmi -f
+docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' \
+    | grep "$builderName" \
+    | awk '{print $2}' \
+    | xargs -r docker rmi -f

@@ -23,7 +23,8 @@ def image(Map params = [:]) {
             def flags = [
                 "--repo \"${settings.image.repository}\"",
                 "--series \"${settings.image.tagSeries}\"",
-                "--meta \"${branch}-${gitUtil.shortSha()}\"",
+                "--branch \"${branch}\"",
+                "--sha \"${branch}\"",
             ]
 
             if (!settings.image.platform.single) {
