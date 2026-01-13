@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres
+    container_name: marketplace
+    environment:
+      POSTGRES_USER: ${SHARED_DB_USER}
+      POSTGRES_PASSWORD: ${SHARED_DB_PASSWORD}
+      POSTGRES_DB: ${SHARED_DB_NAME}
+    ports:
+      - "${SHARED_DB_PORT}:5432"
+
+  card-service:
+    build: ./backend/card-service
+    container_name: card-service
+    ports:
+      - "${CARD_SERVICE_PORT}:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${CARD_DB_HOST}:${CARD_DB_PORT}/${CARD_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${CARD_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${CARD_DB_PASSWORD}
+    depends_on:
+      - db
