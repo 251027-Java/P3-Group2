@@ -1,6 +1,8 @@
 #!/usr/bin/bash
 
-./setup-ssh.sh
+__filename=$(realpath "${BASH_SOURCE[0]}")
+__dirname=$(dirname $__filename)
+"${__dirname}/setup-ssh.sh"
 
 # the default entrypoint for jenkins with -s
 # -s is to resolve:
