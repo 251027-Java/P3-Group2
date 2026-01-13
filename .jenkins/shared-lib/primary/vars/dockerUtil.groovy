@@ -18,35 +18,35 @@ def image(Map params = [:]) {
 
     def successRet = false
 
-    dir(path) {
-        try {
-            docker.withRegistry('', credId) {
-                def flags = [
-                    "--repo \"${settings.image.repository}\"",
-                    "--series \"${settings.image.tagSeries}\"",
-                    "--meta \"${branch}-${gitUtil.shortSha()}\"",
-                ]
+    try {
+        docker.withRegistry('', credId) {
+            def flags = [
+                "--repo \"${settings.image.repository}\"",
+                "--series \"${settings.image.tagSeries}\"",
+                "--meta \"${branch}-${gitUtil.shortSha()}\"",
+            ]
 
-                if (!settings.image.platform.single) {
-                    def platforms = settings.image.platform.multi.join(',')
-                    flags.add("--platforms \"${platforms}\"")
-                }
-
-                if (latest) {
-                    flags.add('--latest')
-                }
-
-                def imageScript = util.loadScript name: 'docker-image.sh'
-                sh "${imageScript} ${flags.join(' ')}"
+            if (!settings.image.platform.single) {
+                def platforms = settings.image.platform.multi.join(',')
+                flags.add("--platforms \"${platforms}\"")
             }
 
-            checksUtil.success name: name
-            successRet = true
-        } catch (err) {
-            echo "${err}"
-            pipelineUtil.failStage()
-            checksUtil.failed name: name
+            if (latest) {
+                flags.add('--latest')
+            }
+
+            def imageScript = util.loadScript name: 'docker-image.sh'
+            dir(path) {
+                sh "${imageScript} ${flags.join(' ')}"
+            }
         }
+
+        checksUtil.success name: name
+        successRet = true
+    } catch (err) {
+        echo "${err}"
+        pipelineUtil.failStage()
+        checksUtil.failed name: name
     }
 
     cleanup tag: tag
