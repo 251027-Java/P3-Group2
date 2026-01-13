@@ -17,7 +17,7 @@
         "tagSeries": "be-jenkins-test",
         "repository": "minidomo/gemdeck",
         "platform": {
-            "single": true,
+            "single": false,
             "multi": [
                 "linux/amd64",
                 "linux/arm64"

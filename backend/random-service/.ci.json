@@ -17,7 +17,7 @@
         "tagSeries": "be-random-service",
         "repository": "minidomo/gemdeck",
         "platform": {
-            "single": true,
+            "single": false,
             "multi": [
                 "linux/amd64",
                 "linux/arm64"
