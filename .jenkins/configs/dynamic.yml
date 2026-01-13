@@ -128,21 +128,3 @@ jobs:
           }
         }
       }
-  - script: >
-      pipelineJob('image') {
-        definition {
-          cpsScm {
-            scm {
-              git {
-                remote {
-                  credentials('github-app-team')
-                  url('https://github.com/251027-Java/P3-Group2')
-                }
-                branches('main')
-              }
-            }
-            scriptPath('.jenkins/jobs/image.Jenkinsfile')
-            lightweight(true)
-          }
-        }
-      }
