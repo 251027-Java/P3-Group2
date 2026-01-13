@@ -113,6 +113,7 @@ if [[ "$DOCKER_TLS_VERIFY" == "1" ]]; then
     contextMap["$curSafePlatform"]="$contextName"
     mainBuilderContext="$contextName"
 
+    # https://serverfault.com/a/1152599
     docker context create $contextName --docker "host=$DOCKER_HOST,ca=$DOCKER_CERT_PATH/ca.pem,cert=$DOCKER_CERT_PATH/cert.pem,key=$DOCKER_CERT_PATH/key.pem"
 fi
 

@@ -141,7 +141,7 @@ jobs:
                 branches('main')
               }
             }
-            scriptPath('.jenkins/jobs/Jenkinsfile.image')
+            scriptPath('.jenkins/jobs/image.Jenkinsfile')
             lightweight(true)
           }
         }
