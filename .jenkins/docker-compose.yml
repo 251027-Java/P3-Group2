@@ -1,6 +1,6 @@
 services:
   jenkins:
-    build: .
+    build: ./docker
     restart: always
     depends_on:
       - jdocker
@@ -11,7 +11,7 @@ services:
       - jenkins-data:/var/jenkins_home
       - jenkins-docker-certs:/certs/client:ro
       - ./configs:/var/jenkins_home/casc_configs
-      - ./ssh:/var/jenkins_home/.ssh
+      - ./ssh:/custom/ssh:ro
     environment:
       JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
       DOCKER_TLS_VERIFY: 1

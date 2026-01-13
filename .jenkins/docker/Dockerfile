@@ -43,13 +43,17 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 ENV JAVA_OPTS=
 ENV CASC_JENKINS_CONFIG=
 
-RUN mkdir -p $JENKINS_HOME/casc_configs
-VOLUME [ "$JENKINS_HOME/casc_configs" ]
+RUN mkdir -p /custom
+VOLUME [ "/custom/ssh" ]
 
-RUN mkdir -p $JENKINS_HOME/.ssh
-VOLUME [ "$JENKINS_HOME/.ssh" ]
+COPY scripts /custom/scripts
 
 USER jenkins
 
+RUN mkdir -p $JENKINS_HOME/casc_configs
+VOLUME [ "$JENKINS_HOME/casc_configs" ]
+
 COPY ./plugins.txt $REF/plugins.txt
 RUN jenkins-plugin-cli -f $REF/plugins.txt
+
+ENTRYPOINT [ "/custom/scripts/entrypoint.sh" ]
