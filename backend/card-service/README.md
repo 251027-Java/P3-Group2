@@ -22,6 +22,9 @@ This service collects and manages Trading Card Game data.
 `GET /api/cards`
 `GET /api/cards?name=Pikachu`
 
+### Get Card by ID
+`GET /api/cards/{cardId}`
+
 ## Testing
 Run tests with:
 ```bash

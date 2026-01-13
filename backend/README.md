@@ -11,4 +11,6 @@
 
 `GET /api/cards?name=Pikachu` = Returns cards with name "Pikachu"
 
+`GET /api/cards/{cardId}` = Returns a specific card by ID
+
 ## MicroServices Architecture
