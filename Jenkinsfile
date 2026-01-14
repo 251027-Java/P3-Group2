@@ -12,6 +12,7 @@ pipeline {
         nodejs 'node-lts'
     }
 
+    // parameters for if we want to manually trigger the job remotely or through the UI
     parameters {
         string name: 'INTL_ATTRIBUTES_LINE', description: 'Comma-separated attributes.', trim: true
         text name: 'INTL_ATTRIBUTES', description: 'Attributes separated by a newline. Overrides `INTL_ATTRIBUTES_LINE` if both are provided.'
@@ -22,6 +23,7 @@ pipeline {
         stage('setup') {
             steps {
                 script {
+                    // use the shared library code that's on the current branch
                     library "primary@${env.CHANGE_BRANCH ?: env.GIT_BRANCH}"
                     util.showEnv()
                     util.updateDisplayName()
