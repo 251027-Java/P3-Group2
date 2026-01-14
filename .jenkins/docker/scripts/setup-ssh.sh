@@ -8,7 +8,7 @@ if [ -e "/custom/ssh" ]; then
     cp -r /custom/ssh $HOME/.ssh
     chmod 600 $HOME/.ssh/*
     
-    # ensure files do not have the '\r' line endings (important files are from windows)
+    # ensure files do not have the '\r' line endings (important if developing on a windows system)
     find $HOME/.ssh -type f -exec sed -i 's/\r$//' {} +
 
     echo "finished copying ssh files"
