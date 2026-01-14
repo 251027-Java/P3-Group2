@@ -68,8 +68,6 @@ def initAttributes(Map params = [:]) {
     def attributes = [:]
 
     attributes.putAll(gitUtil.getChanges())
-    attributes['frontend'] = attributes.keySet().any { it.startsWith('change:frontend') }
-    attributes['backend'] = attributes.keySet().any { it.startsWith('change:backend') }
     attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
     attributes['default'] = gitUtil.isDefaultBranch()
 
@@ -81,6 +79,9 @@ def initAttributes(Map params = [:]) {
 
     echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
     attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
+
+    attributes['frontend'] = attributes.keySet().any { it.startsWith('change:frontend') }
+    attributes['backend'] = attributes.keySet().any { it.startsWith('change:backend') }
 
     return attributes
 }

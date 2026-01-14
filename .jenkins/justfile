@@ -53,7 +53,7 @@ init-files:
     file="./secrets/secrets.properties"; if [ ! -f "$file" ]; then cp ${file}.example $file; echo "Created $file"; fi
     file="./secrets/github_app_team_key.pem"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
     file="./secrets/kubeconfig.yml"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
-    file="./ssh/config"; if [ ! -f "$file" ]; then cp ${file}.example $file; echo "Created $file"; fi
+    file="./ssh/config"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
 
 # Start Jenkins
 [group("Docker")]
@@ -198,3 +198,8 @@ gen-docker-ssh-key:
 [group("Init")]
 setup-ssh:
     docker exec -it $COMPOSE_PROJECT_NAME-jenkins-1 //custom/scripts/setup-ssh.sh
+
+# View the current system's cpu architecture according to docker
+[group("Extra")]
+docker-arch:
+    docker version --format '{{{{.Server.Os}}/{{{{.Server.Arch}}'

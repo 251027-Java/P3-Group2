@@ -147,10 +147,12 @@ def executeDir(Map params = [:]) {
         || attributes["image:${path}".toString()]
     )
 
+    def pushLatest = attributes['default'] || attributes['latest']
+
     if (settings.image.enabled && shouldBuildImage) {
         stage("image ${path}") {
             def success = dockerUtil.image path: path, settings: settings,
-                credId: dockerCredentialsId, latest: attributes['default']
+                credId: dockerCredentialsId, latest: pushLatest
             allSuccessful &= success
         }
     }
