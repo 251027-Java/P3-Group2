@@ -42,7 +42,10 @@ To run commands, you'll need a `.env` file. See [this section](#initialization) 
 
 ### Pipeline file configuration
 
-Service pipelines can be configured through a file called `.ci.json` where you can dictate what stages should run, the command to execute, and image publishing configuration. A schema of this file can be found [here](./ci.schema.json).
+Service pipelines can be configured through a file called `.ci.json` where you can dictate what stages should run, the command to execute, and image publishing configuration. 
+
+- [Schema](./ci.schema.json)
+- [Example file](./.ci.json.example)
 
 #### VSCode schema integration
 

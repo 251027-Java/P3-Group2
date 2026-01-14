@@ -39,7 +39,7 @@ def getSettings(Map params = [:]) {
 }
 
 def getQualifyingDirs() {
-    return findFiles(glob: '*/*/.ci.json').collect { it.path.replace('/.ci.json', '') }
+    return findFiles(glob: '**/.ci.json').collect { it.path.replace('/.ci.json', '') }
 }
 
 def parseAttributes(Map params = [:]) {
