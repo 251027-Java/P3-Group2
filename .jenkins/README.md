@@ -161,7 +161,7 @@ To publish images to Docker Hub, create a [Personal Access Token (PAT)](https://
 
 ### Multi-platform image build support
 
-Multi-platform builds are done using the [native node](https://docs.docker.com/build/building/multi-platform/#multiple-native-nodes) strategy. This is an **OPTIONAL** feature and not necessary to execute Jenkins. If not you choose not to set up this configuration, you'll be limited to the CPU archiecture of your host system. Use `just docker-arch` to see what architecture your builds will natively package for.
+Multi-platform builds are done using the [native node](https://docs.docker.com/build/building/multi-platform/#multiple-native-nodes) strategy. This is an **OPTIONAL** feature and not necessary to execute Jenkins. If you choose not to set up this configuration, you'll be limited to the CPU archiecture of your host system. Use `just docker-arch` to see what architecture your builds will natively package for.
 
 SSH is used to handle connections with nodes/other VMs. An SSH key can be generated with the following command:
 
