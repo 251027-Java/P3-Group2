@@ -1,6 +1,0 @@
-spring:
-  application:
-    name: jenkins-test
-  output:
-    ansi:
-      enabled: always
