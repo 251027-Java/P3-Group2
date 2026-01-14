@@ -23,7 +23,7 @@ def getRecommendedRevspec() {
 
         sh "${path} ${name}"
 
-        return "origin/${name}"
+        return 'FETCH_HEAD'
     }
 
     return isPrCreated() ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
