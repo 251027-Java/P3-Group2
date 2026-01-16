@@ -1,21 +1,21 @@
+/**
+ * This file was created by Claude Sonnet 4.5
+ */
 const { merge } = require("webpack-merge");
-const singleSpaDefaults = require("webpack-config-single-spa-ts");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 
 module.exports = (webpackConfigEnv, argv) => {
-  const orgName = "marketplace";
   const defaultConfig = singleSpaDefaults({
-    orgName,
-    projectName: "root-config",
+    orgName: "marketplace",
+    projectName: "mfe-react-users",
     webpackConfigEnv,
     argv,
-    disableHtmlGeneration: true,
   });
 
   return merge(defaultConfig, {
     // Hot Module Replacement
     devServer: {
-      port: 9000,
+      port: 4202,
       hot: true,
       historyApiFallback: true,
       headers: {
@@ -30,16 +30,7 @@ module.exports = (webpackConfigEnv, argv) => {
         },
       },
     },
-    // modify the webpack config however you'd like to by adding to this object
-    plugins: [
-      new HtmlWebpackPlugin({
-        inject: false,
-        template: "src/index.ejs",
-        templateParameters: {
-          isLocal: webpackConfigEnv && webpackConfigEnv.isLocal,
-          orgName,
-        },
-      }),
-    ],
+    // Externals for shared dependencies
+    externals: ["react", "react-dom", "react-router-dom", "single-spa"],
   });
 };
