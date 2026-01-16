@@ -196,9 +196,6 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <includes>
-                                <include>com/marketplace/**/service/**</include>
-                            </includes>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
@@ -206,7 +203,7 @@
                                         <limit>
                                             <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.50</minimum>
+                                            <minimum>0.60</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
