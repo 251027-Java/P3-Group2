@@ -17,12 +17,12 @@ This document outlines the detailed phases for developing our micro-frontend (MF
 ### Tasks
 
 #### 1.1 Initialize Single-SPA Root-Config
-- [ ] Create root-config application using Single-SPA CLI
-- [ ] Configure application routing for MFEs
-- [ ] Set up layout management (header, footer, navigation)
-- [ ] Configure import maps for MFE orchestration
-- [ ] Implement environment-based configuration (dev, staging, prod)
-- [ ] Add health check and error boundary components
+- [x] Create root-config application using Single-SPA CLI
+- [x] Configure application routing for MFEs
+- [x] Set up layout management (header, footer, navigation)
+- [x] Configure import maps for MFE orchestration
+- [x] Implement environment-based configuration (dev, staging, prod)
+- [x] Add health check and error boundary components
 
 #### 1.2 Project Structure Setup
 ```

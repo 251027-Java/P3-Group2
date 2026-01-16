@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Marketplace - Trading Card Platform</title>
+  <meta name="description" content="Enterprise trading card marketplace platform">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: localhost:*; script-src 'unsafe-inline' 'unsafe-eval' https: localhost:*; connect-src https: localhost:* ws://localhost:*; style-src 'unsafe-inline' https:; object-src 'none';">
+  <meta name="importmap-type" use-injector />
+  
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="/styles/global.css">
+  <!-- If you wish to turn off import-map-overrides for specific environments (prod), uncomment the line below -->
+  <!-- More info at https://github.com/single-spa/import-map-overrides/blob/main/docs/configuration.md#domain-list -->
+  <!-- <meta name="import-map-overrides-domains" content="denylist:prod.example.com" /> -->
+
+  <!-- Shared dependencies go into this import map -->
+  <script type="injector-importmap">
+    {
+      "imports": {
+        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js"
+      }
+    }
+  </script>
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js" as="module">
+Production import map - loaded from server -->
+  <% if (!isLocal) { %>
+  <script type="injector-importmap" src="/importmap.json"></script>
+  <% } %>
+
+  <!-- Local development import map -->  <!-- <script type="injector-importmap" src="/importmap.json"></script> -->
+
+  <% if (isLocal) { %>
+  <script type="injector-importmap">
+    {
+      "imports": {
+        "@marketplace/root-config": "//localhost:9000/marketplace-root-config.js",
+        "@marketplace/mfe-angular-cards": "//localhost:4200/main.js",
+        "@marketplace/mfe-react-users": "//localhost:8080/marketplace-mfe-react-users.js",
+        "@marketplace/navbar": "//localhost:8081/marketplace-navbar.js",
+        "@marketplace/footer": "//localhost:8082/marketplace-footer.js",
+        "@marketplace/home": "//localhost:8083/marketplace-home.js",
+        "@marketplace/not-found": "//localhost:8084/marketplace-not-found.js",
+        "@marketplace/shared-utils": "//localhost:9001/marketplace-shared-utils.js",
+        "@single-spa/welcome": "https://cdn.jsdelivr.net/npm/single-spa-welcome/dist/single-spa-welcome.min.js"
+      }
+    }
+  </script>
+  <% } %>
+
+  <script src="https://cdn.jsdelivr.net/npm/import-map-overrides@5.1.1/dist/import-map-overrides.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@single-spa/import-map-injector@2.0.1/lib/import-map-injector.js"></script>
+</head>
+<body>
+  <noscript>
+    You need to enable JavaScript to run this app.
+  </noscript>
+  <main></main>
+  <script>
+    window.importMapInjector.initPromise.then(() => {
+      import('@marketplace/root-config');
+    });
+  </script>
+  <import-map-overrides-full show-when-local-storage="devtools" dev-libs></import-map-overrides-full>
+</body>
+</html>
