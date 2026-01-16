@@ -209,6 +209,7 @@ This document outlines the detailed phases for developing our micro-frontend (MF
 - [ ] Configure API interceptors
 - [ ] Implement JWT token management
 - [ ] Set up styled-components or CSS modules
+- [ ] Install and configure React Bits for aurora background effects
 
 #### 3.2 Routing & Navigation (2+ views required)
 - [ ] **Route 1**: Login/Register page (`/auth`)
@@ -222,6 +223,7 @@ This document outlines the detailed phases for developing our micro-frontend (MF
 
 **Core Components:**
 1. **LoginFormComponent**
+   - [ ] Aurora background integration using React Bits
    - [ ] Email/username input with validation
    - [ ] Password input with show/hide toggle
    - [ ] Remember me checkbox
