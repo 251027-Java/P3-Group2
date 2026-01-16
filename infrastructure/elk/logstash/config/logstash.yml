@@ -1,0 +1,4 @@
+# Generated with assistance from Cursor
+# Reviewed and modified by Matt Selle
+http.host: "0.0.0.0"
+xpack.monitoring.elasticsearch.hosts: [ "http://elasticsearch:9200" ]
