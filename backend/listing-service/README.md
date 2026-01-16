@@ -27,9 +27,9 @@ The Listing Service is part of a microservices architecture for a card trading m
 
 ## Technologies
 
-- **Java 21** - Programming language
+- **Java 25** - Programming language
 - **Spring Boot 3.4.0** - Application framework
-- **Spring Cloud 2024.0.0** - Microservices support
+- **Spring Cloud 2025.1.0** - Microservices support
   - Netflix Eureka Client - Service discovery
   - OpenFeign - Declarative REST clients
 - **Spring Data JPA** - Data persistence with Hibernate ORM
@@ -197,7 +197,7 @@ PUT /api/listings/1
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `SERVER_PORT` | Application port | 8081 |
-| `DB_HOST` | MySQL host | localhost |
+| `DB_HOST` | PostgreSQL host | localhost |
 | `DB_PORT` | PostgreSQL port | 5432 |
 | `DB_NAME` | Database name | marketplace |
 | `DB_USERNAME` | Database username | postgres |
@@ -222,7 +222,7 @@ Logs are written to both console and file (`logs/listing-service.log`).
 # Build the Docker image
 docker build -t listing-service:latest .
 
-# Run with Docker Compose (includes MySQL and Kafka)
+# Run with Docker Compose (includes PostgreSQL and Kafka)
 docker-compose up -d
 ```
 

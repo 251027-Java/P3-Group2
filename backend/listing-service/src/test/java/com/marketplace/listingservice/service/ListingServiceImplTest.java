@@ -1,12 +1,19 @@
+// Generated with Assistance By Clause Opus 4.5
+// Reviewed and modified by Marcus Wright 
+
 package com.marketplace.listingservice.service;
 
+import com.marketplace.listingservice.client.CardServiceClient;
+import com.marketplace.listingservice.client.UserServiceClient;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
 import com.marketplace.listingservice.dto.UpdateListingRequest;
 import com.marketplace.listingservice.entity.Listing;
 import com.marketplace.listingservice.entity.ListingStatus;
+import com.marketplace.listingservice.exception.CardNotFoundException;
 import com.marketplace.listingservice.exception.InvalidListingOperationException;
 import com.marketplace.listingservice.exception.ListingNotFoundException;
+import com.marketplace.listingservice.exception.UserNotFoundException;
 import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.impl.ListingServiceImpl;
@@ -46,6 +53,12 @@ class ListingServiceImplTest {
     @Mock
     private ListingEventProducer listingEventProducer;
 
+    @Mock
+    private CardServiceClient cardServiceClient;
+
+    @Mock
+    private UserServiceClient userServiceClient;
+
     @InjectMocks
     private ListingServiceImpl listingService;
 
@@ -82,6 +95,8 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should create listing successfully")
         void createListing_Success() {
+            when(userServiceClient.userExists(100L)).thenReturn(true);
+            when(cardServiceClient.cardExists(200L)).thenReturn(true);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
             doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
@@ -94,6 +109,8 @@ class ListingServiceImplTest {
             assertThat(response.getConditionRating()).isEqualTo(8);
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.ACTIVE);
 
+            verify(userServiceClient, times(1)).userExists(100L);
+            verify(cardServiceClient, times(1)).cardExists(200L);
             verify(listingRepository, times(1)).save(any(Listing.class));
             verify(listingEventProducer, times(1)).sendListingCreatedEvent(any(Listing.class));
         }
@@ -102,6 +119,8 @@ class ListingServiceImplTest {
         @DisplayName("Should create listing with custom status")
         void createListing_WithCustomStatus() {
             createRequest.setListingStatus(ListingStatus.ACTIVE);
+            when(userServiceClient.userExists(100L)).thenReturn(true);
+            when(cardServiceClient.cardExists(200L)).thenReturn(true);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
             doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
@@ -109,6 +128,35 @@ class ListingServiceImplTest {
 
             assertThat(response).isNotNull();
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.ACTIVE);
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when user does not exist")
+        void createListing_UserNotFound() {
+            when(userServiceClient.userExists(100L)).thenReturn(false);
+
+            assertThatThrownBy(() -> listingService.createListing(createRequest))
+                    .isInstanceOf(UserNotFoundException.class)
+                    .hasMessageContaining("100");
+
+            verify(userServiceClient, times(1)).userExists(100L);
+            verify(cardServiceClient, never()).cardExists(anyLong());
+            verify(listingRepository, never()).save(any(Listing.class));
+        }
+
+        @Test
+        @DisplayName("Should throw CardNotFoundException when card does not exist")
+        void createListing_CardNotFound() {
+            when(userServiceClient.userExists(100L)).thenReturn(true);
+            when(cardServiceClient.cardExists(200L)).thenReturn(false);
+
+            assertThatThrownBy(() -> listingService.createListing(createRequest))
+                    .isInstanceOf(CardNotFoundException.class)
+                    .hasMessageContaining("200");
+
+            verify(userServiceClient, times(1)).userExists(100L);
+            verify(cardServiceClient, times(1)).cardExists(200L);
+            verify(listingRepository, never()).save(any(Listing.class));
         }
     }
 

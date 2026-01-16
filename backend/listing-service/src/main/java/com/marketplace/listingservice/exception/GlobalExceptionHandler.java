@@ -1,3 +1,6 @@
+// Generated with Assistance By Clause Opus 4.5
+// Reviewed and modified by Marcus Wright 
+
 package com.marketplace.listingservice.exception;
 
 import com.marketplace.listingservice.dto.ErrorResponse;
@@ -41,6 +44,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCardNotFoundException(
             CardNotFoundException ex, HttpServletRequest request) {
         log.warn("Card not found: {}", ex.getMessage());
+        
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(
+            UserNotFoundException ex, HttpServletRequest request) {
+        log.warn("User not found: {}", ex.getMessage());
         
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())

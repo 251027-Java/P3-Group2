@@ -1,6 +1,14 @@
+# Generated with Assistance By Clause Opus 4.5
+# Reviewed and modified by Marcus Wright 
+
 spring:
   application:
     name: listing-service
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:marketplace}

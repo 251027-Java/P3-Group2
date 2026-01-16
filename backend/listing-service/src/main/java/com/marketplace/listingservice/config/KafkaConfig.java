@@ -1,3 +1,6 @@
+// Generated with Assistance By Clause Opus 4.5
+// Reviewed and modified by Marcus Wright 
+
 package com.marketplace.listingservice.config;
 
 import org.apache.kafka.clients.admin.NewTopic;

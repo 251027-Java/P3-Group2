@@ -1,3 +1,6 @@
+// Generated with Assistance By Clause Opus 4.5
+// Reviewed and modified by Marcus Wright 
+
 package com.marketplace.listingservice.client;
 
 import com.marketplace.listingservice.client.dto.CardResponse;
@@ -27,6 +30,6 @@ public class CardServiceClientFallback implements CardServiceClient {
         log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
         // Return true to allow operation to proceed when service is down
         // In production, you might want different behavior
-        return true;
+        return false;
     }
 }

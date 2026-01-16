@@ -1,12 +1,19 @@
+// Generated with Assistance By Clause Opus 4.5
+// Reviewed and modified by Marcus Wright 
+
 package com.marketplace.listingservice.service.impl;
 
+import com.marketplace.listingservice.client.CardServiceClient;
+import com.marketplace.listingservice.client.UserServiceClient;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
 import com.marketplace.listingservice.dto.UpdateListingRequest;
 import com.marketplace.listingservice.entity.Listing;
 import com.marketplace.listingservice.entity.ListingStatus;
+import com.marketplace.listingservice.exception.CardNotFoundException;
 import com.marketplace.listingservice.exception.InvalidListingOperationException;
 import com.marketplace.listingservice.exception.ListingNotFoundException;
+import com.marketplace.listingservice.exception.UserNotFoundException;
 import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.ListingService;
@@ -14,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import feign.FeignException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,11 +38,19 @@ public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepository;
     private final ListingEventProducer listingEventProducer;
+    private final CardServiceClient cardServiceClient;
+    private final UserServiceClient userServiceClient;
 
     @Override
     public ListingResponse createListing(CreateListingRequest request) {
         log.info("Creating new listing for card ID: {} by user ID: {}", 
                 request.getCardId(), request.getOwnerUserId());
+
+        // Verify that the user exists via user service
+        validateUserExists(request.getOwnerUserId());
+
+        // Verify that the card exists via card service
+        validateCardExists(request.getCardId());
 
         Listing listing = Listing.builder()
                 .ownerUserId(request.getOwnerUserId())
@@ -202,5 +218,49 @@ public class ListingServiceImpl implements ListingService {
 
         // Publish listing deleted event
         listingEventProducer.sendListingDeletedEvent(listingId);
+    }
+
+    /**
+     * Validates that a user exists by calling the user service.
+     *
+     * @param userId the user ID to validate
+     * @throws UserNotFoundException if the user does not exist
+     */
+    private void validateUserExists(Long userId) {
+        log.debug("Validating user exists with ID: {}", userId);
+        Boolean exists;
+        try {
+            exists = userServiceClient.userExists(userId);
+        } catch (FeignException e) {
+            log.warn("User service unavailable. Cannot verify user existence for user ID: {}", userId);
+            throw new UserNotFoundException(userId);
+        }
+        if (exists == null || !exists) {
+            log.warn("User validation failed - user not found with ID: {}", userId);
+            throw new UserNotFoundException(userId);
+        }
+        log.debug("User validated successfully with ID: {}", userId);
+    }
+
+    /**
+     * Validates that a card exists by calling the card service.
+     *
+     * @param cardId the card ID to validate
+     * @throws CardNotFoundException if the card does not exist
+     */
+    private void validateCardExists(Long cardId) {
+        log.debug("Validating card exists with ID: {}", cardId);
+        Boolean exists;
+        try {
+            exists = cardServiceClient.cardExists(cardId);
+        } catch (FeignException e) {
+            log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
+            throw new CardNotFoundException(cardId);
+        }
+        if (exists == null || !exists) {
+            log.warn("Card validation failed - card not found with ID: {}", cardId);
+            throw new CardNotFoundException(cardId);
+        }
+        log.debug("Card validated successfully with ID: {}", cardId);
     }
 }

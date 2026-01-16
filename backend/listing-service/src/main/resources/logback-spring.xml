@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- # Generated with Assistance By Clause Opus 4.5
+     # Reviewed and modified by Marcus Wright  -->
+
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     
