@@ -1,0 +1,8 @@
+*.jar
+creds/*.xml
+secrets/*
+!secrets/*.example
+*.pem
+.groovylintrc.json
+ssh/*
+!ssh/config.example
