@@ -1,0 +1,48 @@
+{
+  "_comment": "This file was created by Claude Sonnet 4.5",
+  "name": "@marketplace/mfe-angular-cards",
+  "version": "1.0.0",
+  "description": "Angular micro-frontend for trading card marketplace",
+  "scripts": {
+    "start": "ng serve --port 4201",
+    "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "build:single-spa": "ng build --prod --output-hashing=none",
+    "serve:single-spa": "ng serve --port 4201 --disable-host-check",
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --code-coverage --browsers=ChromeHeadless",
+    "lint": "ng lint",
+    "format": "prettier --write \"src/**/*.{ts,html,css,scss}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,scss}\""
+  },
+  "keywords": [
+    "single-spa",
+    "angular",
+    "micro-frontend",
+    "trading-cards"
+  ],
+  "author": "Marketplace Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@angular-builders/custom-webpack": "^17.0.0",
+    "@angular-devkit/build-angular": "^17.0.0",
+    "@angular/cli": "^17.0.0",
+    "@angular/compiler-cli": "^17.0.0",
+    "prettier": "^3.0.0",
+    "single-spa-angular": "^9.0.0"
+  },
+  "dependencies": {
+    "@angular/animations": "^17.0.0",
+    "@angular/common": "^17.0.0",
+    "@angular/compiler": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/forms": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/platform-browser-dynamic": "^17.0.0",
+    "@angular/router": "^17.0.0",
+    "@marketplace/shared-utils": "file:../shared-utils",
+    "rxjs": "^7.8.0",
+    "tslib": "^2.6.0",
+    "zone.js": "^0.14.0"
+  }
+}

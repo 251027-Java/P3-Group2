@@ -1,3 +1,5 @@
+<!-- This file was created by Claude Sonnet 4.5 -->
+
 # Marketplace Root Config
 
 The root configuration for the Marketplace micro-frontend application using Single-SPA.

@@ -1,4 +1,6 @@
 /**
+ * This file was created by Claude Sonnet 4.5
+ *
  * Marketplace Root Config
  * Main orchestration file for Single-SPA micro-frontends
  * Generated with assistance from GitHub Copilot

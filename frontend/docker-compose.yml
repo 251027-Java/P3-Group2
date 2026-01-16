@@ -1,0 +1,64 @@
+# This file was created by Claude Sonnet 4.5
+
+version: '3.8'
+
+services:
+  # Single-SPA Root Config - Main Orchestrator
+  root-config:
+    build:
+      context: ./root-config
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - NODE_ENV=development
+      - MFE_ANGULAR_CARDS_URL=http://localhost:4201
+      - MFE_REACT_USERS_URL=http://localhost:4202
+    volumes:
+      - ./root-config:/app
+      - /app/node_modules
+    command: npm start
+    networks:
+      - frontend-network
+
+  # Angular Cards MFE
+  mfe-angular-cards:
+    build:
+      context: ./mfe-angular-cards
+      dockerfile: Dockerfile
+    ports:
+      - "4201:4201"
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://localhost:8080
+    volumes:
+      - ./mfe-angular-cards:/app
+      - /app/node_modules
+    command: npm start
+    networks:
+      - frontend-network
+    depends_on:
+      - root-config
+
+  # React Users MFE
+  mfe-react-users:
+    build:
+      context: ./mfe-react-users
+      dockerfile: Dockerfile
+    ports:
+      - "4202:4202"
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://localhost:8081
+    volumes:
+      - ./mfe-react-users:/app
+      - /app/node_modules
+    command: npm start
+    networks:
+      - frontend-network
+    depends_on:
+      - root-config
+
+networks:
+  frontend-network:
+    driver: bridge
