@@ -1,0 +1,58 @@
+services:
+  jenkins:
+    build: ./docker
+    restart: always
+    depends_on:
+      - jdocker
+    ports:
+      - ${JENKINS_PORT}:8080
+      - ${JENKINS_AGENT_PORT}:50000
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+      - ./configs:/var/jenkins_home/casc_configs
+      - ./ssh:/custom/ssh:ro
+    environment:
+      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
+      DOCKER_TLS_VERIFY: 1
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_HOST: tcp://docker:2376
+      CASC_JENKINS_CONFIG: /var/jenkins_home/casc_configs
+    networks:
+      - jenkins-nw
+    privileged: true
+    secrets:
+      - secrets.properties
+      - github_app_team_key
+      - kubeconfig
+
+  jdocker:
+    image: docker:dind
+    restart: always
+    ports:
+      - ${JDOCKER_PORT}:2376
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    networks:
+      jenkins-nw:
+        aliases:
+          - docker
+    privileged: true
+
+volumes:
+  jenkins-data: null
+  jenkins-docker-certs: null
+
+networks:
+  jenkins-nw: null
+
+secrets:
+  secrets.properties:
+    file: ./secrets/secrets.properties
+  github_app_team_key:
+    file: ./secrets/github_app_team_key.pem
+  kubeconfig:
+    file: ./secrets/kubeconfig.yml
