@@ -1,0 +1,25 @@
+package com.marketplace.listingservice.dto;
+
+import com.marketplace.listingservice.entity.ListingStatus;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * DTO for updating an existing listing.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UpdateListingRequest {
+
+    @Min(value = 1, message = "Condition rating must be at least 1")
+    @Max(value = 10, message = "Condition rating must be at most 10")
+    private Integer conditionRating;
+
+    private ListingStatus listingStatus;
+}
