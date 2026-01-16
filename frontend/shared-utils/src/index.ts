@@ -21,3 +21,8 @@ export * from "./utils";
 
 // Export constants
 export * from "./constants";
+// Export authentication utilities
+export * from "./auth";
+
+// Export state management
+export * from "./state";
