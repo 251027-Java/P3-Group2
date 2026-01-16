@@ -2,7 +2,7 @@
  * This file was created by Claude Sonnet 4.5
  */
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { getAuthToken, isTokenExpired } from '@marketplace/shared-utils';
 
 interface ProtectedRouteProps {
@@ -11,10 +11,12 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const token = getAuthToken();
+  const location = useLocation();
   
   // Check if token exists and is not expired
   if (!token || isTokenExpired(token)) {
-    return <Navigate to="/users/auth/login" replace />;
+    // Redirect to login and save the attempted location
+    return <Navigate to="/users/auth/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

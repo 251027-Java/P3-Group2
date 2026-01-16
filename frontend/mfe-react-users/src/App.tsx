@@ -4,6 +4,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { GlobalStyles } from './styles/GlobalStyles';
+import Navigation from './components/Navigation';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
@@ -14,6 +15,7 @@ function App() {
   return (
     <>
       <GlobalStyles />
+      <Navigation />
       <Routes>
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
