@@ -1,0 +1,182 @@
+/**
+ * This file was created by Claude Sonnet 4.5
+ * 
+ * Jenkins Pipeline Configuration for Frontend MFEs
+ * 
+ * This pipeline handles:
+ * - Building all frontend micro-frontends
+ * - Running linting and tests
+ * - Building Docker images
+ * - Pushing to Docker registry
+ */
+
+def buildMFE(String mfeName, String directory, String port) {
+    stage("Build ${mfeName}") {
+        dir("frontend/${directory}") {
+            sh 'npm ci'
+        }
+    }
+    
+    stage("Lint ${mfeName}") {
+        dir("frontend/${directory}") {
+            sh 'npm run lint'
+        }
+    }
+    
+    stage("Test ${mfeName}") {
+        dir("frontend/${directory}") {
+            sh 'npm test -- --watchAll=false --coverage'
+        }
+    }
+    
+    stage("Build Docker Image ${mfeName}") {
+        dir("frontend/${directory}") {
+            script {
+                def imageName = "marketplace/${directory}:${env.BUILD_NUMBER}"
+                def imageLatest = "marketplace/${directory}:latest"
+                
+                sh """
+                    docker build -t ${imageName} -t ${imageLatest} .
+                """
+                
+                // Store image name for push stage
+                env["IMAGE_${mfeName.toUpperCase().replace('-', '_')}"] = imageName
+                env["IMAGE_${mfeName.toUpperCase().replace('-', '_')}_LATEST"] = imageLatest
+            }
+        }
+    }
+}
+
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'node-lts'
+    }
+
+    environment {
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-cred'
+        NODE_ENV = 'production'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Shared Utils') {
+            steps {
+                dir('frontend/shared-utils') {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Build Root Config') {
+            steps {
+                script {
+                    buildMFE('ROOT-CONFIG', 'root-config', '9000')
+                }
+            }
+        }
+
+        stage('Build Angular Cards MFE') {
+            steps {
+                script {
+                    buildMFE('ANGULAR-CARDS', 'mfe-angular-cards', '4201')
+                }
+            }
+        }
+
+        stage('Build React Users MFE') {
+            steps {
+                script {
+                    buildMFE('REACT-USERS', 'mfe-react-users', '4202')
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", DOCKER_CREDENTIALS_ID) {
+                        // Push all images
+                        sh """
+                            docker push ${env.IMAGE_ROOT_CONFIG}
+                            docker push ${env.IMAGE_ROOT_CONFIG_LATEST}
+                            docker push ${env.IMAGE_ANGULAR_CARDS}
+                            docker push ${env.IMAGE_ANGULAR_CARDS_LATEST}
+                            docker push ${env.IMAGE_REACT_USERS}
+                            docker push ${env.IMAGE_REACT_USERS_LATEST}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Cleanup Images') {
+            steps {
+                script {
+                    sh """
+                        docker rmi ${env.IMAGE_ROOT_CONFIG} || true
+                        docker rmi ${env.IMAGE_ROOT_CONFIG_LATEST} || true
+                        docker rmi ${env.IMAGE_ANGULAR_CARDS} || true
+                        docker rmi ${env.IMAGE_ANGULAR_CARDS_LATEST} || true
+                        docker rmi ${env.IMAGE_REACT_USERS} || true
+                        docker rmi ${env.IMAGE_REACT_USERS_LATEST} || true
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive test results
+            junit testResults: '**/test-results/*.xml', allowEmptyResults: true
+            
+            // Archive coverage reports
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'frontend/root-config/coverage',
+                reportFiles: 'index.html',
+                reportName: 'Root Config Coverage'
+            ])
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'frontend/mfe-angular-cards/coverage',
+                reportFiles: 'index.html',
+                reportName: 'Angular Cards Coverage'
+            ])
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'frontend/mfe-react-users/coverage',
+                reportFiles: 'index.html',
+                reportName: 'React Users Coverage'
+            ])
+            
+            // Clean workspace
+            cleanWs()
+        }
+        
+        success {
+            echo 'Frontend build completed successfully!'
+        }
+        
+        failure {
+            echo 'Frontend build failed!'
+        }
+    }
+}
