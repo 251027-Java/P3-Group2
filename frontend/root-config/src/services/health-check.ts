@@ -1,4 +1,6 @@
 /**
+ * This file was created by Claude Sonnet 4.5
+ *
  * Health Check Service
  * Monitors the health of all micro-frontends and backend services
  * Generated with assistance from GitHub Copilot

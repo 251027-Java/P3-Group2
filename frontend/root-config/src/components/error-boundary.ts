@@ -1,4 +1,6 @@
 /**
+ * This file was created by Claude Sonnet 4.5
+ *
  * Error Boundary Component
  * Catches and handles errors in micro-frontends
  * Generated with assistance from GitHub Copilot

@@ -1,4 +1,6 @@
 /**
+ * This file was created by Claude Sonnet 4.5
+ *
  * Environment Configuration
  * Manages environment-specific settings for dev, staging, and production
  * Generated with assistance from GitHub Copilot
