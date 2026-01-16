@@ -5,6 +5,7 @@ package com.marketplace.listingservice.service;
 
 import com.marketplace.listingservice.client.CardServiceClient;
 import com.marketplace.listingservice.client.UserServiceClient;
+import com.marketplace.listingservice.client.dto.CardResponse;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
 import com.marketplace.listingservice.dto.UpdateListingRequest;
@@ -95,8 +96,9 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should create listing successfully")
         void createListing_Success() {
+            CardResponse cardResponse = CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.userExists(100L)).thenReturn(true);
-            when(cardServiceClient.cardExists(200L)).thenReturn(true);
+            when(cardServiceClient.getCardById(200L)).thenReturn(cardResponse);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
             doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
@@ -110,7 +112,7 @@ class ListingServiceImplTest {
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.ACTIVE);
 
             verify(userServiceClient, times(1)).userExists(100L);
-            verify(cardServiceClient, times(1)).cardExists(200L);
+            verify(cardServiceClient, times(1)).getCardById(200L);
             verify(listingRepository, times(1)).save(any(Listing.class));
             verify(listingEventProducer, times(1)).sendListingCreatedEvent(any(Listing.class));
         }
@@ -119,8 +121,9 @@ class ListingServiceImplTest {
         @DisplayName("Should create listing with custom status")
         void createListing_WithCustomStatus() {
             createRequest.setListingStatus(ListingStatus.ACTIVE);
+            CardResponse cardResponse = CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.userExists(100L)).thenReturn(true);
-            when(cardServiceClient.cardExists(200L)).thenReturn(true);
+            when(cardServiceClient.getCardById(200L)).thenReturn(cardResponse);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
             doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
@@ -140,7 +143,7 @@ class ListingServiceImplTest {
                     .hasMessageContaining("100");
 
             verify(userServiceClient, times(1)).userExists(100L);
-            verify(cardServiceClient, never()).cardExists(anyLong());
+            verify(cardServiceClient, never()).getCardById(anyLong());
             verify(listingRepository, never()).save(any(Listing.class));
         }
 
@@ -148,14 +151,14 @@ class ListingServiceImplTest {
         @DisplayName("Should throw CardNotFoundException when card does not exist")
         void createListing_CardNotFound() {
             when(userServiceClient.userExists(100L)).thenReturn(true);
-            when(cardServiceClient.cardExists(200L)).thenReturn(false);
+            when(cardServiceClient.getCardById(200L)).thenReturn(null);
 
             assertThatThrownBy(() -> listingService.createListing(createRequest))
                     .isInstanceOf(CardNotFoundException.class)
                     .hasMessageContaining("200");
 
             verify(userServiceClient, times(1)).userExists(100L);
-            verify(cardServiceClient, times(1)).cardExists(200L);
+            verify(cardServiceClient, times(1)).getCardById(200L);
             verify(listingRepository, never()).save(any(Listing.class));
         }
     }

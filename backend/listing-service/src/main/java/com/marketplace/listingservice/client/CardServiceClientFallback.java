@@ -24,12 +24,4 @@ public class CardServiceClientFallback implements CardServiceClient {
                 .description("Card service is currently unavailable")
                 .build();
     }
-
-    @Override
-    public Boolean cardExists(Long cardId) {
-        log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
-        // Return true to allow operation to proceed when service is down
-        // In production, you might want different behavior
-        return false;
-    }
 }

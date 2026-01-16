@@ -23,13 +23,4 @@ public interface CardServiceClient {
      */
     @GetMapping("/api/cards/{cardId}")
     CardResponse getCardById(@PathVariable("cardId") Long cardId);
-
-    /**
-     * Checks if a card exists by card ID.
-     *
-     * @param cardId the card ID
-     * @return true if the card exists, false otherwise
-     */
-    @GetMapping("/api/cards/{cardId}/exists")
-    Boolean cardExists(@PathVariable("cardId") Long cardId);
 }

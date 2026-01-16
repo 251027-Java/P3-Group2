@@ -4,6 +4,7 @@
 package com.marketplace.listingservice.service.impl;
 
 import com.marketplace.listingservice.client.CardServiceClient;
+import com.marketplace.listingservice.client.dto.CardResponse;
 import com.marketplace.listingservice.client.UserServiceClient;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
@@ -250,14 +251,14 @@ public class ListingServiceImpl implements ListingService {
      */
     private void validateCardExists(Long cardId) {
         log.debug("Validating card exists with ID: {}", cardId);
-        Boolean exists;
+        CardResponse cardResponse;
         try {
-            exists = cardServiceClient.cardExists(cardId);
+            cardResponse = cardServiceClient.getCardById(cardId);
         } catch (FeignException e) {
             log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
             throw new CardNotFoundException(cardId);
         }
-        if (exists == null || !exists) {
+        if (cardResponse == null || cardResponse.getCardId() == null) {
             log.warn("Card validation failed - card not found with ID: {}", cardId);
             throw new CardNotFoundException(cardId);
         }
