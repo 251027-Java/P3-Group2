@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js",
+    "@marketplace/root-config": "/marketplace-root-config.js",
+    "@marketplace/mfe-angular-cards": "/mfe-angular-cards/main.js",
+    "@marketplace/mfe-react-users": "/mfe-react-users/marketplace-mfe-react-users.js",
+    "@marketplace/navbar": "/navbar/marketplace-navbar.js",
+    "@marketplace/footer": "/footer/marketplace-footer.js",
+    "@marketplace/home": "/home/marketplace-home.js",
+    "@marketplace/not-found": "/not-found/marketplace-not-found.js",
+    "@marketplace/shared-utils": "/shared-utils/marketplace-shared-utils.js"
+  }
+}
