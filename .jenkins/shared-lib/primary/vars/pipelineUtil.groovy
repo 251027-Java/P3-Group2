@@ -80,8 +80,8 @@ def initAttributes(Map params = [:]) {
     echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
     attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
 
-    attributes['frontend'] = attributes.keySet().any { it.startsWith('change:frontend') }
-    attributes['backend'] = attributes.keySet().any { it.startsWith('change:backend') }
+    attributes['frontend'] = attributes['frontend'] || attributes.keySet().any { it.startsWith('change:frontend') }
+    attributes['backend'] = attributes['backend'] || attributes.keySet().any { it.startsWith('change:backend') }
 
     return attributes
 }
