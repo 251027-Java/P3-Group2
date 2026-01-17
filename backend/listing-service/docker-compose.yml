@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: listing-service
     ports:
-      - "8081:8081"
+      - "8082:8082"
     environment:
       - DB_HOST=postgres-listing
       - DB_PORT=5432
