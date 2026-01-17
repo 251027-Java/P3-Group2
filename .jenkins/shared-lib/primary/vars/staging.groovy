@@ -36,7 +36,7 @@ def test(Map params = [:]) {
     def successRet = false
     def summary = """
 ```sh
-${settings.lint.command}
+${settings.test.command}
 ```
 """.trim()
 
@@ -67,13 +67,42 @@ def build(Map params = [:]) {
     def successRet = false
     def summary = """
 ```sh
-${settings.lint.command}
+${settings.build.command}
 ```
 """.trim()
 
     dir(path) {
         try {
             sh "${settings.build.command}"
+            checksUtil.success name: name, summary: summary
+            successRet = true
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name, summary: summary
+        }
+    }
+
+    return successRet
+}
+
+def dependencies(Map params = [:]) {
+    def path = params.path
+    def settings = params.settings
+
+    def name = "dependencies / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
+    def successRet = false
+    def summary = """
+```sh
+${settings.dependencies.command}
+```
+""".trim()
+
+    dir(path) {
+        try {
+            sh "${settings.dependencies.command}"
             checksUtil.success name: name, summary: summary
             successRet = true
         } catch (err) {
@@ -117,7 +146,15 @@ def executeDir(Map params = [:]) {
         )
     )
 
+    // read .ci.json file for the service
     def settings = pipelineUtil.getSettings path: path
+
+    if (settings.dependencies?.enabled && shouldRun) {
+        stage("dependencies ${path}") {
+            def success = dependencies path: path, settings: settings
+            allSuccessful &= success
+        }
+    }
 
     if (settings.lint.enabled && shouldRun) {
         stage("lint ${path}") {
