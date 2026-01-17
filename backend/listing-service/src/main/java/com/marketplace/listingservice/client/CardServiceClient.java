@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "card-service", fallback = CardServiceClientFallback.class)
 public interface CardServiceClient {
 
+    // TODO
+    // Need to make sure the cardResponse maps appropriately to the actual output from the card service.
+
     /**
      * Retrieves card details by card ID.
      *

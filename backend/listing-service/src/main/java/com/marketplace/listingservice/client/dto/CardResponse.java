@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * DTO representing a card response from the Card Service.
  */
@@ -19,9 +21,9 @@ public class CardResponse {
 
     private Long cardId;
     private String name;
-    private String description;
-    private String rarity;
+    private String cleanName;
     private String imageUrl;
-    private String cardType;
-    private Double marketValue;
+    private Integer setId;
+    private Integer categoryId;
+    private BigDecimal price;
 }

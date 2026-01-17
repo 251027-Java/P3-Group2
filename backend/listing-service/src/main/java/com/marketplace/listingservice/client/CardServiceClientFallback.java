@@ -21,7 +21,6 @@ public class CardServiceClientFallback implements CardServiceClient {
         return CardResponse.builder()
                 .cardId(cardId)
                 .name("Unknown Card")
-                .description("Card service is currently unavailable")
                 .build();
     }
 }
