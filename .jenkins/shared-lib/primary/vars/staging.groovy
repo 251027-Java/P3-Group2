@@ -146,7 +146,7 @@ def executeDir(Map params = [:]) {
         )
     )
 
-    // read .ci.json file for the service
+    // read the .ci.json file for the service
     def settings = pipelineUtil.getSettings path: path
 
     if (settings.dependencies?.enabled && shouldRun) {
