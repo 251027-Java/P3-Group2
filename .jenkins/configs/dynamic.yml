@@ -32,6 +32,7 @@ unclassified:
         name: "primary"
         retriever:
           modernSCM:
+            clone: true
             libraryPath: ".jenkins/shared-lib/primary/"
             scm:
               gitSource:
@@ -39,6 +40,12 @@ unclassified:
                 remote: "https://github.com/251027-Java/P3-Group2"
                 traits:
                   - "gitBranchDiscovery"
+                  - cloneOption:
+                      extension:
+                        depth: 1
+                        honorRefspec: true
+                        noTags: true
+                        shallow: true
 tool:
   jdk:
     installations:
