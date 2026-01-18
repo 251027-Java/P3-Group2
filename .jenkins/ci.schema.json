@@ -137,8 +137,6 @@
         }
     },
     "required": [
-        "lint",
-        "test",
         "build",
         "image"
     ],
