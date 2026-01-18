@@ -27,12 +27,13 @@ ${settings.lint.command}
     return successRet
 }
 
-// assumes java. not expecting tests for frontend
 def test(Map params = [:]) {
     def path = params.path
     def settings = params.settings
 
     def name = "test / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
     def successRet = false
     def summary = """
 ```sh
@@ -40,17 +41,15 @@ ${settings.lint.command}
 ```
 """.trim()
 
-    withChecks(name: name) {
-        dir(path) {
-            try {
-                sh "${settings.test.command}"
-                junit '**/target/surefire-reports/TEST-*.xml'
-                successRet = true
-            } catch (err) {
-                echo "${err}"
-                pipelineUtil.failStage()
-                checksUtil.failed name: name, summary: summary
-            }
+    dir(path) {
+        try {
+            sh "${settings.test.command}"
+            checksUtil.success name: name, summary: summary
+            successRet = true
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name, summary: summary
         }
     }
 
