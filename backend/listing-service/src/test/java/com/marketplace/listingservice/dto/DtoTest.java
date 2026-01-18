@@ -1,7 +1,9 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.dto;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.marketplace.listingservice.entity.Listing;
 import com.marketplace.listingservice.entity.ListingStatus;
@@ -9,8 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for DTO classes.
@@ -21,7 +21,7 @@ class DtoTest {
     @DisplayName("ListingResponse should convert from entity correctly")
     void listingResponseFromEntity() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         Listing listing = Listing.builder()
                 .listingId(1L)
                 .ownerUserId(100L)
@@ -73,7 +73,7 @@ class DtoTest {
     @DisplayName("ErrorResponse should build correctly")
     void errorResponseBuilder() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(404)
                 .message("Not found")

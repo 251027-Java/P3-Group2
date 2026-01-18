@@ -1,15 +1,15 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.entity;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for Listing entity and ListingStatus enum.
@@ -20,7 +20,7 @@ class ListingEntityTest {
     @DisplayName("Should create listing with builder")
     void createListingWithBuilder() {
         LocalDateTime now = LocalDateTime.now();
-        
+
         Listing listing = Listing.builder()
                 .listingId(1L)
                 .ownerUserId(100L)
@@ -42,7 +42,7 @@ class ListingEntityTest {
     @DisplayName("Should create listing with no-args constructor")
     void createListingWithNoArgsConstructor() {
         Listing listing = new Listing();
-        
+
         assertThat(listing.getListingId()).isNull();
         assertThat(listing.getOwnerUserId()).isNull();
         assertThat(listing.getCardId()).isNull();
@@ -52,7 +52,7 @@ class ListingEntityTest {
     @DisplayName("Should set and get listing properties")
     void setAndGetListingProperties() {
         Listing listing = new Listing();
-        
+
         listing.setListingId(1L);
         listing.setOwnerUserId(100L);
         listing.setCardId(200L);
@@ -104,17 +104,11 @@ class ListingEntityTest {
     @Test
     @DisplayName("Listing should have correct equals and hashCode")
     void listingEqualsAndHashCode() {
-        Listing listing1 = Listing.builder()
-                .listingId(1L)
-                .ownerUserId(100L)
-                .cardId(200L)
-                .build();
+        Listing listing1 =
+                Listing.builder().listingId(1L).ownerUserId(100L).cardId(200L).build();
 
-        Listing listing2 = Listing.builder()
-                .listingId(1L)
-                .ownerUserId(100L)
-                .cardId(200L)
-                .build();
+        Listing listing2 =
+                Listing.builder().listingId(1L).ownerUserId(100L).cardId(200L).build();
 
         assertThat(listing1).isEqualTo(listing2);
         assertThat(listing1.hashCode()).isEqualTo(listing2.hashCode());
@@ -132,7 +126,7 @@ class ListingEntityTest {
                 .build();
 
         String toStringResult = listing.toString();
-        
+
         assertThat(toStringResult).contains("listingId=1");
         assertThat(toStringResult).contains("ownerUserId=100");
         assertThat(toStringResult).contains("cardId=200");

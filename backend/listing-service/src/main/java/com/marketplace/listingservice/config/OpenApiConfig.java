@@ -1,5 +1,5 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.config;
 
@@ -28,24 +28,19 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Listing Service API")
-                        .description("API documentation for the Card Marketplace Listing Service. " +
-                                "This service manages card trade listings, allowing users to create, " +
-                                "update, and manage their card listings for trading.")
+                        .description("API documentation for the Card Marketplace Listing Service. "
+                                + "This service manages card trade listings, allowing users to create, "
+                                + "update, and manage their card listings for trading.")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Marketplace Team")
                                 .email("support@marketplace.com")
                                 .url("https://marketplace.com"))
-                        .license(new License()
-                                .name("MIT License")
-                                .url("https://opensource.org/licenses/MIT")))
+                        .license(new License().name("MIT License").url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
-                        new Server()
-                                .url("http://localhost:" + serverPort)
-                                .description("Local Development Server"),
+                        new Server().url("http://localhost:" + serverPort).description("Local Development Server"),
                         new Server()
                                 .url("http://listing-service:" + serverPort)
-                                .description("Docker Container Server")
-                ));
+                                .description("Docker Container Server")));
     }
 }

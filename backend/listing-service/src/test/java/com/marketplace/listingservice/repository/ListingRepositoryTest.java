@@ -1,7 +1,9 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.marketplace.listingservice.entity.Listing;
 import com.marketplace.listingservice.entity.ListingStatus;
@@ -16,15 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Integration tests for ListingRepository.
  * Uses H2 in-memory database for testing.
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@EmbeddedKafka(partitions = 1, topics = {"listing-created", "listing-updated", "listing-status-changed", "listing-deleted"})
+@EmbeddedKafka(
+        partitions = 1,
+        topics = {"listing-created", "listing-updated", "listing-status-changed", "listing-deleted"})
 @Transactional
 class ListingRepositoryTest {
 
@@ -111,8 +113,7 @@ class ListingRepositoryTest {
     @Test
     @DisplayName("Should find listings by owner and status")
     void findByOwnerUserIdAndListingStatus() {
-        List<Listing> listings = listingRepository.findByOwnerUserIdAndListingStatus(
-                100L, ListingStatus.ACTIVE);
+        List<Listing> listings = listingRepository.findByOwnerUserIdAndListingStatus(100L, ListingStatus.ACTIVE);
 
         assertThat(listings).hasSize(1);
         assertThat(listings.get(0).getOwnerUserId()).isEqualTo(100L);
@@ -122,8 +123,7 @@ class ListingRepositoryTest {
     @Test
     @DisplayName("Should find listings by card ID and status")
     void findByCardIdAndListingStatus() {
-        List<Listing> listings = listingRepository.findByCardIdAndListingStatus(
-                200L, ListingStatus.ACTIVE);
+        List<Listing> listings = listingRepository.findByCardIdAndListingStatus(200L, ListingStatus.ACTIVE);
 
         assertThat(listings).hasSize(2);
         assertThat(listings).allMatch(l -> l.getCardId().equals(200L));

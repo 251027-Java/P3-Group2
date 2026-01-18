@@ -1,7 +1,14 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.controller;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marketplace.listingservice.dto.CreateListingRequest;
@@ -25,13 +32,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Unit tests for ListingController.
@@ -70,9 +70,7 @@ class ListingControllerTest {
                 .conditionRating(8)
                 .build();
 
-        updateRequest = UpdateListingRequest.builder()
-                .conditionRating(9)
-                .build();
+        updateRequest = UpdateListingRequest.builder().conditionRating(9).build();
     }
 
     @Nested
@@ -82,8 +80,7 @@ class ListingControllerTest {
         @Test
         @DisplayName("POST /api/listings - Success")
         void createListing_Success() throws Exception {
-            when(listingService.createListing(any(CreateListingRequest.class)))
-                    .thenReturn(testListingResponse);
+            when(listingService.createListing(any(CreateListingRequest.class))).thenReturn(testListingResponse);
 
             mockMvc.perform(post("/api/listings")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -132,11 +129,9 @@ class ListingControllerTest {
         @Test
         @DisplayName("GET /api/listings/{id} - Not Found")
         void getListingById_NotFound() throws Exception {
-            when(listingService.getListingById(999L))
-                    .thenThrow(new ListingNotFoundException(999L));
+            when(listingService.getListingById(999L)).thenThrow(new ListingNotFoundException(999L));
 
-            mockMvc.perform(get("/api/listings/999"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/listings/999")).andExpect(status().isNotFound());
         }
 
         @Test
@@ -151,8 +146,7 @@ class ListingControllerTest {
                     .createdAt(LocalDateTime.now())
                     .build();
 
-            when(listingService.getAllListings())
-                    .thenReturn(Arrays.asList(testListingResponse, listing2));
+            when(listingService.getAllListings()).thenReturn(Arrays.asList(testListingResponse, listing2));
 
             mockMvc.perform(get("/api/listings"))
                     .andExpect(status().isOk())
@@ -166,16 +160,13 @@ class ListingControllerTest {
         void getAllListings_Empty() throws Exception {
             when(listingService.getAllListings()).thenReturn(Collections.emptyList());
 
-            mockMvc.perform(get("/api/listings"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(0)));
+            mockMvc.perform(get("/api/listings")).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
         }
 
         @Test
         @DisplayName("GET /api/listings/active - Success")
         void getActiveListings_Success() throws Exception {
-            when(listingService.getActiveListings())
-                    .thenReturn(List.of(testListingResponse));
+            when(listingService.getActiveListings()).thenReturn(List.of(testListingResponse));
 
             mockMvc.perform(get("/api/listings/active"))
                     .andExpect(status().isOk())
@@ -186,8 +177,7 @@ class ListingControllerTest {
         @Test
         @DisplayName("GET /api/listings/user/{userId} - Success")
         void getListingsByOwnerUserId_Success() throws Exception {
-            when(listingService.getListingsByOwnerUserId(100L))
-                    .thenReturn(List.of(testListingResponse));
+            when(listingService.getListingsByOwnerUserId(100L)).thenReturn(List.of(testListingResponse));
 
             mockMvc.perform(get("/api/listings/user/100"))
                     .andExpect(status().isOk())
@@ -198,8 +188,7 @@ class ListingControllerTest {
         @Test
         @DisplayName("GET /api/listings/card/{cardId} - Success")
         void getListingsByCardId_Success() throws Exception {
-            when(listingService.getListingsByCardId(200L))
-                    .thenReturn(List.of(testListingResponse));
+            when(listingService.getListingsByCardId(200L)).thenReturn(List.of(testListingResponse));
 
             mockMvc.perform(get("/api/listings/card/200"))
                     .andExpect(status().isOk())
@@ -210,8 +199,7 @@ class ListingControllerTest {
         @Test
         @DisplayName("GET /api/listings/status/{status} - Success")
         void getListingsByStatus_Success() throws Exception {
-            when(listingService.getListingsByStatus(ListingStatus.ACTIVE))
-                    .thenReturn(List.of(testListingResponse));
+            when(listingService.getListingsByStatus(ListingStatus.ACTIVE)).thenReturn(List.of(testListingResponse));
 
             mockMvc.perform(get("/api/listings/status/ACTIVE"))
                     .andExpect(status().isOk())
@@ -297,11 +285,9 @@ class ListingControllerTest {
         @Test
         @DisplayName("POST /api/listings/{id}/cancel - Not Found")
         void cancelListing_NotFound() throws Exception {
-            when(listingService.cancelListing(999L))
-                    .thenThrow(new ListingNotFoundException(999L));
+            when(listingService.cancelListing(999L)).thenThrow(new ListingNotFoundException(999L));
 
-            mockMvc.perform(post("/api/listings/999/cancel"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(post("/api/listings/999/cancel")).andExpect(status().isNotFound());
         }
     }
 
@@ -331,11 +317,9 @@ class ListingControllerTest {
         @Test
         @DisplayName("POST /api/listings/{id}/complete - Not Found")
         void completeListing_NotFound() throws Exception {
-            when(listingService.completeListing(999L))
-                    .thenThrow(new ListingNotFoundException(999L));
+            when(listingService.completeListing(999L)).thenThrow(new ListingNotFoundException(999L));
 
-            mockMvc.perform(post("/api/listings/999/complete"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(post("/api/listings/999/complete")).andExpect(status().isNotFound());
         }
     }
 
@@ -348,8 +332,7 @@ class ListingControllerTest {
         void deleteListing_Success() throws Exception {
             doNothing().when(listingService).deleteListing(1L);
 
-            mockMvc.perform(delete("/api/listings/1"))
-                    .andExpect(status().isNoContent());
+            mockMvc.perform(delete("/api/listings/1")).andExpect(status().isNoContent());
 
             verify(listingService, times(1)).deleteListing(1L);
         }
@@ -357,11 +340,9 @@ class ListingControllerTest {
         @Test
         @DisplayName("DELETE /api/listings/{id} - Not Found")
         void deleteListing_NotFound() throws Exception {
-            doThrow(new ListingNotFoundException(999L))
-                    .when(listingService).deleteListing(999L);
+            doThrow(new ListingNotFoundException(999L)).when(listingService).deleteListing(999L);
 
-            mockMvc.perform(delete("/api/listings/999"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(delete("/api/listings/999")).andExpect(status().isNotFound());
         }
     }
 }

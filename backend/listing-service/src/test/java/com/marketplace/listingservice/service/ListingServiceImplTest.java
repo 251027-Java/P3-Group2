@@ -1,7 +1,14 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 import com.marketplace.listingservice.client.CardServiceClient;
 import com.marketplace.listingservice.client.UserServiceClient;
@@ -32,14 +39,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 
 /**
  * Unit tests for ListingServiceImpl.
@@ -84,9 +83,7 @@ class ListingServiceImplTest {
                 .conditionRating(8)
                 .build();
 
-        updateRequest = UpdateListingRequest.builder()
-                .conditionRating(9)
-                .build();
+        updateRequest = UpdateListingRequest.builder().conditionRating(9).build();
     }
 
     @Nested
@@ -96,7 +93,8 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should create listing successfully")
         void createListing_Success() {
-            CardResponse cardResponse = CardResponse.builder().cardId(200L).name("Test Card").build();
+            CardResponse cardResponse =
+                    CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.userExists(100L)).thenReturn(true);
             when(cardServiceClient.getCardById(200L)).thenReturn(cardResponse);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
@@ -121,7 +119,8 @@ class ListingServiceImplTest {
         @DisplayName("Should create listing with custom status")
         void createListing_WithCustomStatus() {
             createRequest.setListingStatus(ListingStatus.ACTIVE);
-            CardResponse cardResponse = CardResponse.builder().cardId(200L).name("Test Card").build();
+            CardResponse cardResponse =
+                    CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.userExists(100L)).thenReturn(true);
             when(cardServiceClient.getCardById(200L)).thenReturn(cardResponse);
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
@@ -244,8 +243,7 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should get listings by status")
         void getListingsByStatus_Success() {
-            when(listingRepository.findByListingStatus(ListingStatus.ACTIVE))
-                    .thenReturn(List.of(testListing));
+            when(listingRepository.findByListingStatus(ListingStatus.ACTIVE)).thenReturn(List.of(testListing));
 
             List<ListingResponse> responses = listingService.getListingsByStatus(ListingStatus.ACTIVE);
 
@@ -256,8 +254,7 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should get active listings")
         void getActiveListings_Success() {
-            when(listingRepository.findByListingStatus(ListingStatus.ACTIVE))
-                    .thenReturn(List.of(testListing));
+            when(listingRepository.findByListingStatus(ListingStatus.ACTIVE)).thenReturn(List.of(testListing));
 
             List<ListingResponse> responses = listingService.getActiveListings();
 
@@ -363,8 +360,7 @@ class ListingServiceImplTest {
             ListingResponse response = listingService.cancelListing(1L);
 
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.CANCELLED);
-            verify(listingEventProducer, times(1))
-                    .sendListingStatusChangedEvent(any(Listing.class), eq("CANCELLED"));
+            verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("CANCELLED"));
         }
 
         @Test
@@ -372,8 +368,7 @@ class ListingServiceImplTest {
         void cancelListing_NotFound() {
             when(listingRepository.findById(999L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> listingService.cancelListing(999L))
-                    .isInstanceOf(ListingNotFoundException.class);
+            assertThatThrownBy(() -> listingService.cancelListing(999L)).isInstanceOf(ListingNotFoundException.class);
         }
 
         @Test
@@ -411,8 +406,7 @@ class ListingServiceImplTest {
             ListingResponse response = listingService.completeListing(1L);
 
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.COMPLETED);
-            verify(listingEventProducer, times(1))
-                    .sendListingStatusChangedEvent(any(Listing.class), eq("COMPLETED"));
+            verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("COMPLETED"));
         }
 
         @Test
@@ -420,8 +414,7 @@ class ListingServiceImplTest {
         void completeListing_NotFound() {
             when(listingRepository.findById(999L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> listingService.completeListing(999L))
-                    .isInstanceOf(ListingNotFoundException.class);
+            assertThatThrownBy(() -> listingService.completeListing(999L)).isInstanceOf(ListingNotFoundException.class);
         }
 
         @Test
@@ -458,8 +451,7 @@ class ListingServiceImplTest {
         void deleteListing_NotFound() {
             when(listingRepository.findById(999L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> listingService.deleteListing(999L))
-                    .isInstanceOf(ListingNotFoundException.class);
+            assertThatThrownBy(() -> listingService.deleteListing(999L)).isInstanceOf(ListingNotFoundException.class);
         }
     }
 }
