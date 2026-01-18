@@ -41,7 +41,8 @@ public class TcgConnectService {
         String url = "/{categoryId}/{groupId}/products";
         log.info("Fetching products from: {}", url);
         try {
-            TcgWrapperDto<TcgProductDto> response = restClient.get()
+            TcgWrapperDto<TcgProductDto> response = restClient
+                    .get()
                     .uri(url, categoryId, groupId)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});
@@ -66,7 +67,8 @@ public class TcgConnectService {
         String url = "/{categoryId}/{groupId}/prices";
         log.info("Fetching prices from: {}", url);
         try {
-            TcgWrapperDto<TcgPriceDto> response = restClient.get()
+            TcgWrapperDto<TcgPriceDto> response = restClient
+                    .get()
                     .uri(url, categoryId, groupId)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});
@@ -90,18 +92,22 @@ public class TcgConnectService {
     public boolean isCard(TcgProductDto product) {
         // Heuristic 1: Check extended data for "Number" or "Rarity"
         if (product.getExtendedData() != null) {
-            boolean hasNumber = product.getExtendedData().stream()
-                    .anyMatch(ed -> "Number".equalsIgnoreCase(ed.getName()));
+            boolean hasNumber =
+                    product.getExtendedData().stream().anyMatch(ed -> "Number".equalsIgnoreCase(ed.getName()));
             if (hasNumber) return true;
         }
 
         // Heuristic 2: Name blacklist (Sealed products)
         String name = product.getName().toLowerCase();
-        if (name.contains("booster") || name.contains("box") || 
-            name.contains("pack") || name.contains("tin") || 
-            name.contains("case") || name.contains("display") || 
-            name.contains("collection") || name.contains("deck") || 
-            name.contains("bundle")) {
+        if (name.contains("booster")
+                || name.contains("box")
+                || name.contains("pack")
+                || name.contains("tin")
+                || name.contains("case")
+                || name.contains("display")
+                || name.contains("collection")
+                || name.contains("deck")
+                || name.contains("bundle")) {
             return false;
         }
 
