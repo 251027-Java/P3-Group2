@@ -27,12 +27,13 @@ ${settings.lint.command}
     return successRet
 }
 
-// assumes java. not expecting tests for frontend
 def test(Map params = [:]) {
     def path = params.path
     def settings = params.settings
 
     def name = "test / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
     def successRet = false
     def summary = """
 ```sh
