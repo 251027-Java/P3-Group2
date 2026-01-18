@@ -40,17 +40,15 @@ ${settings.lint.command}
 ```
 """.trim()
 
-    withChecks(name: name) {
-        dir(path) {
-            try {
-                sh "${settings.test.command}"
-                junit '**/target/surefire-reports/TEST-*.xml'
-                successRet = true
-            } catch (err) {
-                echo "${err}"
-                pipelineUtil.failStage()
-                checksUtil.failed name: name, summary: summary
-            }
+    dir(path) {
+        try {
+            sh "${settings.test.command}"
+            checksUtil.success name: name, summary: summary
+            successRet = true
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name, summary: summary
         }
     }
 
