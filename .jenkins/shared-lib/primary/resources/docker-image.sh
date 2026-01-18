@@ -33,6 +33,8 @@ branch=""
 sha=""
 latest="false"
 
+failed=0
+
 # parse args
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -76,6 +78,10 @@ if [ ! -e "$dockerLocation" ]; then
     exit 1
 fi
 
+# display steps that are being executed in the bash script
+set -x
+PS4='+ ${LINENO}: '
+
 # ensure platforms only consists of ones that are supported
 supportedPlatforms=("$curSafePlatform")
 
@@ -83,30 +89,32 @@ if [ -f "$ssh_config_file" ]; then
     supportedPlatforms+=($(get-external-hosts $curSafePlatform))
 fi
 
-platforms=()
+matchedPlatforms=()
 
-for p in "${givenPlatforms[@]}"; do
-    cleaned=$(clean-platform "$p")
+for given in "${givenPlatforms[@]}"; do
+    cleaned=$(clean-platform "$given")
 
-    for a in "${supportedPlatforms[@]}"; do
-        if [[ "$cleaned" == "$a" ]]; then
-            platforms+=("$p")
+    for supported in "${supportedPlatforms[@]}"; do
+        if [[ "$cleaned" == "$supported" ]]; then
+            matchedPlatforms+=("$given")
             break
         fi
     done
 done
 
-echo "finalized platforms: ${platforms[@]}"
+echo "matched platforms: ${matchedPlatforms[@]}"
 
 # create context - for each (except host if not TLS)
 declare -A contextMap
 
-for platform in "${platforms[@]}"; do
+for platform in "${matchedPlatforms[@]}"; do
     if [[ "$platform" != "$curPlatform" ]]; then
         safePlatform=$(clean-platform "$platform")
         contextName=$(get-random-string)
         contextMap["$safePlatform"]="$contextName"
 
+        # this does NOT produce an error if the ssh connection cannot be established
+        # error would be shown in the `docker builder ls`
         docker context create $contextName --docker "host=ssh://$safePlatform"
     fi
 done
@@ -125,47 +133,71 @@ fi
 
 # create builder
 docker builder create --name $builderName --platform $curPlatform $mainBuilderContext
+platforms=("$curPlatform")
 
 # append to builder - for each (except host)
-for platform in "${platforms[@]}"; do
+for platform in "${matchedPlatforms[@]}"; do
     if [[ "$platform" != "$curPlatform" ]]; then
         safePlatform=$(clean-platform "$platform")
         contextName="${contextMap[$safePlatform]}"
 
-        docker builder create --name $builderName --platform $platform --append $contextName
+        # this could fail due to not being able to connect to context.
+        # we don't want to break or exit earlier because we should build what we can. still indicate failure at the end
+        if docker builder create --name $builderName --platform $platform --append $contextName; then
+            platforms+=("$platform")
+        else
+            failed=1
+        fi
     fi
 done
 
-# build cache - for each
-for platform in "${platforms[@]}"; do
-    safePlatform=$(clean-platform "$platform")
+echo "finalized platforms: ${platforms[@]}"
 
-    docker build --builder $builderName -t $builderName:$safePlatform --platform $platform \
-        --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries \
-        --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries,mode=max \
-        --load $dockerLocation
-done
+build-and-push() {
+    # build cache - for each
+    for platform in "${platforms[@]}"; do
+        safePlatform=$(clean-platform "$platform")
 
-# final push
-platformString=$(IFS=,; echo "${platforms[*]}")
-cacheFromFlags=()
+        # this could fail due to failed Dockerfile
+        if ! docker build --builder $builderName -t $builderName:$safePlatform --platform $platform \
+            --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries \
+            --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries,mode=max \
+            --load $dockerLocation; then
+            return 1
+        fi
+    done
 
-for platform in "${platforms[@]}"; do
-    safePlatform=$(clean-platform "$platform")
-    cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries")
-done
+    # final push prep
+    local platformString=$(IFS=,; echo "${platforms[*]}")
+    local cacheFromFlags=()
 
-tagFlags=("-t" "$dockerRepo:$tagSeries-$branch-$sha")
-if [[ "$latest" == "true" ]]; then
-    tagFlags+=("-t" "$dockerRepo:$tagSeries-latest")
-fi
+    for platform in "${platforms[@]}"; do
+        safePlatform=$(clean-platform "$platform")
+        cacheFromFlags+=("--cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries")
+    done
 
-docker build --builder $builderName "${tagFlags[@]}" --platform $platformString "${cacheFromFlags[@]}" --push $dockerLocation
+    local tagFlags=("-t" "$dockerRepo:$tagSeries-$branch-$sha")
+    if [[ "$latest" == "true" ]]; then
+        tagFlags+=("-t" "$dockerRepo:$tagSeries-latest")
+    fi
+
+    # this could fail due to failed Dockerfile
+    if ! docker build --builder $builderName "${tagFlags[@]}" \
+        --platform $platformString "${cacheFromFlags[@]}" \
+        --push $dockerLocation; then
+        return 1
+    fi
+
+    return 0
+}
+
+build-and-push || failed=1
 
 # clean up created contexts - for each
 for key in "${!contextMap[@]}"; do
     contextName="${contextMap[$key]}"
 
+    # these docker --context commands can fail. just continue upon on failure to ensure clean up
     docker --context $contextName container ls -a --format '{{.ID}} {{.Names}}' \
         | grep "$builderName" | awk '{print $1}' \
         | xargs -r docker --context $contextName rm -f -v
@@ -181,3 +213,7 @@ docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}' \
     | grep "$builderName" \
     | awk '{print $2}' \
     | xargs -r docker rmi -f
+
+[[ $failed -ne 0 ]] && exit 1
+
+exit 0
