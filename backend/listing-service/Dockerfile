@@ -11,7 +11,7 @@ WORKDIR /app
 RUN apk add --no-cache maven
 
 # Copy pom.xml first to leverage Docker layer caching
-COPY pom.xml .
+COPY pom.xmlasd .
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN mvn dependency:go-offline -B
