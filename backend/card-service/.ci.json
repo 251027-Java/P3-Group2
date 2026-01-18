@@ -10,7 +10,7 @@
     },
     "build": {
         "enabled": true,
-        "command": "mvn -B package -DskipTests"
+        "command": "mvn -B package -DskipTests -Djacoco.skip"
     },
     "image": {
         "enabled": true,
