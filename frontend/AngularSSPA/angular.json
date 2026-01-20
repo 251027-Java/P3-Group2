@@ -15,9 +15,7 @@
           "options": {
             "outputPath": "dist/angular-sspa",
             "index": "src/index.html",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -33,7 +31,7 @@
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
               "libraryName": "AngularSSPA",
-              "libraryTarget": "umd"
+              "libraryTarget": "system"
             },
             "deployUrl": "http://localhost:4200/"
           },

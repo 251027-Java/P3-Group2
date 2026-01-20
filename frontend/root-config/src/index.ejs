@@ -4,12 +4,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  
+  <script src="https://cdn.jsdelivr.net/npm/zone.js@0.16.0/bundles/zone.umd.min.js"></script> <!-- To get Zone.js for the application -->
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Marketplace - Trading Card Platform</title>
   <meta name="description" content="Enterprise trading card marketplace platform">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: localhost:*; script-src 'unsafe-inline' 'unsafe-eval' https: localhost:*; connect-src https: localhost:* ws://localhost:*; style-src 'unsafe-inline' https:; object-src 'none';">
-  <meta name="importmap-type" use-injector />
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: localhost:*; script-src 'unsafe-inline' 'unsafe-eval' https: localhost:*; connect-src https: localhost:* ws://localhost:*; style-src 'unsafe-inline' https:; object-src 'none';"> -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: localhost:*; script-src 'unsafe-inline' 'unsafe-eval' https: localhost:* cdn.jsdelivr.net; connect-src https: localhost:* ws://localhost:* cdn.jsdelivr.net; style-src 'unsafe-inline' https: localhost:*; object-src 'none';">
+
+  <!-- <meta name="importmap-type" use-injector /> -->
+  <meta name="importmap-type" content="systemjs-importmap" />
   
   <!-- Global Styles -->
   <link rel="stylesheet" href="/styles/global.css">
@@ -18,24 +24,26 @@
   <!-- <meta name="import-map-overrides-domains" content="denylist:prod.example.com" /> -->
 
   <!-- Shared dependencies go into this import map -->
-  <script type="injector-importmap">
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.15.1/dist/system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.15.1/dist/extras/amd.min.js"></script>
+  <script type="systemjs-importmap">
     {
       "imports": {
-        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js"
+        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js"
       }
     }
   </script>
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js" as="module">
+  <!-- <link rel="preload" href="https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js" as="module"> -->
 <!-- Production import map - loaded from server -->
   <% if (!isLocal) { %>
-  <script type="injector-importmap" src="/importmap.json"></script>
+  <script type="systemjs-importmap" src="/importmap.json"></script>
   <% } %>
 
   <!-- Local development import map -->  <!-- <script type="injector-importmap" src="/importmap.json"></script> -->
    <!-- "@marketplace/home": "//localhost:8083/marketplace-home.js", -->
 
   <% if (isLocal) { %>
-  <script type="injector-importmap">
+  <script type="systemjs-importmap">
     {
       "imports": {
         "@marketplace/root-config": "//localhost:9000/marketplace-root-config.js",
@@ -61,10 +69,16 @@
   </noscript>
   <main></main>
   <script>
-    window.importMapInjector.initPromise.then(() => {
-      import('@marketplace/root-config');
-    });
+System.import('@marketplace/root-config');
   </script>
   <import-map-overrides-full show-when-local-storage="devtools" dev-libs></import-map-overrides-full>
 </body>
 </html>
+
+<!--
+<script>
+    window.importMapInjector.initPromise.then(() => {
+      import('@marketplace/root-config');
+    });
+  </script>
+ -->
