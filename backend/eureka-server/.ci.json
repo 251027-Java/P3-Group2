@@ -1,0 +1,23 @@
+{
+    "$schema": "../../.jenkins/ci.schema.json",
+    "lint": {
+        "enabled": true,
+        "command": "mvn -B spotless:check checkstyle:check"
+    },
+    "build": {
+        "enabled": true,
+        "command": "mvn -B package -DskipTests"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "be-eureka-server",
+        "repository": "minidomo/gemdeck",
+        "platform": {
+            "single": false,
+            "multi": [
+                "linux/amd64",
+                "linux/arm64"
+            ]
+        }
+    }
+}
