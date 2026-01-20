@@ -1,5 +1,5 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.config;
 
@@ -29,18 +29,12 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic listingCreatedTopic() {
-        return TopicBuilder.name(listingCreatedTopic)
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return TopicBuilder.name(listingCreatedTopic).partitions(3).replicas(1).build();
     }
 
     @Bean
     public NewTopic listingUpdatedTopic() {
-        return TopicBuilder.name(listingUpdatedTopic)
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return TopicBuilder.name(listingUpdatedTopic).partitions(3).replicas(1).build();
     }
 
     @Bean
@@ -53,9 +47,6 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic listingDeletedTopic() {
-        return TopicBuilder.name(listingDeletedTopic)
-                .partitions(3)
-                .replicas(1)
-                .build();
+        return TopicBuilder.name(listingDeletedTopic).partitions(3).replicas(1).build();
     }
 }

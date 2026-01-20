@@ -1,5 +1,5 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.kafka;
 
@@ -97,14 +97,15 @@ public class ListingEventProducer {
 
     private void sendEvent(String topic, String key, ListingEvent event) {
         log.info("Sending event to topic {}: {}", topic, event);
-        
-        CompletableFuture<SendResult<String, ListingEvent>> future = 
-                kafkaTemplate.send(topic, key, event);
-        
+
+        CompletableFuture<SendResult<String, ListingEvent>> future = kafkaTemplate.send(topic, key, event);
+
         future.whenComplete((result, ex) -> {
             if (ex == null) {
-                log.info("Event sent successfully to topic {} with offset {}", 
-                        topic, result.getRecordMetadata().offset());
+                log.info(
+                        "Event sent successfully to topic {} with offset {}",
+                        topic,
+                        result.getRecordMetadata().offset());
             } else {
                 log.error("Failed to send event to topic {}: {}", topic, ex.getMessage(), ex);
             }
