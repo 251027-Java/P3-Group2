@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: marketplace-ingress
+spec:
+  tls:
+    - hosts:
+        - ec2-16-58-75-153.us-east-2.compute.amazonaws.com
+      secretName: self-signed-tls
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+          - path: /react
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend # Update to React Frontend Service
+                port:
+                  number: 80
+          - path: /angular
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend # Update to Angular Frontend Service
+                port:
+                  number: 80
