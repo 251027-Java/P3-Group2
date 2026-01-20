@@ -15,5 +15,6 @@
         <module>card-service</module>
         <module>eureka-server</module>
         <module>listing-service</module>
+        <module>api-gateway</module>
     </modules>
 </project>
