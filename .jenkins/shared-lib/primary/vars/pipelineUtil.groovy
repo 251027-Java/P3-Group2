@@ -67,7 +67,10 @@ def initAttributes(Map params = [:]) {
 
     def attributes = [:]
 
-    attributes.putAll(gitUtil.getChanges())
+    echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
+    def userAttr = parseAttributes([content: "[${adjustedSrc}]"])
+
+    attributes.putAll(gitUtil.getChanges(userAttr['pr:default']))
     attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
     attributes['default'] = gitUtil.isDefaultBranch()
 
@@ -77,8 +80,8 @@ def initAttributes(Map params = [:]) {
         attributes.putAll(parseAttributes([content: message]))
     }
 
-    echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
-    attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
+    // insert after commit message to override existing ones
+    attributes.putAll(userAttr)
 
     attributes['frontend'] = attributes['frontend'] || attributes.keySet().any { it.startsWith('change:frontend') }
     attributes['backend'] = attributes['backend'] || attributes.keySet().any { it.startsWith('change:backend') }
