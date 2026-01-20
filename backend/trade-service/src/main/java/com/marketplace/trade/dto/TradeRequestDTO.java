@@ -19,13 +19,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TradeRequestDTO {
-    
+
     @NotNull(message = "Listing ID is required")
     private Long listingId;
-    
+
     @NotNull(message = "Requesting user ID is required")
     private Long requestingUserId;
-    
+
     @NotEmpty(message = "At least one card must be offered")
     private List<Long> offeredCardIds;
 }

@@ -10,7 +10,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 /**
  * Main application class for Trade Service
  * Handles trade requests and management for marketplace platform
- * 
+ *
  * Note: @EnableEurekaClient is no longer needed in Spring Boot 4.0+
  * Eureka client is auto-configured when spring-cloud-starter-netflix-eureka-client is on the classpath
  */

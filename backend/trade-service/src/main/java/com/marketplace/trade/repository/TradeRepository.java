@@ -17,18 +17,20 @@ import java.util.Optional;
  */
 @Repository
 public interface TradeRepository extends JpaRepository<Trade, Long> {
-    
+
     List<Trade> findByListingId(Long listingId);
-    
+
     List<Trade> findByRequestingUserId(Long requestingUserId);
-    
+
     List<Trade> findByListingIdAndTradeStatus(Long listingId, TradeStatus status);
-    
+
     List<Trade> findByRequestingUserIdAndTradeStatus(Long requestingUserId, TradeStatus status);
-    
-    @Query("SELECT t FROM Trade t WHERE t.listingId = :listingId AND t.requestingUserId = :requestingUserId AND t.tradeStatus = 'pending'")
-    Optional<Trade> findPendingTradeByListingAndUser(@Param("listingId") Long listingId, @Param("requestingUserId") Long requestingUserId);
-    
+
+    @Query(
+            "SELECT t FROM Trade t WHERE t.listingId = :listingId AND t.requestingUserId = :requestingUserId AND t.tradeStatus = 'pending'")
+    Optional<Trade> findPendingTradeByListingAndUser(
+            @Param("listingId") Long listingId, @Param("requestingUserId") Long requestingUserId);
+
     @Query("SELECT t FROM Trade t JOIN FETCH t.offeredCards WHERE t.tradeId = :tradeId")
     Optional<Trade> findByIdWithOfferedCards(@Param("tradeId") Long tradeId);
 }

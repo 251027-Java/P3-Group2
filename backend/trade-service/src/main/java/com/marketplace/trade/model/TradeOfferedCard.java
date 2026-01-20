@@ -4,9 +4,11 @@ package com.marketplace.trade.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Entity representing cards offered in a trade
@@ -17,17 +19,22 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class TradeOfferedCard {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "offeredId")
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long offeredId;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tradeId", nullable = false)
     private Trade trade;
-    
+
     @Column(name = "cardId", nullable = false)
+    @ToString.Include
     private Long cardId;
 }

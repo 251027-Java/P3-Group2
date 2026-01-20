@@ -6,11 +6,11 @@ package com.marketplace.trade.exception;
  * Custom exception for trade-related business logic errors
  */
 public class TradeException extends RuntimeException {
-    
+
     public TradeException(String message) {
         super(message);
     }
-    
+
     public TradeException(String message, Throwable cause) {
         super(message, cause);
     }

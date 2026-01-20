@@ -11,20 +11,37 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 @FeignClient(name = "user-service")
 public interface UserServiceClient {
-    
+
     @GetMapping("/api/users/{userId}")
     UserResponse getUser(@PathVariable("userId") Long userId);
-    
+
     class UserResponse {
         private Long appUserId;
         private String email;
         private String username;
-        
-        public Long getAppUserId() { return appUserId; }
-        public void setAppUserId(Long appUserId) { this.appUserId = appUserId; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
+
+        public Long getAppUserId() {
+            return appUserId;
+        }
+
+        public void setAppUserId(Long appUserId) {
+            this.appUserId = appUserId;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
     }
 }

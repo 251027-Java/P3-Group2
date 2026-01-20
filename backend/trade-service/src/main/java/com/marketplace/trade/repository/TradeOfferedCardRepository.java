@@ -13,8 +13,8 @@ import java.util.List;
  */
 @Repository
 public interface TradeOfferedCardRepository extends JpaRepository<TradeOfferedCard, Long> {
-    
+
     List<TradeOfferedCard> findByTrade_TradeId(Long tradeId);
-    
+
     void deleteByTrade_TradeId(Long tradeId);
 }

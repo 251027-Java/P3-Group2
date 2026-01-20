@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TradeResponseDTO {
-    
+
     private Long tradeId;
     private Long listingId;
     private Long requestingUserId;
