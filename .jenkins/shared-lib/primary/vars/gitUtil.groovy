@@ -17,7 +17,6 @@ def isPrToDefaultBranch() {
 }
 
 def getRecommendedRevspec(isPrToDefaultAttribute) {
-    echo "isPRTODEFAULT: ${isPrToDefaultAttribute}"
     def prDefault = isPrToDefaultAttribute || isPrToDefaultBranch()
     def prCreated = isPrCreated()
     def prevResult = "${currentBuild.previousBuild?.result}".toString()
@@ -38,7 +37,6 @@ def getRecommendedRevspec(isPrToDefaultAttribute) {
 
 def getChanges(isPrToDefaultAttribute) {
     def path = util.loadScript name: 'git-changes.sh'
-    echo "GETCHANGES_ PR TO DEFAULT: ${isPrToDefaultAttribute}"
     def revspec = getRecommendedRevspec(isPrToDefaultAttribute)
 
     def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()

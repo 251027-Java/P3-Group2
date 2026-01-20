@@ -67,22 +67,19 @@ def initAttributes(Map params = [:]) {
 
     def attributes = [:]
 
-    echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
-    def userAttr = parseAttributes([content: "[${adjustedSrc}]"])
-    util.printMap(userAttr)
-    echo "INIT_ATTR PR DEFAULT: ${userAttr['pr:default']}"
-    attributes.putAll(gitUtil.getChanges(userAttr['pr:default']))
-    attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
-    attributes['default'] = gitUtil.isDefaultBranch()
-
     if (attrIncludeGit) {
         def message = gitUtil.getCommitMessage()
         echo "INIT_ATTRIBUTES: git message: ${message}"
         attributes.putAll(parseAttributes([content: message]))
     }
+    
+    attributes.putAll(gitUtil.getChanges(attributes['pr:default']))
+    attributes['pr:default'] = attributes['pr:default'] || gitUtil.isPrToDefaultBranch()
+    attributes['default'] = attributes['default'] || gitUtil.isDefaultBranch()
 
     // insert after commit message to override existing ones
-    attributes.putAll(userAttr)
+    echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
+    attributes.putAll(parseAttributes([content: "[${adjustedSrc}]"]))
 
     attributes['frontend'] = attributes['frontend'] || attributes.keySet().any { it.startsWith('change:frontend') }
     attributes['backend'] = attributes['backend'] || attributes.keySet().any { it.startsWith('change:backend') }
