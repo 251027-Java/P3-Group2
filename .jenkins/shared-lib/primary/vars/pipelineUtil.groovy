@@ -69,6 +69,7 @@ def initAttributes(Map params = [:]) {
 
     echo "INIT_ATTRIBUTES: passed in: ${adjustedSrc}"
     def userAttr = parseAttributes([content: "[${adjustedSrc}]"])
+    util.printMap(userAttr)
     echo "INIT_ATTR PR DEFAULT: ${userAttr['pr:default']}"
     attributes.putAll(gitUtil.getChanges(userAttr['pr:default']))
     attributes['pr:default'] = gitUtil.isPrToDefaultBranch()
