@@ -43,8 +43,8 @@ services:
   # React Users MFE
   mfe-react-users:
     build:
-      context: ./mfe-react-users
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./mfe-react-users/Dockerfile
     ports:
       - "4202:4202"
     environment:
