@@ -26,12 +26,13 @@
     }
   </script>
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/esm/single-spa.min.js" as="module">
-Production import map - loaded from server -->
+<!-- Production import map - loaded from server -->
   <% if (!isLocal) { %>
   <script type="injector-importmap" src="/importmap.json"></script>
   <% } %>
 
   <!-- Local development import map -->  <!-- <script type="injector-importmap" src="/importmap.json"></script> -->
+   <!-- "@marketplace/home": "//localhost:8083/marketplace-home.js", -->
 
   <% if (isLocal) { %>
   <script type="injector-importmap">
@@ -42,7 +43,7 @@ Production import map - loaded from server -->
         "@marketplace/mfe-react-users": "//localhost:8080/marketplace-mfe-react-users.js",
         "@marketplace/navbar": "//localhost:8081/marketplace-navbar.js",
         "@marketplace/footer": "//localhost:8082/marketplace-footer.js",
-        "@marketplace/home": "//localhost:8083/marketplace-home.js",
+        "@marketplace/home": "http://localhost:4200/main.js",
         "@marketplace/not-found": "//localhost:8084/marketplace-not-found.js",
         "@marketplace/shared-utils": "//localhost:9001/marketplace-shared-utils.js",
         "@single-spa/welcome": "https://cdn.jsdelivr.net/npm/single-spa-welcome/dist/single-spa-welcome.min.js"
