@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: card-service
+    name: user-service
   datasource:
     # Connects to the docker instance on localhost port 5432
     url: jdbc:postgresql://localhost:5432/postgres
