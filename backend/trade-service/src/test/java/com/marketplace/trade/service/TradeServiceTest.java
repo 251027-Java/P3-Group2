@@ -1,5 +1,5 @@
-// Generated with assistance from Cursor
-// Reviewed and modified by Matt Selle
+// Generated with assistance from Cursor & Claude Opus 4.5
+// Reviewed and modified by Matt Selle & Marcus Wright
 package com.marketplace.trade.service;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -561,5 +561,309 @@ class TradeServiceTest {
         assertEquals(TradeStatus.accepted, result.getTradeStatus());
     }
 
-    
+    @Test
+    void testDeclineTradeRequest_NotPending() {
+        trade.setTradeStatus(TradeStatus.accepted);
+        when(tradeRepository.findById(1L)).thenReturn(Optional.of(trade));
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.declineTradeRequest(1L, 1L);
+        });
+
+        verify(tradeRepository, never()).save(any(Trade.class));
+    }
+
+    @Test
+    void testDeclineTradeRequest_AlreadyRejected() {
+        trade.setTradeStatus(TradeStatus.rejected);
+        when(tradeRepository.findById(1L)).thenReturn(Optional.of(trade));
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.declineTradeRequest(1L, 1L);
+        });
+
+        verify(tradeRepository, never()).save(any(Trade.class));
+    }
+
+    @Test
+    void testCreateTradeRequest_KafkaFails_ShouldStillSucceed() {
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
+        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
+
+        doThrow(new RuntimeException("Kafka down"))
+                .when(kafkaTemplate)
+                .send(anyString(), any());
+
+        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getTradeId());
+        verify(tradeRepository, times(1)).save(any(Trade.class));
+    }
+
+    @Test
+    void testAcceptTradeRequest_UpdateListingStatusFails_ShouldStillSucceed() {
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(tradeRepository.findByListingIdAndTradeStatus(1L, TradeStatus.pending))
+                .thenReturn(Arrays.asList(trade));
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+
+        doThrow(new RuntimeException("Listing service down"))
+                .when(listingServiceClient)
+                .updateListingStatusToComplete(eq(1L));
+
+        TradeResponseDTO result = tradeService.acceptTradeRequest(1L, 1L);
+
+        assertNotNull(result);
+        assertEquals(TradeStatus.accepted, result.getTradeStatus());
+    }
+
+    @Test
+    void testAcceptTradeRequest_NoOtherPendingTrades() {
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(tradeRepository.findByListingIdAndTradeStatus(1L, TradeStatus.pending))
+                .thenReturn(Arrays.asList(trade)); // only the accepted trade itself
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+
+        TradeResponseDTO result = tradeService.acceptTradeRequest(1L, 1L);
+
+        assertNotNull(result);
+        assertEquals(TradeStatus.accepted, result.getTradeStatus());
+        verify(tradeRepository, times(1)).save(any(Trade.class)); // only the accepted trade
+    }
+
+    @Test
+    void testGetAllTrades_EmptyList() {
+        when(tradeRepository.findAll()).thenReturn(List.of());
+
+        List<TradeResponseDTO> results = tradeService.getAllTrades();
+
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+    }
+
+    @Test
+    void testGetAllTrades_MultipleTrades() {
+        Trade trade2 = new Trade();
+        trade2.setTradeId(2L);
+        trade2.setListingId(2L);
+        trade2.setRequestingUserId(3L);
+        trade2.setTradeStatus(TradeStatus.accepted);
+
+        when(tradeRepository.findAll()).thenReturn(Arrays.asList(trade, trade2));
+
+        List<TradeResponseDTO> results = tradeService.getAllTrades();
+
+        assertEquals(2, results.size());
+    }
+
+    @Test
+    void testCreateTradeRequest_ListingStatusUppercase() {
+        listingResponse.setListingStatus("ACTIVE");
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
+        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
+
+        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void testCreateTradeRequest_ListingStatusMixedCase() {
+        listingResponse.setListingStatus("Active");
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
+        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
+
+        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void testCreateTradeRequest_InactiveListingCancelled() {
+        listingResponse.setListingStatus("cancelled");
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.createTradeRequest(tradeRequestDTO);
+        });
+    }
+
+    @Test
+    void testGetTradesByListingId_MultipleTrades() {
+        Trade trade2 = new Trade();
+        trade2.setTradeId(2L);
+        trade2.setListingId(1L);
+        trade2.setRequestingUserId(3L);
+        trade2.setTradeStatus(TradeStatus.rejected);
+
+        when(tradeRepository.findByListingId(1L)).thenReturn(Arrays.asList(trade, trade2));
+
+        List<TradeResponseDTO> results = tradeService.getTradesByListingId(1L);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(t -> t.getListingId().equals(1L)));
+    }
+
+    @Test
+    void testGetTradesByRequestingUserId_MultipleTrades() {
+        Trade trade2 = new Trade();
+        trade2.setTradeId(2L);
+        trade2.setListingId(2L);
+        trade2.setRequestingUserId(2L);
+        trade2.setTradeStatus(TradeStatus.accepted);
+
+        when(tradeRepository.findByRequestingUserId(2L)).thenReturn(Arrays.asList(trade, trade2));
+
+        List<TradeResponseDTO> results = tradeService.getTradesByRequestingUserId(2L);
+
+        assertEquals(2, results.size());
+        assertTrue(results.stream().allMatch(t -> t.getRequestingUserId().equals(2L)));
+    }
+
+    @Test
+    void testAcceptTradeRequest_TradeStatusCancelled() {
+        trade.setTradeStatus(TradeStatus.cancelled);
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.acceptTradeRequest(1L, 1L);
+        });
+
+        verify(tradeRepository, never()).save(any(Trade.class));
+    }
+
+    @Test
+    void testAcceptTradeRequest_TradeStatusRejected() {
+        trade.setTradeStatus(TradeStatus.rejected);
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.acceptTradeRequest(1L, 1L);
+        });
+
+        verify(tradeRepository, never()).save(any(Trade.class));
+    }
+
+    @Test
+    void testDeclineTradeRequest_TradeStatusCancelled() {
+        trade.setTradeStatus(TradeStatus.cancelled);
+        when(tradeRepository.findById(1L)).thenReturn(Optional.of(trade));
+
+        assertThrows(TradeException.class, () -> {
+            tradeService.declineTradeRequest(1L, 1L);
+        });
+
+        verify(tradeRepository, never()).save(any(Trade.class));
+    }
+
+    @Test
+    void testGetTradeById_WithOfferedCards() {
+        TradeOfferedCard card1 = new TradeOfferedCard();
+        card1.setCardId(10L);
+        card1.setTrade(trade);
+        
+        TradeOfferedCard card2 = new TradeOfferedCard();
+        card2.setCardId(11L);
+        card2.setTrade(trade);
+        
+        trade.setOfferedCards(Arrays.asList(card1, card2));
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+
+        TradeResponseDTO result = tradeService.getTradeById(1L);
+
+        assertNotNull(result);
+        assertEquals(2, result.getOfferedCardIds().size());
+        assertTrue(result.getOfferedCardIds().contains(10L));
+        assertTrue(result.getOfferedCardIds().contains(11L));
+    }
+
+    @Test
+    void testCreateTradeRequest_WithSingleOfferedCard() {
+        tradeRequestDTO.setOfferedCardIds(Arrays.asList(10L));
+
+        Trade savedTrade = new Trade();
+        savedTrade.setTradeId(1L);
+        savedTrade.setListingId(1L);
+        savedTrade.setRequestingUserId(2L);
+        savedTrade.setTradeStatus(TradeStatus.pending);
+
+        TradeOfferedCard card = new TradeOfferedCard();
+        card.setCardId(10L);
+        card.setTrade(savedTrade);
+        savedTrade.setOfferedCards(Arrays.asList(card));
+
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
+        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
+        when(tradeRepository.save(any(Trade.class))).thenReturn(savedTrade);
+        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList(card));
+
+        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
+
+        assertNotNull(result);
+        assertEquals(1, result.getOfferedCardIds().size());
+    }
+
+    @Test
+    void testCreateTradeRequest_WithManyOfferedCards() {
+        tradeRequestDTO.setOfferedCardIds(Arrays.asList(10L, 11L, 12L, 13L, 14L));
+
+        Trade savedTrade = new Trade();
+        savedTrade.setTradeId(1L);
+        savedTrade.setListingId(1L);
+        savedTrade.setRequestingUserId(2L);
+        savedTrade.setTradeStatus(TradeStatus.pending);
+        savedTrade.setOfferedCards(Arrays.asList());
+
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
+        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
+        when(tradeRepository.save(any(Trade.class))).thenReturn(savedTrade);
+        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
+
+        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
+
+        assertNotNull(result);
+        verify(tradeOfferedCardRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testDeclineTradeRequest_ByListingOwner() {
+        // Trade was made by user 2, listing owned by user 1
+        trade.setRequestingUserId(2L);
+        when(tradeRepository.findById(1L)).thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+
+        TradeResponseDTO result = tradeService.declineTradeRequest(1L, 1L);
+
+        assertNotNull(result);
+        assertEquals(TradeStatus.rejected, result.getTradeStatus());
+    }
+
+    @Test
+    void testAcceptTradeRequest_EmptyPendingTradesList() {
+        when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(tradeRepository.findByListingIdAndTradeStatus(1L, TradeStatus.pending))
+                .thenReturn(Arrays.asList()); // empty list, though unusual
+        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
+
+        TradeResponseDTO result = tradeService.acceptTradeRequest(1L, 1L);
+
+        assertNotNull(result);
+        assertEquals(TradeStatus.accepted, result.getTradeStatus());
+    }
 }
