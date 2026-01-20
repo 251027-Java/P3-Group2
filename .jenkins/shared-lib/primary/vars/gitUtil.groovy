@@ -17,7 +17,13 @@ def isPrToDefaultBranch() {
 }
 
 def getRecommendedRevspec() {
-    if (isPrToDefaultBranch() && (isPrCreated() || currentBuild.previousBuild?.result == 'FAILURE')) {
+    def prDefault = isPrToDefaultBranch()
+    def prCreated = isPrCreated()
+    def prevResult = "${currentBuild.previousBuild?.result}".toString()
+
+    echo "PrDefault: ${prDefault} | PrCreate: ${prCreated} | PrevResult: ${prevResult}"
+
+    if (prDefault && (prCreated || prevResult == 'FAILURE')) {
         def path = util.loadScript name: 'fetch-latest.sh'
         def name = getDefaultBranchName()
 
@@ -26,7 +32,7 @@ def getRecommendedRevspec() {
         return 'FETCH_HEAD'
     }
 
-    return isPrCreated() ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
+    return prCreated ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
 }
 
 def getChanges() {
