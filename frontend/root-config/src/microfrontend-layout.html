@@ -6,23 +6,7 @@
     This defines the application structure and routing for all MFEs
   -->
 
-  <!-- Global Header/Navigation -->
-  <header>
-    <application name="@marketplace/navbar"></application>
-  </header>
-
-  <!-- Main Content Area with Route-based MFE Loading -->
   <main>
-    <!-- Welcome/Home Page -->
-    <route default path="/">
-      <application name="@marketplace/home"></application>
-    </route>
-
-    <!-- Card Marketplace MFE (Angular) -->
-    <route path="cards">
-      <application name="@marketplace/mfe-angular-cards"></application>
-    </route>
-
     <!-- User Management MFE (React) -->
     <route path="auth">
       <application name="@marketplace/mfe-react-users"></application>
@@ -34,14 +18,9 @@
       <application name="@marketplace/mfe-react-users"></application>
     </route>
 
-    <!-- Fallback for 404 -->
-    <route path="404">
-      <application name="@marketplace/not-found"></application>
+    <!-- Default: use AngularSSPA for everything else (home, cards, auth pages) -->
+    <route default>
+      <application name="@marketplace/mfe-angular-cards"></application>
     </route>
   </main>
-
-  <!-- Global Footer -->
-  <footer>
-    <application name="@marketplace/footer"></application>
-  </footer>
 </single-spa-router>

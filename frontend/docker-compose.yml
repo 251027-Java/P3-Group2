@@ -21,24 +21,39 @@ services:
     networks:
       - frontend-network
 
-  # Angular Cards MFE
-  mfe-angular-cards:
+  # Angular SSPA (Replaces mfe-angular-cards)
+  angular-sspa:
     build:
-      context: ./mfe-angular-cards
+      context: ./AngularSSPA
       dockerfile: Dockerfile
     ports:
       - "4201:4201"
-    environment:
-      - NODE_ENV=development
-      - API_URL=http://localhost:8080
     volumes:
-      - ./mfe-angular-cards:/app
+      - ./AngularSSPA:/app
       - /app/node_modules
-    command: npm start
     networks:
       - frontend-network
     depends_on:
       - root-config
+
+  # Angular Cards MFE (Disabled)
+  # mfe-angular-cards:
+  #   build:
+  #     context: ./mfe-angular-cards
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "4201:4201"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - API_URL=http://localhost:8080
+  #   volumes:
+  #     - ./mfe-angular-cards:/app
+  #     - /app/node_modules
+  #   command: npm start
+  #   networks:
+  #     - frontend-network
+  #   depends_on:
+  #     - root-config
 
   # React Users MFE
   mfe-react-users:
