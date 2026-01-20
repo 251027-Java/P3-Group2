@@ -6,10 +6,10 @@ spring:
     name: card-service
   datasource:
     # Connects to the docker instance on localhost port 5432
-    url: jdbc:postgresql://localhost:5432/card_db
+    url: jdbc:postgresql://localhost:5431/postgres
     driver-class-name: org.postgresql.Driver
-    username: admin
-    password: market_pass
+    username: postgres
+    password: password
   jpa:
     # Updated for Postgres
     database-platform: org.hibernate.dialect.PostgreSQLDialect
