@@ -1,0 +1,27 @@
+{
+    "$schema": "../../.jenkins/ci.schema.json",
+    "lint": {
+        "enabled": true,
+        "command": "mvn -B spotless:check checkstyle:check"
+    },
+    "test": {
+        "enabled": true,
+        "command": "mvn -B test"
+    },
+    "build": {
+        "enabled": true,
+        "command": "mvn -B package -DskipTests -Djacoco.skip"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "be-card-service",
+        "repository": "minidomo/gemdeck",
+        "platform": {
+            "single": false,
+            "multi": [
+                "linux/amd64",
+                "linux/arm64"
+            ]
+        }
+    }
+}

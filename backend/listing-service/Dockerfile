@@ -1,56 +1,37 @@
 # syntax=docker/dockerfile:1
+# most of this file is from `docker init`
 
-# ====================================
-# Stage 1: Build Stage
-# ====================================
-FROM eclipse-temurin:25-jdk-alpine AS build
+FROM eclipse-temurin:25-jdk-jammy AS deps
 
-WORKDIR /app
+WORKDIR /build
 
-# Install Maven
-RUN apk add --no-cache maven
+# Copy the mvnw wrapper with executable permissions.
+COPY --chmod=0755 mvnw mvnw
+COPY .mvn/ .mvn/
 
-# Copy pom.xml first to leverage Docker layer caching
-COPY pom.xml .
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.m2 so that subsequent builds don't have to
+# re-download packages.
+RUN --mount=type=bind,source=pom.xml,target=pom.xml \
+    --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -DskipTests
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline -B
+# Create a stage for building the application based on the stage with downloaded dependencies.
+# This Dockerfile is optimized for Java applications that output an uber jar, which includes
+# all the dependencies needed to run your app inside a JVM.
+FROM deps AS package
 
-# Copy source code
-COPY src ./src
+WORKDIR /build
 
-# Build the application (skip tests for faster build, tests should run in CI)
-RUN mvn package -DskipTests -B
+COPY ./src src/
+RUN --mount=type=bind,source=pom.xml,target=pom.xml \
+    --mount=type=cache,target=/root/.m2 \
+    ./mvnw package -DskipTests -Djacoco.skip && \
+    mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
 
-# ====================================
-# Stage 2: Runtime Stage
-# ====================================
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:25-jre-alpine AS final
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+COPY --from=package build/target/app.jar .
 
-WORKDIR /app
+EXPOSE 8082
 
-# Copy the built JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
-
-# Create logs directory
-RUN mkdir -p logs && chown -R appuser:appgroup /app
-
-# Switch to non-root user
-USER appuser
-
-# Expose application port
-EXPOSE 8081
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1
-
-# JVM options for containerized environments
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
-
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
