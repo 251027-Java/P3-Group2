@@ -27,30 +27,29 @@ ${settings.lint.command}
     return successRet
 }
 
-// assumes java. not expecting tests for frontend
 def test(Map params = [:]) {
     def path = params.path
     def settings = params.settings
 
     def name = "test / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
     def successRet = false
     def summary = """
 ```sh
-${settings.lint.command}
+${settings.test.command}
 ```
 """.trim()
 
-    withChecks(name: name) {
-        dir(path) {
-            try {
-                sh "${settings.test.command}"
-                junit '**/target/surefire-reports/TEST-*.xml'
-                successRet = true
-            } catch (err) {
-                echo "${err}"
-                pipelineUtil.failStage()
-                checksUtil.failed name: name, summary: summary
-            }
+    dir(path) {
+        try {
+            sh "${settings.test.command}"
+            checksUtil.success name: name, summary: summary
+            successRet = true
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name, summary: summary
         }
     }
 
@@ -67,13 +66,42 @@ def build(Map params = [:]) {
     def successRet = false
     def summary = """
 ```sh
-${settings.lint.command}
+${settings.build.command}
 ```
 """.trim()
 
     dir(path) {
         try {
             sh "${settings.build.command}"
+            checksUtil.success name: name, summary: summary
+            successRet = true
+        } catch (err) {
+            echo "${err}"
+            pipelineUtil.failStage()
+            checksUtil.failed name: name, summary: summary
+        }
+    }
+
+    return successRet
+}
+
+def dependencies(Map params = [:]) {
+    def path = params.path
+    def settings = params.settings
+
+    def name = "dependencies / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
+    def successRet = false
+    def summary = """
+```sh
+${settings.dependencies.command}
+```
+""".trim()
+
+    dir(path) {
+        try {
+            sh "${settings.dependencies.command}"
             checksUtil.success name: name, summary: summary
             successRet = true
         } catch (err) {
@@ -117,16 +145,24 @@ def executeDir(Map params = [:]) {
         )
     )
 
+    // read the .ci.json file for the service
     def settings = pipelineUtil.getSettings path: path
 
-    if (settings.lint.enabled && shouldRun) {
+    if (settings.dependencies?.enabled && shouldRun) {
+        stage("dependencies ${path}") {
+            def success = dependencies path: path, settings: settings
+            allSuccessful &= success
+        }
+    }
+
+    if (settings.lint?.enabled && shouldRun) {
         stage("lint ${path}") {
             def success = lint path: path, settings: settings
             allSuccessful &= success
         }
     }
 
-    if (settings.test.enabled && shouldRun) {
+    if (settings.test?.enabled && shouldRun) {
         stage("test ${path}") {
             def success = test path: path, settings: settings
             allSuccessful &= success
@@ -142,7 +178,10 @@ def executeDir(Map params = [:]) {
     }
 
     def shouldBuildImage = (
-        attributes["build:${path}".toString()]
+        (
+            attributes["build:${path}".toString()]
+            && attributes['default']
+        )
         || attributes['imageall']
         || attributes["image:${path}".toString()]
     )

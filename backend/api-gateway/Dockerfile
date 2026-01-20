@@ -25,13 +25,13 @@ WORKDIR /build
 COPY ./src src/
 RUN --mount=type=bind,source=pom.xml,target=pom.xml \
     --mount=type=cache,target=/root/.m2 \
-    ./mvnw package -DskipTests -Djacoco.skip && \
+    ./mvnw package -DskipTests && \
     mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
 
 FROM eclipse-temurin:25-jre-alpine AS final
 
 COPY --from=package build/target/app.jar .
 
-EXPOSE 8082
+EXPOSE 8080
 
 ENTRYPOINT [ "java", "-jar", "app.jar" ]
