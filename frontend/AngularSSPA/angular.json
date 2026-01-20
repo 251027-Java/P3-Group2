@@ -15,7 +15,7 @@
           "options": {
             "outputPath": "dist/angular-sspa",
             "index": "src/index.html",
-            "browser": "src/main.ts",
+            "main": "src/main.single-spa.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -30,7 +30,6 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "main": "src/main.single-spa.ts",
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
               "libraryName": "AngularSSPA",
