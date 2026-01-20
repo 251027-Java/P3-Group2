@@ -1,56 +1,92 @@
 # syntax=docker/dockerfile:1
 
-# ====================================
-# Stage 1: Build Stage
-# ====================================
-FROM eclipse-temurin:25-jdk-alpine AS build
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
 
-WORKDIR /app
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-# Install Maven
-RUN apk add --no-cache maven
+################################################################################
 
-# Copy pom.xml first to leverage Docker layer caching
-COPY pom.xml .
+# Create a stage for resolving and downloading dependencies.
+FROM eclipse-temurin:25-jdk-jammy as deps
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline -B
+WORKDIR /build
 
-# Copy source code
-COPY src ./src
+# Copy the mvnw wrapper with executable permissions.
+COPY --chmod=0755 mvnw mvnw
+COPY .mvn/ .mvn/
 
-# Build the application (skip tests for faster build, tests should run in CI)
-RUN mvn package -DskipTests -B
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.m2 so that subsequent builds don't have to
+# re-download packages.
+RUN --mount=type=bind,source=pom.xml,target=pom.xml \
+    --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -DskipTests
 
-# ====================================
-# Stage 2: Runtime Stage
-# ====================================
-FROM eclipse-temurin:25-jre-alpine
+################################################################################
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+# Create a stage for building the application based on the stage with downloaded dependencies.
+# This Dockerfile is optimized for Java applications that output an uber jar, which includes
+# all the dependencies needed to run your app inside a JVM. If your app doesn't output an uber
+# jar and instead relies on an application server like Apache Tomcat, you'll need to update this
+# stage with the correct filename of your package and update the base image of the "final" stage
+# use the relevant app server, e.g., using tomcat (https://hub.docker.com/_/tomcat/) as a base image.
+FROM deps as package
 
-WORKDIR /app
+WORKDIR /build
 
-# Copy the built JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY ./src src/
+RUN --mount=type=bind,source=pom.xml,target=pom.xml \
+    --mount=type=cache,target=/root/.m2 \
+    ./mvnw package -DskipTests -Djacoco.skip && \
+    mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
 
-# Create logs directory
-RUN mkdir -p logs && chown -R appuser:appgroup /app
+################################################################################
 
-# Switch to non-root user
+# Create a stage for extracting the application into separate layers.
+# Take advantage of Spring Boot's layer tools and Docker's caching by extracting
+# the packaged application into separate layers that can be copied into the final stage.
+# See Spring's docs for reference:
+# https://docs.spring.io/spring-boot/docs/current/reference/html/container-images.html
+FROM package as extract
+
+WORKDIR /build
+
+RUN java -Djarmode=layertools -jar target/app.jar extract --destination target/extracted
+
+################################################################################
+
+# Create a new stage for running the application that contains the minimal
+# runtime dependencies for the application. This often uses a different base
+# image from the install or build stage where the necessary files are copied
+# from the install stage.
+#
+# The example below uses eclipse-turmin's JRE image as the foundation for running the app.
+# By specifying the "25-jre-jammy" tag, it will also use whatever happens to be the
+# most recent version of that tag when you build your Dockerfile.
+# If reproducibility is important, consider using a specific digest SHA, like
+# eclipse-temurin@sha256:99cede493dfd88720b610eb8077c8688d3cca50003d76d1d539b0efc8cca72b4.
+FROM eclipse-temurin:25-jre-jammy AS final
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
 USER appuser
 
-# Expose application port
-EXPOSE 8081
+# Copy the executable from the "package" stage.
+COPY --from=extract build/target/extracted/dependencies/ ./
+COPY --from=extract build/target/extracted/spring-boot-loader/ ./
+COPY --from=extract build/target/extracted/snapshot-dependencies/ ./
+COPY --from=extract build/target/extracted/application/ ./
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1
+EXPOSE 8082
 
-# JVM options for containerized environments
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
-
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT [ "java", "org.springframework.boot.loader.launch.JarLauncher" ]
