@@ -155,14 +155,14 @@ def executeDir(Map params = [:]) {
         }
     }
 
-    if (settings.lint.enabled && shouldRun) {
+    if (settings.lint?.enabled && shouldRun) {
         stage("lint ${path}") {
             def success = lint path: path, settings: settings
             allSuccessful &= success
         }
     }
 
-    if (settings.test.enabled && shouldRun) {
+    if (settings.test?.enabled && shouldRun) {
         stage("test ${path}") {
             def success = test path: path, settings: settings
             allSuccessful &= success
