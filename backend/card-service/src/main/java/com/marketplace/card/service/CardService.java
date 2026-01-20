@@ -40,7 +40,6 @@ public class CardService {
         this.cardRepository = cardRepository;
     }
 
-
     /**
      * Synchronizes cards for a specific Category and Set ID from the external TCG provider.
      * <p>
@@ -64,18 +63,19 @@ public class CardService {
 
         // 3. Fetch existing cards for this set to avoid N+1 selects
         List<Card> existingCards = cardRepository.findBySetId(groupId);
-        Map<Long, Card> existingCardMap = existingCards.stream()
-                .collect(Collectors.toMap(Card::getCardId, Function.identity()));
+        Map<Long, Card> existingCardMap =
+                existingCards.stream().collect(Collectors.toMap(Card::getCardId, Function.identity()));
 
         // 4. Map Products to Cards
         List<Card> cardsToSave = products.stream()
                 .filter(tcgConnectService::isCard)
-                .map(product -> prepareCard(product, priceMap.get(product.getProductId()), existingCardMap.get(product.getProductId())))
+                .map(product -> prepareCard(
+                        product, priceMap.get(product.getProductId()), existingCardMap.get(product.getProductId())))
                 .collect(Collectors.toList());
 
         // 5. Batch Save
         cardRepository.saveAll(cardsToSave);
-        
+
         log.info("Sync completed. Processed {} cards.", cardsToSave.size());
     }
 
@@ -89,7 +89,7 @@ public class CardService {
      */
     private Card prepareCard(TcgProductDto product, TcgPriceDto priceDto, Card existingCard) {
         Card card = (existingCard != null) ? existingCard : new Card();
-        
+
         card.setCardId(product.getProductId());
         card.setName(product.getName());
         card.setCleanName(product.getCleanName());
@@ -117,7 +117,7 @@ public class CardService {
     public List<Card> getAllCards() {
         return cardRepository.findAll();
     }
-    
+
     /**
      * Searches for cards matching the partial name (case-insensitive).
      *
@@ -127,7 +127,7 @@ public class CardService {
     public List<Card> searchCards(String name) {
         return cardRepository.findByNameContainingIgnoreCase(name);
     }
-    
+
     /**
      * Retrieves a specific card by its unique ID.
      *

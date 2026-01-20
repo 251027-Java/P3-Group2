@@ -37,7 +37,9 @@ public class CardController {
      * @return Response confirmation message.
      */
     @PostMapping("/sync/{categoryId}/{setId}")
-    @Operation(summary = "Sync Cards", description = "Triggers collection of cards from TCGPlayer for a specific Set ID")
+    @Operation(
+            summary = "Sync Cards",
+            description = "Triggers collection of cards from TCGPlayer for a specific Set ID")
     public ResponseEntity<String> syncCards(@PathVariable Integer categoryId, @PathVariable Integer setId) {
         cardService.syncCards(categoryId, setId);
         return ResponseEntity.ok("Sync requested for Set ID: " + setId);
