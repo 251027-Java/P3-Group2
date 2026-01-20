@@ -120,4 +120,92 @@ class TradeModelsExtendedTests {
         assertThat(card.getTrade()).isEqualTo(trade);
         assertThat(trade.getOfferedCards()).contains(card);
     }
+
+    @Test
+    @DisplayName("Trades with different IDs should not be equal")
+    void tradeEqualsWithDifferentIds() {
+        Trade t1 = new Trade();
+        t1.setTradeId(1L);
+
+        Trade t2 = new Trade();
+        t2.setTradeId(2L);
+
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    @DisplayName("Trade equals should handle null tradeId correctly")
+    void tradeEqualsWithNullId() {
+        Trade t1 = new Trade();
+        Trade t2 = new Trade();
+
+        assertThat(t1).isEqualTo(t2);
+
+        t1.setTradeId(1L);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    @DisplayName("AllArgsConstructor should correctly initialize Trade")
+    void tradeAllArgsConstructor() {
+        LocalDateTime now = LocalDateTime.now();
+
+        Trade trade = new Trade(
+                1L,
+                10L,
+                20L,
+                Trade.TradeStatus.pending,
+                now,
+                null
+        );
+
+        assertThat(trade.getTradeId()).isEqualTo(1L);
+        assertThat(trade.getListingId()).isEqualTo(10L);
+        assertThat(trade.getRequestingUserId()).isEqualTo(20L);
+        assertThat(trade.getTradeStatus()).isEqualTo(Trade.TradeStatus.pending);
+        assertThat(trade.getCreatedAt()).isEqualTo(now);
+    }
+
+    @Test
+    @DisplayName("onCreate should set defaults only when values are null")
+    void onCreateMixedNullValues() {
+        Trade trade = new Trade();
+        trade.setTradeStatus(Trade.TradeStatus.accepted);
+
+        trade.onCreate();
+
+        assertThat(trade.getTradeStatus()).isEqualTo(Trade.TradeStatus.accepted);
+        assertThat(trade.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("TradeStatus valueOf should resolve correctly")
+    void tradeStatusValueOf() {
+        Trade.TradeStatus status = Trade.TradeStatus.valueOf("pending");
+        assertThat(status).isEqualTo(Trade.TradeStatus.pending);
+    }
+
+    @Test
+    @DisplayName("TradeOfferedCard with different IDs should not be equal")
+    void tradeOfferedCardNotEqual() {
+        TradeOfferedCard c1 = new TradeOfferedCard();
+        c1.setOfferedId(1L);
+
+        TradeOfferedCard c2 = new TradeOfferedCard();
+        c2.setOfferedId(2L);
+
+        assertThat(c1).isNotEqualTo(c2);
+    }
+
+    @Test
+    @DisplayName("TradeOfferedCard all-args constructor should set all fields")
+    void tradeOfferedCardAllArgsConstructor() {
+        Trade trade = new Trade();
+        TradeOfferedCard card = new TradeOfferedCard(1L, trade, 100L);
+
+        assertThat(card.getOfferedId()).isEqualTo(1L);
+        assertThat(card.getTrade()).isEqualTo(trade);
+        assertThat(card.getCardId()).isEqualTo(100L);
+    }
+
 }

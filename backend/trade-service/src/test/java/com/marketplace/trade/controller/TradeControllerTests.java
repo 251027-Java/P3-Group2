@@ -163,4 +163,134 @@ class TradeControllerTest {
                     .andExpect(jsonPath("$.tradeStatus", is("rejected")));
         }
     }
+
+    @Test
+    @DisplayName("POST /api/trades - Validation failure returns 400")
+    void createTrade_InvalidRequest_ReturnsBadRequest() throws Exception {
+        TradeRequestDTO invalidRequest = new TradeRequestDTO(
+                null,      // listingId invalid
+                null,      // requestingUserId invalid
+                List.of()  // empty list invalid
+        );
+
+        mockMvc.perform(post("/api/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+
+        verify(tradeService, never()).createTradeRequest(any());
+    }
+
+    @Test
+    @DisplayName("GET /api/trades - Empty list")
+    void getAllTrades_EmptyList() throws Exception {
+        when(tradeService.getAllTrades()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/trades"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("GET /api/trades/{id} - Trade not found")
+    void getTradeById_NotFound() throws Exception {
+        when(tradeService.getTradeById(999L))
+                .thenThrow(new RuntimeException("Trade not found"));
+
+        mockMvc.perform(get("/api/trades/999"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trades/{id}/accept - Service throws exception")
+    void acceptTrade_ServiceFailure() throws Exception {
+        when(tradeService.acceptTradeRequest(eq(1L), eq(100L)))
+                .thenThrow(new RuntimeException("Unauthorized"));
+
+        mockMvc.perform(put("/api/trades/1/accept")
+                        .param("listingOwnerId", "100"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("GET /api/trades/user/{userId} - No trades returns empty list")
+    void getTradesByUserId_Empty_ReturnsEmptyList() throws Exception {
+        when(tradeService.getTradesByRequestingUserId(999L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/trades/user/999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("PUT /api/trades/{tradeId}/accept - TradeService throws TradeException")
+    void acceptTrade_TradeServiceThrows_Returns500() throws Exception {
+        when(tradeService.acceptTradeRequest(eq(1L), eq(100L)))
+                .thenThrow(new RuntimeException("Not authorized"));
+
+        mockMvc.perform(put("/api/trades/1/accept").param("listingOwnerId", "100"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trades/{tradeId}/decline - TradeService throws TradeException")
+    void declineTrade_TradeServiceThrows_Returns500() throws Exception {
+        when(tradeService.declineTradeRequest(eq(1L), eq(100L)))
+                .thenThrow(new RuntimeException("Not authorized"));
+
+        mockMvc.perform(put("/api/trades/1/decline").param("listingOwnerId", "100"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("POST /api/trades - TradeService throws ResourceNotFoundException")
+    void createTrade_TradeServiceNotFound_Returns404() throws Exception {
+        when(tradeService.createTradeRequest(any())).thenThrow(new RuntimeException("Listing not found"));
+
+        mockMvc.perform(post("/api/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tradeRequestDTO)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trades/{tradeId}/accept - Missing listingOwnerId returns 400")
+    void acceptTrade_MissingListingOwnerId_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(put("/api/trades/1/accept")) // omit param
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trades/{tradeId}/decline - Missing listingOwnerId returns 400")
+    void declineTrade_MissingListingOwnerId_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(put("/api/trades/1/decline")) // omit param
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET /api/trades/{tradeId} - Invalid path variable returns 400")
+    void getTradeById_InvalidPathVariable_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/trades/invalid"))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    @DisplayName("POST /api/trades - Empty JSON triggers validation errors")
+    void createTrade_EmptyJson_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/trades")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET /api/trades/listing/{listingId} - Empty list")
+    void getTradesByListingId_Empty_ReturnsEmptyList() throws Exception {
+        when(tradeService.getTradesByListingId(999L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/trades/listing/999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
 }

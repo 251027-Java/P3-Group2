@@ -179,7 +179,7 @@ class TradeServiceTest {
         assertEquals(TradeStatus.accepted, result.getTradeStatus());
 
         verify(tradeRepository, times(1)).save(any(Trade.class));
-        verify(listingServiceClient, times(1)).updateListingStatus(eq(1L), any());
+        verify(listingServiceClient, times(1)).updateListingStatusToComplete(eq(1L));
         verify(kafkaTemplate, times(1)).send(anyString(), any());
     }
 
@@ -325,7 +325,7 @@ class TradeServiceTest {
         assertEquals(TradeStatus.rejected, anotherTrade.getTradeStatus());
 
         verify(tradeRepository, times(2)).save(any(Trade.class)); // accepted + cancelled
-        verify(listingServiceClient).updateListingStatus(eq(1L), any());
+        verify(listingServiceClient).updateListingStatusToComplete(eq(1L));
     }
 
     @Test
@@ -334,6 +334,16 @@ class TradeServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> tradeService.declineTradeRequest(1L, 1L));
         verify(tradeRepository, never()).save(any());
     }
+
+    @Test
+    void getAllTrades_shouldReturnAllTrades() {
+        when(tradeRepository.findAll()).thenReturn(List.of(trade));
+
+        List<TradeResponseDTO> results = tradeService.getAllTrades();
+
+        assertEquals(1, results.size());
+    }
+
 
     @Test
     void testGetTradesByListingId_Empty() {
@@ -403,4 +413,153 @@ class TradeServiceTest {
 
         verify(tradeRepository, times(3)).save(any()); // accepted + 2 cancelled
     }
+
+    @Test
+    void declineTradeRequest_whenKafkaFails_shouldStillSucceed() {
+        Trade trade = new Trade();
+        trade.setTradeId(1L);
+        trade.setListingId(10L);
+        trade.setRequestingUserId(20L);
+        trade.setTradeStatus(Trade.TradeStatus.pending);
+
+        ListingServiceClient.ListingResponse listing =
+                new ListingServiceClient.ListingResponse();
+        listing.setOwnerUserId(99L);
+
+        when(tradeRepository.findById(1L))
+                .thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(10L))
+                .thenReturn(listing);
+
+        when(tradeRepository.save(any(Trade.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        doThrow(new RuntimeException("Kafka down"))
+                .when(kafkaTemplate)
+                .send(anyString(), any());
+
+        TradeResponseDTO result =
+                tradeService.declineTradeRequest(1L, 99L);
+
+        assertEquals(Trade.TradeStatus.rejected, result.getTradeStatus());
+    }
+
+
+    @Test
+    void getTradeById_whenOfferedCardsNull_shouldMapWithoutError() {
+        Trade trade = new Trade();
+        trade.setTradeId(1L);
+        trade.setListingId(2L);
+        trade.setRequestingUserId(3L);
+        trade.setTradeStatus(Trade.TradeStatus.pending);
+        trade.setOfferedCards(null);
+
+        when(tradeRepository.findByIdWithOfferedCards(1L))
+                .thenReturn(Optional.of(trade));
+
+        TradeResponseDTO dto = tradeService.getTradeById(1L);
+
+        assertNotNull(dto);
+        assertEquals(1L, dto.getTradeId());
+        assertNull(dto.getOfferedCardIds());
+    }
+
+    @Test
+    void acceptTradeRequest_shouldRejectOtherPendingTrades() {
+        Trade accepted = new Trade();
+        accepted.setTradeId(1L);
+        accepted.setListingId(50L);
+        accepted.setRequestingUserId(60L);
+        accepted.setTradeStatus(Trade.TradeStatus.pending);
+
+        Trade other = new Trade();
+        other.setTradeId(2L);
+        other.setListingId(50L);
+        other.setTradeStatus(Trade.TradeStatus.pending);
+
+        ListingServiceClient.ListingResponse listing =
+                new ListingServiceClient.ListingResponse();
+        listing.setOwnerUserId(99L);
+
+        when(tradeRepository.findByIdWithOfferedCards(1L))
+                .thenReturn(Optional.of(accepted));
+        when(listingServiceClient.getListing(50L))
+                .thenReturn(listing);
+        when(tradeRepository.findByListingIdAndTradeStatus(
+                50L, Trade.TradeStatus.pending))
+                .thenReturn(List.of(accepted, other));
+
+        when(tradeRepository.save(any(Trade.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        tradeService.acceptTradeRequest(1L, 99L);
+
+        verify(tradeRepository).save(other);
+    }
+
+    @Test
+    void acceptTradeRequest_whenListingNotFound_shouldThrow() {
+        when(tradeRepository.findByIdWithOfferedCards(1L))
+                .thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(anyLong()))
+                .thenThrow(new RuntimeException("down"));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> tradeService.acceptTradeRequest(1L, 1L));
+    }
+
+    @Test
+    void declineTradeRequest_whenListingNotFound_shouldThrow() {
+        when(tradeRepository.findById(1L))
+                .thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(anyLong()))
+                .thenThrow(new RuntimeException("down"));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> tradeService.declineTradeRequest(1L, 1L));
+    }
+
+    @Test
+    void createTradeRequest_whenUserNotFound_shouldThrow() {
+        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
+        when(userServiceClient.getUser(anyLong()))
+                .thenThrow(new RuntimeException("user down"));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> tradeService.createTradeRequest(tradeRequestDTO));
+    }
+
+    @Test
+    void getTradeById_withNullOfferedCards_shouldSucceed() {
+        trade.setOfferedCards(null);
+        when(tradeRepository.findByIdWithOfferedCards(1L))
+                .thenReturn(Optional.of(trade));
+
+        TradeResponseDTO dto = tradeService.getTradeById(1L);
+
+        assertNotNull(dto);
+        assertNull(dto.getOfferedCardIds());
+    }
+
+    @Test
+    void acceptTradeRequest_whenKafkaFails_shouldStillSucceed() {
+        when(tradeRepository.findByIdWithOfferedCards(1L))
+                .thenReturn(Optional.of(trade));
+        when(listingServiceClient.getListing(1L))
+                .thenReturn(listingResponse);
+        when(tradeRepository.findByListingIdAndTradeStatus(anyLong(), any()))
+                .thenReturn(List.of(trade));
+        when(tradeRepository.save(any()))
+                .thenAnswer(i -> i.getArgument(0));
+
+        doThrow(new RuntimeException("Kafka down"))
+                .when(kafkaTemplate)
+                .send(anyString(), any());
+
+        TradeResponseDTO result = tradeService.acceptTradeRequest(1L, 1L);
+
+        assertEquals(TradeStatus.accepted, result.getTradeStatus());
+    }
+
+    
 }

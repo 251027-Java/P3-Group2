@@ -14,7 +14,7 @@
     },
     "image": {
         "enabled": true,
-        "tagSeries": "be-card-service",
+        "tagSeries": "be-trade-service",
         "repository": "minidomo/gemdeck",
         "platform": {
             "single": false,

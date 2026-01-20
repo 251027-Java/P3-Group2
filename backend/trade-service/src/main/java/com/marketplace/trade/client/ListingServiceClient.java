@@ -17,8 +17,8 @@ public interface ListingServiceClient {
     @GetMapping("/api/listings/{listingId}")
     ListingResponse getListing(@PathVariable("listingId") Long listingId);
 
-    @PutMapping("/api/listings/{listingId}/status")
-    void updateListingStatus(@PathVariable("listingId") Long listingId, @RequestBody ListingStatusUpdate statusUpdate);
+    @PutMapping("/api/listings/{listingId}/complete")
+    void updateListingStatusToComplete(@PathVariable("listingId") Long listingId);
 
     class ListingResponse {
         private Long listingId;
