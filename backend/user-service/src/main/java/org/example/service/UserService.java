@@ -10,7 +10,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.ResponseCache;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,37 +41,39 @@ public class UserService {
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
 
         User savedUser = userRepository.save(user);
-        
+
         return Optional.of(UserResponse.fromUser(savedUser));
     }
 
     public UserResponse getUserById(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository
+                .findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
         return UserResponse.fromUser(user);
     }
 
     public UserResponse getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository
+                .findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
         return UserResponse.fromUser(user);
     }
 
     public UserResponse getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository
+                .findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
         return UserResponse.fromUser(user);
     }
 
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserResponse::fromUser)
-                .collect(Collectors.toList());
+        return userRepository.findAll().stream().map(UserResponse::fromUser).collect(Collectors.toList());
     }
 
     @Transactional
     public UserResponse updateUser(Long userId, UpdateUserRequest request) {
-        User user = userRepository.findById(userId)
+        User user = userRepository
+                .findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
         // Check if email is being changed and if it already exists

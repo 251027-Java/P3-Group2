@@ -10,9 +10,9 @@ import org.example.dto.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,7 +26,8 @@ public class UserController {
     @Operation(summary = "Create a new user", description = "Creates a new user in the system")
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
         Optional<UserResponse> response = userService.createUser(request);
-        return response.map(userResponse -> ResponseEntity.status(HttpStatus.CREATED).body(userResponse))
+        return response.map(userResponse ->
+                        ResponseEntity.status(HttpStatus.CREATED).body(userResponse))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
@@ -72,9 +73,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @Operation(summary = "Update user", description = "Updates an existing user's information")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable Long userId,
-            @RequestBody UpdateUserRequest request) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long userId, @RequestBody UpdateUserRequest request) {
         try {
             UserResponse response = userService.updateUser(userId, request);
             return ResponseEntity.ok(response);
