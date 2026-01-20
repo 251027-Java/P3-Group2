@@ -1,5 +1,5 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.client;
 
@@ -18,9 +18,6 @@ public class CardServiceClientFallback implements CardServiceClient {
     @Override
     public CardResponse getCardById(Long cardId) {
         log.warn("Card service unavailable. Returning fallback response for card ID: {}", cardId);
-        return CardResponse.builder()
-                .cardId(cardId)
-                .name("Unknown Card")
-                .build();
+        return CardResponse.builder().cardId(cardId).name("Unknown Card").build();
     }
 }

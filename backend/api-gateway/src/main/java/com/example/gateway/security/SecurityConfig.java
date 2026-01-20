@@ -9,7 +9,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-
 import java.util.List;
 
 @Configuration
@@ -19,15 +18,12 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
-        return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-
+        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                .authorizeExchange(auth -> auth
-                        .pathMatchers("/api/auth/**", "/actuator/**").permitAll()
-                        .anyExchange().authenticated()
-                )
+                .authorizeExchange(auth -> auth.pathMatchers("/api/auth/**", "/actuator/**")
+                        .permitAll()
+                        .anyExchange()
+                        .authenticated())
                 .build();
     }
 
@@ -40,8 +36,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(false);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
         return source;

@@ -1,5 +1,5 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.kafka;
 
@@ -24,8 +24,7 @@ public class ListingEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.card-deleted:card-deleted}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void handleCardDeletedEvent(String event) {
         log.info("Received card deleted event: {}", event);
         // TODO: Implement logic to handle card deletion
@@ -41,8 +40,7 @@ public class ListingEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.user-deleted:user-deleted}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void handleUserDeletedEvent(String event) {
         log.info("Received user deleted event: {}", event);
         // TODO: Implement logic to handle user deletion
@@ -58,8 +56,7 @@ public class ListingEventConsumer {
     @KafkaListener(
             topics = "${kafka.topics.trade-completed:trade-completed}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void handleTradeCompletedEvent(String event) {
         log.info("Received trade completed event: {}", event);
         // TODO: Implement logic to mark listing as completed when trade is finalized
