@@ -1,6 +1,6 @@
 // Generated with assistance from Antigravity through Gemini
 // Reviewed and modified by Liam Ruiz
-package main.java.com.marketplace.auth.controller;
+package com.marketplace.auth.controller;
 
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;

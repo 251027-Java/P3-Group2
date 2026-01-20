@@ -1,6 +1,6 @@
 // Generated with assistance from Antigravity through Gemini
 // Reviewed and modified by Liam Ruiz
-package main.java.com.marketplace.auth.service;
+package com.marketplace.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

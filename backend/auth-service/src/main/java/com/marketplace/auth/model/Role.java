@@ -1,4 +1,4 @@
-package main.java.com.marketplace.auth.model;
+package com.marketplace.auth.model;
 
 /**
  * Enum representing user roles in the system.

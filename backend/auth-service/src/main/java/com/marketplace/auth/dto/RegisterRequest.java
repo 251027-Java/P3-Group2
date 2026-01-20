@@ -1,4 +1,4 @@
-package main.java.com.marketplace.auth.dto;
+package com.marketplace.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
