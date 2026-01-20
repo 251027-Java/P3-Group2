@@ -1,16 +1,15 @@
 package com.example.gateway.security;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import reactor.core.publisher.Mono;
-import org.springframework.web.server.WebFilterChain;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
@@ -52,11 +51,7 @@ public class JwtAuthenticationFilter implements WebFilter {
             if (jwtUtil.validateToken(jwt, listenerId)) {
 
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                listenerId,
-                                null,
-                                Collections.emptyList()
-                        );
+                        new UsernamePasswordAuthenticationToken(listenerId, null, Collections.emptyList());
 
                 SecurityContext context =
                         new org.springframework.security.core.context.SecurityContextImpl(authentication);
