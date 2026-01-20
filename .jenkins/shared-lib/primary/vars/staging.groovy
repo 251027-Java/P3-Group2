@@ -178,7 +178,10 @@ def executeDir(Map params = [:]) {
     }
 
     def shouldBuildImage = (
-        attributes["build:${path}".toString()]
+        (
+            attributes["build:${path}".toString()]
+            && attributes['default']
+        )
         || attributes['imageall']
         || attributes["image:${path}".toString()]
     )
