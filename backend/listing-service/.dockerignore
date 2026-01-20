@@ -1,0 +1,17 @@
+# Docker Compose Override for Development
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+*.log
+*.jar
+target/
+.git
+.gitignore
+README.md
+*.md
+.mvn/
+mvnw
+mvnw.cmd
+.idea/
+*.iml
+.vscode/
+.DS_Store
+logs/

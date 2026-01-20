@@ -20,6 +20,13 @@ spring:
       hibernate:
         format_sql: true
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+    fetch-registry: true
+    register-with-eureka: true
+
 # Logging Configuration
 logging:
   level:
