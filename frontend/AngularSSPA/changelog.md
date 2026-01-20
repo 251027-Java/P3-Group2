@@ -54,7 +54,26 @@ export class AppModule { }
 
 ---
 
-#### 4. Missing Environment Files
+#### 4. Import Standalone Page Components
+
+- **File**: `src/app/app.module.ts`
+- **Change**: Added standalone page components to imports array
+- **Reason**: The project uses standalone page components (LoginPageComponent, SignupPageComponent, MarketplacePageComponent) but the NgModule-based AppComponent couldn't access the RouterModule directives. Standalone components must be imported (not declared) in NgModules.
+
+```typescript
+imports: [
+  BrowserModule,
+  RouterModule.forRoot(routes),
+  // Import standalone components
+  LoginPageComponent,
+  SignupPageComponent,
+  MarketplacePageComponent
+],
+```
+
+---
+
+#### 5. Missing Environment Files
 
 - **Files**: `src/environments/environment.ts`, `src/environments/environment.prod.ts` *(NEW)*
 - **Change**: Created environment configuration files
@@ -72,9 +91,28 @@ export const environment = {
 };
 ```
 
+#### 6. Bootstrap Mode Mismatch (Critical)
+
+- **File**: `src/main.single-spa.ts`
+- **Change**: Reverted from standalone `bootstrapApplication()` to NgModule `bootstrapModule(AppModule)`
+- **Reason**: A merge changed the bootstrap to use standalone mode, which bypassed the `AppModule` entirely. This meant `RouterModule` was never loaded, causing the `router-outlet` error.
+
+```diff
+-import { bootstrapApplication } from '@angular/platform-browser';
+-import { AppComponent } from './app/app.component';
+-const lifecycles = singleSpaAngular({
+-  bootstrapFunction: () => bootstrapApplication(AppComponent, appConfig),
++import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
++import { AppModule } from './app/app.module';
++const lifecycles = singleSpaAngular({
++  bootstrapFunction: singleSpaProps => {
++    return platformBrowserDynamic(getSingleSpaExtraProviders()).bootstrapModule(AppModule);
++  },
+```
+
 ---
 
-#### 5. Standalone Component Compatibility (Angular 17+)
+#### 7. Standalone Component Compatibility (Angular 17+)
 
 - **Files**: `src/app/app.component.ts`, `src/app/empty-route/empty-route.component.ts`
 - **Change**: Added `standalone: false` to component decorators
@@ -103,9 +141,9 @@ export const environment = {
 
 | File | Action | Description |
 | ---- | ------ | ----------- |
-| `Dockerfile` | Modified | Fixed output path case sensitivity |
+| `Dockerfile` | Modified | Fixed output path case sensitivity, healthcheck port |
 | `angular.json` | Modified | Changed `browser` → `main`, removed duplicate |
-| `src/app/app.module.ts` | Created | Added missing NgModule for Single-SPA |
+| `src/app/app.module.ts` | Created | Added NgModule with standalone component imports |
 | `src/app/app.component.ts` | Modified | Added `standalone: false` |
 | `src/app/empty-route/empty-route.component.ts` | Modified | Added `standalone: false` |
 | `src/environments/environment.ts` | Created | Development environment config |
