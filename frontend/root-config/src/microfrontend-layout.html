@@ -14,7 +14,7 @@
   <!-- Main Content Area with Route-based MFE Loading -->
   <main>
     <!-- Welcome/Home Page -->
-    <route default path="/">
+    <route path="/">
       <application name="@marketplace/home"></application>
     </route>
 
@@ -35,7 +35,7 @@
     </route>
 
     <!-- Fallback for 404 -->
-    <route path="404">
+    <route default>
       <application name="@marketplace/not-found"></application>
     </route>
   </main>
