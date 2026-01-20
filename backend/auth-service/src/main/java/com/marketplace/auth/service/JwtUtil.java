@@ -45,6 +45,12 @@ public class JwtUtil {
     public String generateToken(String username) {
         return generateToken(new HashMap<>(), username);
     }
+    
+    public String generateToken(String username, String role) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("role", role);
+        return generateToken(extraClaims, username);
+    }
 
     /**
      * Generates a JWT token with extra claims.

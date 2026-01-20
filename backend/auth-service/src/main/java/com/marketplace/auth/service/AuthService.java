@@ -30,7 +30,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
-    // Mock user store - TODO: Replace with AppUser-service client
+    // TODO: Replace with AppUser-service feign client
     private final Map<String, AppUser> usersByEmail = new ConcurrentHashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
 
@@ -123,6 +123,9 @@ public class AuthService {
 
         log.info("User authenticated: {} (role: {})", user.getUsername(), user.getRole());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+
+
+
 
         return AuthResponse.builder()
                 .token(token)
