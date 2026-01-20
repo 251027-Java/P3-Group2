@@ -8,6 +8,25 @@
             "type": "string",
             "description": "Optional JSON Schema reference URI for tooling or validation."
         },
+        "dependencies": {
+            "type": "object",
+            "description": "Configuration for installing dependencies.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether dependencies should be installed for this service."
+                },
+                "command": {
+                    "type": "string",
+                    "description": "The command executed to install dependencies."
+                }
+            },
+            "required": [
+                "enabled",
+                "command"
+            ],
+            "additionalProperties": false
+        },
         "lint": {
             "type": "object",
             "description": "Configuration for linting and static analysis.",
@@ -118,8 +137,6 @@
         }
     },
     "required": [
-        "lint",
-        "test",
         "build",
         "image"
     ],

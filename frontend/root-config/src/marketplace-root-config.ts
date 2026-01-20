@@ -7,6 +7,7 @@
  * Reviewed and modified by Development Team
  */
 
+import "regenerator-runtime/runtime";
 import { registerApplication, start } from "single-spa";
 import {
   constructApplications,

@@ -1,4 +1,5 @@
 <!-- This file was created by Claude Sonnet 4.5 -->
+<script type="module" src="/marketplace-root-config.js"></script>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,12 +38,14 @@
 <!-- Production import map - loaded from server -->
   <% if (!isLocal) { %>
   <script type="systemjs-importmap" src="/importmap.json"></script>
+  <script type="systemjs-importmap" src="/importmap.json"></script>
   <% } %>
 
   <!-- Local development import map -->  <!-- <script type="injector-importmap" src="/importmap.json"></script> -->
    <!-- "@marketplace/home": "//localhost:8083/marketplace-home.js", -->
 
   <% if (isLocal) { %>
+  <script type="systemjs-importmap">
   <script type="systemjs-importmap">
     {
       "imports": {
@@ -60,8 +63,8 @@
   </script>
   <% } %>
 
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.14.2/dist/system.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/import-map-overrides@5.1.1/dist/import-map-overrides.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@single-spa/import-map-injector@2.0.1/lib/import-map-injector.js"></script>
 </head>
 <body>
   <noscript>

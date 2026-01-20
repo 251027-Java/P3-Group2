@@ -1,0 +1,60 @@
+server:
+  forward-headers-strategy: framework
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  output:
+    ansi:
+      enabled: always
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Route: /card/** -> card-service
+            - id: card-route
+              uri: lb://card-service
+              predicates:
+                - Path=/api/cards/**
+
+            # Route: /listing/** -> listing-service
+            - id: listing-route
+              uri: lb://listing-service
+              predicates:
+                - Path=/api/listings/**
+
+            
+
+           
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+# Logging for debugging routes
+logging:
+  level:
+    org.spring: DEBUG
+
+# Actuator Config
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret: ${JWT_SECRET:averylongsecretkeythatissecureenoughforhmacsha256algorithm}
+  expiration: ${JWT_EXPIRATION:86400000}

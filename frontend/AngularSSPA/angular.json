@@ -15,7 +15,10 @@
           "options": {
             "outputPath": "dist/angular-sspa",
             "index": "src/index.html",
-            "polyfills": [],
+            "main": "src/main.single-spa.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -27,13 +30,10 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "main": "src/main.single-spa.ts",
             "customWebpackConfig": {
-              "path": "extra-webpack.config.js",
-              "libraryName": "AngularSSPA",
-              "libraryTarget": "system"
+              "path": "extra-webpack.config.js"
             },
-            "deployUrl": "http://localhost:4200/"
+            "deployUrl": "http://localhost:4201/"
           },
           "configurations": {
             "production": {
