@@ -11,7 +11,6 @@ docker-compose up
 This requires that the instance is configure with the correct environment variables.
 This service requires the variables:
 
-- EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
 - JWT_SECRET=averylongsecretkeythatissecureenoughforhmacsha256algorithm
 - JWT_EXPIRATION=86400000
 
