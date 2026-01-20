@@ -10,6 +10,7 @@ import org.example.dto.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -24,12 +25,9 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Create a new user", description = "Creates a new user in the system")
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
-        try {
-            UserResponse response = userService.createUser(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        Optional<UserResponse> response = userService.createUser(request);
+        return response.map(userResponse -> ResponseEntity.status(HttpStatus.CREATED).body(userResponse))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
     @GetMapping("/{userId}")

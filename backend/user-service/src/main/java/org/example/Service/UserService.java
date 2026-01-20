@@ -10,7 +10,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.ResponseCache;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,13 +23,14 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
-    public UserResponse createUser(CreateUserRequest request) {
+    public Optional<UserResponse> createUser(CreateUserRequest request) {
         // Validate unique constraints
+
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username already exists");
+            return Optional.empty();
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+            return Optional.empty();
         }
 
         User user = new User();
@@ -39,7 +42,8 @@ public class UserService {
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
 
         User savedUser = userRepository.save(user);
-        return UserResponse.fromUser(savedUser);
+        
+        return Optional.of(UserResponse.fromUser(savedUser));
     }
 
     public UserResponse getUserById(Long userId) {
