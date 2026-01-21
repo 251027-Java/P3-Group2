@@ -528,6 +528,25 @@ spec:
   type: ClusterIP
 
 # ============================================
+# FRONTEND CONFIG
+# ============================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  # Root Config URLs
+  MKPL_ROOT_CONFIG_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_ANGULAR_CARDS_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
+  MKPL_REACT_USERS_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+  MKPL_HOME_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
+  MKPL_NAVBAR_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_FOOTER_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_NOT_FOUND_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_SHARED_UTIL_URL: "http://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+
+# ============================================
 # FRONTEND - ROOT CONFIG (Single-SPA Orchestrator)
 # ============================================
 ---
@@ -551,6 +570,47 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
+          env:
+            - name: MKPL_ROOT_CONFIG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_ROOT_CONFIG_URL
+            - name: MKPL_ANGULAR_CARDS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_ANGULAR_CARDS_URL
+            - name: MKPL_REACT_USERS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_REACT_USERS_URL
+            - name: MKPL_HOME_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_HOME_URL
+            - name: MKPL_NAVBAR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_NAVBAR_URL
+            - name: MKPL_FOOTER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_FOOTER_URL
+            - name: MKPL_NOT_FOUND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_NOT_FOUND_URL
+            - name: MKPL_SHARED_UTIL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_SHARED_UTIL_URL
 
 ---
 apiVersion: v1

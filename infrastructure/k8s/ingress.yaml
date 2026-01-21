@@ -5,7 +5,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - ec2-16-58-75-153.us-east-2.compute.amazonaws.com
+        - ec2-18-188-75-153.us-east-2.compute.amazonaws.com
       secretName: tls
   rules:
     - http:
@@ -17,24 +17,49 @@ spec:
                 name: api-gateway
                 port:
                   number: 8080
-          - path: /
-            pathType: Prefix
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-mfe-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+    - hosts:
+        - ec2-18-188-75-153.us-east-2.compute.amazonaws.com
+      secretName: tls
+  rules:
+    - http:
+        paths:
+          - path: /angular(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: root-config
-                port:
-                  number: 9000
-          - path: /react
-            pathType: Prefix
-            backend:
-              service:
-                name: mfe-react-users # Update to React Frontend Service
-                port:
-                  number: 4202
-          - path: /angular
-            pathType: Prefix
-            backend:
-              service:
-                name: angular-sspa # Update to Angular Frontend Service
+                name: angular-sspa
                 port:
                   number: 4201
+          - path: /react(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mfe-react-users
+                port:
+                  number: 4202
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-root-ingress
+spec:
+  tls:
+    - hosts:
+        - ec2-18-188-75-153.us-east-2.compute.amazonaws.com
+      secretName: tls
+  defaultBackend:
+    service:
+      name: root-config
+      port:
+        number: 9000
