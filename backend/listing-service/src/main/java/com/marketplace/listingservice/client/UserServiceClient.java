@@ -8,6 +8,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Optional;
+
 /**
  * Feign client for communicating with the User Service.
  * Allows the listing service to validate user existence and retrieve user details.
@@ -22,14 +24,5 @@ public interface UserServiceClient {
      * @return the user details
      */
     @GetMapping("/api/users/{userId}")
-    UserResponse getUserById(@PathVariable("userId") Long userId);
-
-    /**
-     * Checks if a user exists by user ID.
-     *
-     * @param userId the user ID
-     * @return true if the user exists, false otherwise
-     */
-    @GetMapping("/api/users/{userId}/exists")
-    Boolean userExists(@PathVariable("userId") Long userId);
+    Optional<UserResponse> getUserById(@PathVariable("userId") Long userId);
 }

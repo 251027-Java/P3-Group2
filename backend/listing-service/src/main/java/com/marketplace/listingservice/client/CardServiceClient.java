@@ -8,6 +8,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Optional;
+
 /**
  * Feign client for communicating with the Card Service.
  * Allows the listing service to validate card existence and retrieve card details.
@@ -25,5 +27,5 @@ public interface CardServiceClient {
      * @return the card details
      */
     @GetMapping("/api/cards/{cardId}")
-    CardResponse getCardById(@PathVariable("cardId") Long cardId);
+    Optional<CardResponse> getCardById(@PathVariable("cardId") Long cardId);
 }
