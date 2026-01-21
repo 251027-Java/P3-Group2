@@ -58,7 +58,7 @@
   display: flex;
 }
 
-.page-slot > * {
+.page-slot>* {
   flex: 1;
 }
 
