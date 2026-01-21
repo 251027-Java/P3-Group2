@@ -1,7 +1,5 @@
 package com.marketplace.card.controller;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -156,8 +154,7 @@ class CardControllerTest {
             when(cardService.getCardById(999L)).thenReturn(Optional.empty());
 
             // Act & Assert
-            mockMvc.perform(get("/api/cards/999"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/cards/999")).andExpect(status().isNotFound());
         }
     }
 }

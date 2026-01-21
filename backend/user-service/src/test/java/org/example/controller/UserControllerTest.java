@@ -2,7 +2,6 @@ package org.example.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -66,8 +65,8 @@ class UserControllerTest {
         @DisplayName("POST /api/users - should return 201 with UserResponse when successful")
         void createUser_ValidRequest_Returns201() throws Exception {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "test@example.com", "testuser", "password123", 40.7128, -74.0060, "USER");
+            CreateUserRequest request =
+                    new CreateUserRequest("test@example.com", "testuser", "password123", 40.7128, -74.0060, "USER");
             when(userService.createUser(any(CreateUserRequest.class))).thenReturn(Optional.of(mockUserResponse));
 
             // Act & Assert
@@ -85,8 +84,8 @@ class UserControllerTest {
         @DisplayName("POST /api/users - should return 400 when user creation fails")
         void createUser_DuplicateUser_Returns400() throws Exception {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "existing@example.com", "existinguser", "password123", null, null, null);
+            CreateUserRequest request =
+                    new CreateUserRequest("existing@example.com", "existinguser", "password123", null, null, null);
             when(userService.createUser(any(CreateUserRequest.class))).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -122,8 +121,7 @@ class UserControllerTest {
             when(userService.getUserById(999L)).thenThrow(new IllegalArgumentException("User not found"));
 
             // Act & Assert
-            mockMvc.perform(get("/api/users/999"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/users/999")).andExpect(status().isNotFound());
         }
 
         @Test
@@ -193,7 +191,8 @@ class UserControllerTest {
             updatedResponse.setUserId(1L);
             updatedResponse.setEmail("newemail@example.com");
             updatedResponse.setUsername("newusername");
-            when(userService.updateUser(anyLong(), any(UpdateUserRequest.class))).thenReturn(updatedResponse);
+            when(userService.updateUser(anyLong(), any(UpdateUserRequest.class)))
+                    .thenReturn(updatedResponse);
 
             // Act & Assert
             mockMvc.perform(put("/api/users/1")
@@ -231,19 +230,19 @@ class UserControllerTest {
             doNothing().when(userService).deleteUser(1L);
 
             // Act & Assert
-            mockMvc.perform(delete("/api/users/1"))
-                    .andExpect(status().isNoContent());
+            mockMvc.perform(delete("/api/users/1")).andExpect(status().isNoContent());
         }
 
         @Test
         @DisplayName("DELETE /api/users/{userId} - should return 404 when not found")
         void deleteUser_UserNotFound_Returns404() throws Exception {
             // Arrange
-            doThrow(new IllegalArgumentException("User not found")).when(userService).deleteUser(999L);
+            doThrow(new IllegalArgumentException("User not found"))
+                    .when(userService)
+                    .deleteUser(999L);
 
             // Act & Assert
-            mockMvc.perform(delete("/api/users/999"))
-                    .andExpect(status().isNotFound());
+            mockMvc.perform(delete("/api/users/999")).andExpect(status().isNotFound());
         }
     }
 }

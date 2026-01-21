@@ -60,8 +60,8 @@ class UserServiceTest {
         @DisplayName("Should create user successfully")
         void createUser_ValidRequest_ReturnsUserResponse() {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "new@example.com", "newuser", "password123", 40.0, -74.0, "USER");
+            CreateUserRequest request =
+                    new CreateUserRequest("new@example.com", "newuser", "password123", 40.0, -74.0, "USER");
             when(userRepository.existsByUsername("newuser")).thenReturn(false);
             when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
@@ -84,8 +84,8 @@ class UserServiceTest {
         @DisplayName("Should return empty when username already exists")
         void createUser_DuplicateUsername_ReturnsEmpty() {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "new@example.com", "existinguser", "password123", null, null, null);
+            CreateUserRequest request =
+                    new CreateUserRequest("new@example.com", "existinguser", "password123", null, null, null);
             when(userRepository.existsByUsername("existinguser")).thenReturn(true);
 
             // Act
@@ -100,8 +100,8 @@ class UserServiceTest {
         @DisplayName("Should return empty when email already exists")
         void createUser_DuplicateEmail_ReturnsEmpty() {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "existing@example.com", "newuser", "password123", null, null, null);
+            CreateUserRequest request =
+                    new CreateUserRequest("existing@example.com", "newuser", "password123", null, null, null);
             when(userRepository.existsByUsername("newuser")).thenReturn(false);
             when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
@@ -117,8 +117,8 @@ class UserServiceTest {
         @DisplayName("Should default role to USER when not provided")
         void createUser_NoRole_DefaultsToUser() {
             // Arrange
-            CreateUserRequest request = new CreateUserRequest(
-                    "new@example.com", "newuser", "password123", null, null, null);
+            CreateUserRequest request =
+                    new CreateUserRequest("new@example.com", "newuser", "password123", null, null, null);
             when(userRepository.existsByUsername("newuser")).thenReturn(false);
             when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
