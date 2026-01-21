@@ -58,14 +58,14 @@ services:
       dockerfile: Dockerfile
     container_name: api-gateway
     ports:
-      - "${GATEWAY_PORT:-8080}:8080"
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     environment:
       SERVER_PORT: ${GATEWAY_PORT}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL:-http://eureka-server:8761/eureka/}
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GATEWAY_PORT}/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -77,7 +77,7 @@ services:
     build: ./backend/card-service
     container_name: card-service
     ports:
-      - "${CARD_SERVICE_PORT}:8081"
+      - "${CARD_SERVICE_PORT}:${CARD_SERVICE_PORT}"
     environment:
       SERVER_PORT: ${CARD_SERVICE_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${CARD_DB_HOST}:${CARD_DB_PORT}/${CARD_DB_NAME}
@@ -96,7 +96,7 @@ services:
     build: ./backend/listing-service
     container_name: listing-service
     ports:
-      - "${LISTING_SERVICE_PORT}:8082"
+      - "${LISTING_SERVICE_PORT}:${LISTING_SERVICE_PORT}"
     environment:
       SERVER_PORT: ${LISTING_SERVICE_PORT}
       DB_HOST: ${LISTING_DB_HOST}
@@ -118,7 +118,7 @@ services:
     build: ./backend/user-service
     container_name: user-service
     ports:
-      - "${USER_SERVICE_PORT}:8083"
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
     environment:
       SERVER_PORT: ${USER_SERVICE_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}
@@ -136,7 +136,7 @@ services:
     build: ./backend/auth-service
     container_name: auth-service
     ports:
-      - "${AUTH_SERVICE_PORT}:8084"
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     environment:
       SERVER_PORT: ${AUTH_SERVICE_PORT}
       JWT_SECRET: ${JWT_SECRET}
@@ -152,7 +152,7 @@ services:
     build: ./backend/trade-service
     container_name: trade-service
     ports:
-      - "${TRADE_SERVICE_PORT}:8085"
+      - "${TRADE_SERVICE_PORT}:${TRADE_SERVICE_PORT}"
     environment:
       SERVER_PORT: ${TRADE_SERVICE_PORT}
       DB_HOST: ${TRADE_DB_HOST}
