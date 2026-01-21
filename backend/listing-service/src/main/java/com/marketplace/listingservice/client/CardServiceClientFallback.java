@@ -7,6 +7,8 @@ import com.marketplace.listingservice.client.dto.CardResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * Fallback implementation for CardServiceClient.
  * Used when the card service is unavailable.
@@ -16,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class CardServiceClientFallback implements CardServiceClient {
 
     @Override
-    public CardResponse getCardById(Long cardId) {
+    public Optional<CardResponse> getCardById(Long cardId) {
         log.warn("Card service unavailable. Returning fallback response for card ID: {}", cardId);
-        return CardResponse.builder().cardId(cardId).name("Unknown Card").build();
+        return Optional.empty();
     }
 }
