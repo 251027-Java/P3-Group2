@@ -5,6 +5,9 @@ package com.marketplace.trade.client;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.marketplace.trade.client.dto.ListingResponse;
+import com.marketplace.trade.client.dto.ListingStatus;
+import com.marketplace.trade.client.dto.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,7 +24,7 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get listingId")
         void listingResponse_ListingId() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
+            ListingResponse response = new ListingResponse();
             response.setListingId(1L);
             assertEquals(1L, response.getListingId());
         }
@@ -29,7 +32,7 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get ownerUserId")
         void listingResponse_OwnerUserId() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
+            ListingResponse response = new ListingResponse();
             response.setOwnerUserId(100L);
             assertEquals(100L, response.getOwnerUserId());
         }
@@ -37,7 +40,7 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get cardId")
         void listingResponse_CardId() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
+            ListingResponse response = new ListingResponse();
             response.setCardId(50L);
             assertEquals(50L, response.getCardId());
         }
@@ -45,15 +48,15 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get listingStatus")
         void listingResponse_ListingStatus() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
-            response.setListingStatus("active");
-            assertEquals("active", response.getListingStatus());
+            ListingResponse response = new ListingResponse();
+            response.setListingStatus(ListingStatus.ACTIVE);
+            assertEquals("active", response.getListingStatus().getValue());
         }
 
         @Test
         @DisplayName("Should handle null values")
         void listingResponse_NullValues() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
+            ListingResponse response = new ListingResponse();
             assertNull(response.getListingId());
             assertNull(response.getOwnerUserId());
             assertNull(response.getCardId());
@@ -63,43 +66,16 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set all fields correctly")
         void listingResponse_AllFields() {
-            ListingServiceClient.ListingResponse response = new ListingServiceClient.ListingResponse();
+            ListingResponse response = new ListingResponse();
             response.setListingId(1L);
             response.setOwnerUserId(2L);
             response.setCardId(3L);
-            response.setListingStatus("completed");
+            response.setListingStatus(ListingStatus.COMPLETED);
 
             assertEquals(1L, response.getListingId());
             assertEquals(2L, response.getOwnerUserId());
             assertEquals(3L, response.getCardId());
-            assertEquals("completed", response.getListingStatus());
-        }
-    }
-
-    @Nested
-    @DisplayName("ListingStatusUpdate Tests")
-    class ListingStatusUpdateTests {
-
-        @Test
-        @DisplayName("Should create with no-args constructor")
-        void listingStatusUpdate_NoArgsConstructor() {
-            ListingServiceClient.ListingStatusUpdate update = new ListingServiceClient.ListingStatusUpdate();
-            assertNull(update.getStatus());
-        }
-
-        @Test
-        @DisplayName("Should create with status constructor")
-        void listingStatusUpdate_StatusConstructor() {
-            ListingServiceClient.ListingStatusUpdate update = new ListingServiceClient.ListingStatusUpdate("completed");
-            assertEquals("completed", update.getStatus());
-        }
-
-        @Test
-        @DisplayName("Should set and get status")
-        void listingStatusUpdate_SetStatus() {
-            ListingServiceClient.ListingStatusUpdate update = new ListingServiceClient.ListingStatusUpdate();
-            update.setStatus("active");
-            assertEquals("active", update.getStatus());
+            assertEquals("completed", response.getListingStatus().getValue());
         }
     }
 
@@ -110,15 +86,15 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get appUserId")
         void userResponse_AppUserId() {
-            UserServiceClient.UserResponse response = new UserServiceClient.UserResponse();
-            response.setAppUserId(1L);
-            assertEquals(1L, response.getAppUserId());
+            UserResponse response = new UserResponse();
+            response.setUserId(1L);
+            assertEquals(1L, response.getUserId());
         }
 
         @Test
         @DisplayName("Should set and get email")
         void userResponse_Email() {
-            UserServiceClient.UserResponse response = new UserServiceClient.UserResponse();
+            UserResponse response = new UserResponse();
             response.setEmail("test@example.com");
             assertEquals("test@example.com", response.getEmail());
         }
@@ -126,7 +102,7 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set and get username")
         void userResponse_Username() {
-            UserServiceClient.UserResponse response = new UserServiceClient.UserResponse();
+            UserResponse response = new UserResponse();
             response.setUsername("testuser");
             assertEquals("testuser", response.getUsername());
         }
@@ -134,8 +110,8 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should handle null values")
         void userResponse_NullValues() {
-            UserServiceClient.UserResponse response = new UserServiceClient.UserResponse();
-            assertNull(response.getAppUserId());
+            UserResponse response = new UserResponse();
+            assertNull(response.getUserId());
             assertNull(response.getEmail());
             assertNull(response.getUsername());
         }
@@ -143,12 +119,12 @@ class ClientResponseClassesTest {
         @Test
         @DisplayName("Should set all fields correctly")
         void userResponse_AllFields() {
-            UserServiceClient.UserResponse response = new UserServiceClient.UserResponse();
-            response.setAppUserId(100L);
+            UserResponse response = new UserResponse();
+            response.setUserId(100L);
             response.setEmail("user@test.com");
             response.setUsername("user123");
 
-            assertEquals(100L, response.getAppUserId());
+            assertEquals(100L, response.getUserId());
             assertEquals("user@test.com", response.getEmail());
             assertEquals("user123", response.getUsername());
         }

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "trades")
+@Table(name = "trades", schema = "trade_management")
 @Getter
 @Setter
 @NoArgsConstructor

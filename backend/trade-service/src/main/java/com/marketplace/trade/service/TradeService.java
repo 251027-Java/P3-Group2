@@ -4,6 +4,7 @@ package com.marketplace.trade.service;
 
 import com.marketplace.trade.client.ListingServiceClient;
 import com.marketplace.trade.client.UserServiceClient;
+import com.marketplace.trade.client.dto.ListingResponse;
 import com.marketplace.trade.dto.TradeRequestDTO;
 import com.marketplace.trade.dto.TradeResponseDTO;
 import com.marketplace.trade.exception.ResourceNotFoundException;
@@ -49,7 +50,7 @@ public class TradeService {
                 request.getRequestingUserId());
 
         // Validate listing exists and is active
-        ListingServiceClient.ListingResponse listing;
+        ListingResponse listing;
         try {
             listing = listingServiceClient.getListing(request.getListingId());
         } catch (Exception e) {
@@ -57,7 +58,7 @@ public class TradeService {
             throw new ResourceNotFoundException("Listing not found: " + request.getListingId());
         }
 
-        if (!"active".equalsIgnoreCase(listing.getListingStatus())) {
+        if (!"active".equalsIgnoreCase(listing.getListingStatus().getValue())) {
             throw new TradeException("Cannot create trade request for inactive listing");
         }
 
@@ -125,7 +126,7 @@ public class TradeService {
         }
 
         // Validate listing owner
-        ListingServiceClient.ListingResponse listing;
+        ListingResponse listing;
         try {
             listing = listingServiceClient.getListing(trade.getListingId());
         } catch (Exception e) {
@@ -179,7 +180,7 @@ public class TradeService {
         }
 
         // Validate listing owner
-        ListingServiceClient.ListingResponse listing;
+        ListingResponse listing;
         try {
             listing = listingServiceClient.getListing(trade.getListingId());
         } catch (Exception e) {

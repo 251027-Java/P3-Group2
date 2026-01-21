@@ -1,0 +1,23 @@
+{
+    "$schema": "../../.jenkins/ci.schema.json",
+    "dependencies": {
+        "enabled": true,
+        "command": "npm ci"
+    },
+    "build": {
+        "enabled": true,
+        "command": "npm run build"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "fe-angular-sspa",
+        "repository": "minidomo/gemdeck",
+        "platform": {
+            "single": false,
+            "multi": [
+                "linux/amd64",
+                "linux/arm64"
+            ]
+        }
+    }
+}
