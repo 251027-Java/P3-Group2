@@ -1,22 +1,29 @@
 package com.marketplace.auth.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.marketplace.auth.client.UserServiceClient;
+import com.marketplace.auth.client.dto.AuthUserResponse;
+import com.marketplace.auth.client.dto.CreateUserRequest;
+import com.marketplace.auth.client.dto.UserResponse;
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Unit tests for AuthService.
+ * Unit tests for AuthService with UserServiceClient integration.
  */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -27,6 +34,10 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private UserServiceClient userServiceClient;
+
+    @InjectMocks
     private AuthService authService;
 
     private static final String TEST_TOKEN = "test.jwt.token";
@@ -34,148 +45,242 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Setup mock behavior for password encoder
-        when(passwordEncoder.encode(anyString())).thenAnswer(invocation -> "encoded_" + invocation.getArgument(0));
-
-        // Setup mock behavior for JwtUtil
         lenient().when(jwtUtil.generateToken(anyString(), anyString())).thenReturn(TEST_TOKEN);
         lenient().when(jwtUtil.getExpiration()).thenReturn(EXPIRATION);
-
-        authService = new AuthService(jwtUtil, passwordEncoder);
     }
 
-    @Test
-    @DisplayName("Should register new user successfully")
-    void register_NewUser_ReturnsAuthResponseWithToken() {
-        // Arrange
-        RegisterRequest request = new RegisterRequest("newuser@example.com", "newuser", "password123");
+    @Nested
+    @DisplayName("Registration Tests")
+    class RegistrationTests {
 
-        // Act
-        AuthResponse response = authService.register(request);
+        @Test
+        @DisplayName("Should register new user successfully")
+        void register_NewUser_ReturnsAuthResponseWithToken() {
+            // Arrange
+            RegisterRequest request = new RegisterRequest("newuser@example.com", "newuser", "password123");
+            UserResponse createdUser = UserResponse.builder()
+                    .userId(1L)
+                    .email("newuser@example.com")
+                    .username("newuser")
+                    .role("USER")
+                    .build();
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(TEST_TOKEN, response.getToken());
-        assertEquals("Bearer", response.getType());
-        assertEquals("newuser", response.getUsername());
-        assertEquals("USER", response.getRole());
-        assertEquals(EXPIRATION, response.getExpiresIn());
+            when(userServiceClient.createUser(any(CreateUserRequest.class))).thenReturn(createdUser);
 
-        verify(passwordEncoder).encode("password123");
-        verify(jwtUtil).generateToken("newuser", "USER");
+            // Act
+            AuthResponse response = authService.register(request);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(TEST_TOKEN, response.getToken());
+            assertEquals("Bearer", response.getType());
+            assertEquals("newuser", response.getUsername());
+            assertEquals("USER", response.getRole());
+            assertEquals(EXPIRATION, response.getExpiresIn());
+
+            verify(userServiceClient).createUser(any(CreateUserRequest.class));
+            verify(jwtUtil).generateToken("newuser", "USER");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when user creation fails")
+        void register_UserCreationFails_ThrowsIllegalArgumentException() {
+            // Arrange
+            RegisterRequest request = new RegisterRequest("existing@example.com", "existing", "password");
+            when(userServiceClient.createUser(any(CreateUserRequest.class))).thenReturn(null);
+
+            // Act & Assert
+            IllegalArgumentException exception =
+                    assertThrows(IllegalArgumentException.class, () -> authService.register(request));
+            assertTrue(exception.getMessage().contains("Failed to create user"));
+
+            verify(userServiceClient).createUser(any(CreateUserRequest.class));
+            verify(jwtUtil, never()).generateToken(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("Should pass correct data to user service")
+        void register_CorrectDataPassedToUserService() {
+            // Arrange
+            RegisterRequest request = new RegisterRequest("test@example.com", "testuser", "testpass");
+            UserResponse createdUser = UserResponse.builder()
+                    .userId(1L)
+                    .email("test@example.com")
+                    .username("testuser")
+                    .role("USER")
+                    .build();
+
+            when(userServiceClient.createUser(any(CreateUserRequest.class))).thenAnswer(invocation -> {
+                CreateUserRequest createRequest = invocation.getArgument(0);
+                assertEquals("test@example.com", createRequest.getEmail());
+                assertEquals("testuser", createRequest.getUsername());
+                assertEquals("testpass", createRequest.getPassword());
+                assertEquals("USER", createRequest.getRole());
+                return createdUser;
+            });
+
+            // Act
+            authService.register(request);
+
+            // Assert
+            verify(userServiceClient).createUser(any(CreateUserRequest.class));
+        }
     }
 
-    @Test
-    @DisplayName("Should throw exception when registering with existing email")
-    void register_ExistingEmail_ThrowsIllegalArgumentException() {
-        // Arrange - admin@example.com is seeded in the service
-        RegisterRequest request = new RegisterRequest("admin@example.com", "newadmin", "password");
+    @Nested
+    @DisplayName("Login Tests")
+    class LoginTests {
 
-        // Act & Assert
-        IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> authService.register(request));
-        assertEquals("Email already registered", exception.getMessage());
+        @Test
+        @DisplayName("Should login user successfully with valid credentials")
+        void login_ValidCredentials_ReturnsAuthResponseWithToken() {
+            // Arrange
+            LoginRequest request = new LoginRequest("user@example.com", "password123");
+            AuthUserResponse authUser = AuthUserResponse.builder()
+                    .userId(1L)
+                    .email("user@example.com")
+                    .username("testuser")
+                    .passwordHash("hashed_password")
+                    .role("USER")
+                    .build();
+
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(true);
+
+            // Act
+            AuthResponse response = authService.login(request);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(TEST_TOKEN, response.getToken());
+            assertEquals("Bearer", response.getType());
+            assertEquals("testuser", response.getUsername());
+            assertEquals("USER", response.getRole());
+            assertEquals(EXPIRATION, response.getExpiresIn());
+
+            verify(userServiceClient).getUserForAuth("user@example.com");
+            verify(passwordEncoder).matches("password123", "hashed_password");
+            verify(jwtUtil).generateToken("testuser", "USER");
+        }
+
+        @Test
+        @DisplayName("Should login admin user successfully")
+        void login_AdminUser_ReturnsAuthResponseWithAdminRole() {
+            // Arrange
+            LoginRequest request = new LoginRequest("admin@example.com", "admin123");
+            AuthUserResponse authUser = AuthUserResponse.builder()
+                    .userId(1L)
+                    .email("admin@example.com")
+                    .username("admin")
+                    .passwordHash("hashed_admin123")
+                    .role("ADMIN")
+                    .build();
+
+            when(userServiceClient.getUserForAuth("admin@example.com")).thenReturn(authUser);
+            when(passwordEncoder.matches("admin123", "hashed_admin123")).thenReturn(true);
+
+            // Act
+            AuthResponse response = authService.login(request);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals("admin", response.getUsername());
+            assertEquals("ADMIN", response.getRole());
+        }
+
+        @Test
+        @DisplayName("Should throw exception for non-existent user")
+        void login_NonExistentUser_ThrowsIllegalArgumentException() {
+            // Arrange
+            LoginRequest request = new LoginRequest("nonexistent@example.com", "password");
+            when(userServiceClient.getUserForAuth("nonexistent@example.com")).thenReturn(null);
+
+            // Act & Assert
+            IllegalArgumentException exception =
+                    assertThrows(IllegalArgumentException.class, () -> authService.login(request));
+            assertEquals("Invalid email or password", exception.getMessage());
+
+            verify(userServiceClient).getUserForAuth("nonexistent@example.com");
+            verify(passwordEncoder, never()).matches(anyString(), anyString());
+        }
+
+        @Test
+        @DisplayName("Should throw exception for wrong password")
+        void login_WrongPassword_ThrowsIllegalArgumentException() {
+            // Arrange
+            LoginRequest request = new LoginRequest("user@example.com", "wrongpassword");
+            AuthUserResponse authUser = AuthUserResponse.builder()
+                    .userId(1L)
+                    .email("user@example.com")
+                    .username("testuser")
+                    .passwordHash("hashed_correctpassword")
+                    .role("USER")
+                    .build();
+
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(passwordEncoder.matches("wrongpassword", "hashed_correctpassword"))
+                    .thenReturn(false);
+
+            // Act & Assert
+            IllegalArgumentException exception =
+                    assertThrows(IllegalArgumentException.class, () -> authService.login(request));
+            assertEquals("Invalid email or password", exception.getMessage());
+
+            verify(passwordEncoder).matches("wrongpassword", "hashed_correctpassword");
+            verify(jwtUtil, never()).generateToken(anyString(), anyString());
+        }
     }
 
-    @Test
-    @DisplayName("Should login seeded admin user successfully")
-    void login_ValidAdminCredentials_ReturnsAuthResponseWithToken() {
-        // Arrange
-        when(passwordEncoder.matches("admin123", "encoded_admin123")).thenReturn(true);
-        LoginRequest request = new LoginRequest("admin@example.com", "admin123");
+    @Nested
+    @DisplayName("Integration Flow Tests")
+    class IntegrationFlowTests {
 
-        // Act
-        AuthResponse response = authService.login(request);
+        @Test
+        @DisplayName("Should handle user service returning user with all fields")
+        void login_UserServiceReturnsCompleteUser_HandlesCorrectly() {
+            // Arrange
+            LoginRequest request = new LoginRequest("complete@example.com", "password");
+            AuthUserResponse authUser = AuthUserResponse.builder()
+                    .userId(99L)
+                    .email("complete@example.com")
+                    .username("completeuser")
+                    .passwordHash("complete_hash")
+                    .role("USER")
+                    .build();
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(TEST_TOKEN, response.getToken());
-        assertEquals("Bearer", response.getType());
-        assertEquals("admin", response.getUsername());
-        assertEquals("ADMIN", response.getRole());
-        assertEquals(EXPIRATION, response.getExpiresIn());
-    }
+            when(userServiceClient.getUserForAuth("complete@example.com")).thenReturn(authUser);
+            when(passwordEncoder.matches("password", "complete_hash")).thenReturn(true);
 
-    @Test
-    @DisplayName("Should login seeded regular user successfully")
-    void login_ValidUserCredentials_ReturnsAuthResponseWithToken() {
-        // Arrange
-        when(passwordEncoder.matches("user123", "encoded_user123")).thenReturn(true);
-        LoginRequest request = new LoginRequest("user@example.com", "user123");
+            // Act
+            AuthResponse response = authService.login(request);
 
-        // Act
-        AuthResponse response = authService.login(request);
+            // Assert
+            assertNotNull(response);
+            assertEquals("completeuser", response.getUsername());
+            assertEquals("USER", response.getRole());
+        }
 
-        // Assert
-        assertNotNull(response);
-        assertEquals(TEST_TOKEN, response.getToken());
-        assertEquals("Bearer", response.getType());
-        assertEquals("user", response.getUsername());
-        assertEquals("USER", response.getRole());
-    }
+        @Test
+        @DisplayName("Should generate correct JWT token parameters")
+        void login_GeneratesTokenWithCorrectParameters() {
+            // Arrange
+            LoginRequest request = new LoginRequest("user@example.com", "password");
+            AuthUserResponse authUser = AuthUserResponse.builder()
+                    .userId(1L)
+                    .email("user@example.com")
+                    .username("specificuser")
+                    .passwordHash("hash")
+                    .role("ADMIN")
+                    .build();
 
-    @Test
-    @DisplayName("Should throw exception for non-existent email on login")
-    void login_NonExistentEmail_ThrowsIllegalArgumentException() {
-        // Arrange
-        LoginRequest request = new LoginRequest("nonexistent@example.com", "password");
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(passwordEncoder.matches("password", "hash")).thenReturn(true);
 
-        // Act & Assert
-        IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> authService.login(request));
-        assertEquals("Invalid email or password", exception.getMessage());
-    }
+            // Act
+            authService.login(request);
 
-    @Test
-    @DisplayName("Should throw exception for wrong password on login")
-    void login_WrongPassword_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(passwordEncoder.matches("wrongpassword", "encoded_admin123")).thenReturn(false);
-        LoginRequest request = new LoginRequest("admin@example.com", "wrongpassword");
-
-        // Act & Assert
-        IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> authService.login(request));
-        assertEquals("Invalid email or password", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should register and then login with new user")
-    void registerAndLogin_NewUser_WorksSuccessfully() {
-        // Arrange
-        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "testuser", "testpass");
-
-        // Act - Register
-        AuthResponse registerResponse = authService.register(registerRequest);
-
-        // Assert registration
-        assertNotNull(registerResponse);
-        assertEquals("testuser", registerResponse.getUsername());
-
-        // Arrange - Login
-        when(passwordEncoder.matches("testpass", "encoded_testpass")).thenReturn(true);
-        LoginRequest loginRequest = new LoginRequest("test@example.com", "testpass");
-
-        // Act - Login
-        AuthResponse loginResponse = authService.login(loginRequest);
-
-        // Assert login
-        assertNotNull(loginResponse);
-        assertEquals("testuser", loginResponse.getUsername());
-        assertEquals("USER", loginResponse.getRole());
-    }
-
-    @Test
-    @DisplayName("Should assign USER role to newly registered users")
-    void register_NewUser_AssignsUserRole() {
-        // Arrange
-        RegisterRequest request = new RegisterRequest("regular@example.com", "regular", "password");
-
-        // Act
-        AuthResponse response = authService.register(request);
-
-        // Assert
-        assertEquals("USER", response.getRole());
-        verify(jwtUtil).generateToken("regular", "USER");
+            // Assert - verify token generated with correct username and role
+            verify(jwtUtil).generateToken("specificuser", "ADMIN");
+        }
     }
 }

@@ -6,6 +6,7 @@ import org.example.repository.UserRepository;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
+import org.example.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,6 +119,16 @@ public class UserService {
         }
 
         userRepository.deleteById(userId);
+    }
+
+    /**
+     * Internal method for auth-service to get user with password hash.
+     */
+    public org.example.dto.AuthUserResponse getUserForAuth(String email) {
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+        return org.example.dto.AuthUserResponse.fromUser(user);
     }
 
     private String hashPassword(String password) {
