@@ -26,7 +26,8 @@ builderName=$(get-random-string)
 ssh_config_file="$HOME/.ssh/config"
 
 givenPlatforms=("$curPlatform")
-dockerLocation="."
+dockerfilePathArg=""
+dockerContext="."
 dockerRepo=""
 tagSeries=""
 branch=""
@@ -42,8 +43,12 @@ while [[ $# -gt 0 ]]; do
             IFS=',' read -r -a givenPlatforms <<< "$2"
             shift 2
             ;;
-        --location)
-            dockerLocation="$2"
+        --context)
+            dockerContext="$2"
+            shift 2
+            ;;
+        --dockerfile)
+            dockerfilePathArg="$2"
             shift 2
             ;;
         --repo)
@@ -73,8 +78,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [ ! -e "$dockerLocation" ]; then
-    echo "directory not found: $dockerLocation"
+dockerfilePath="$dockerContext/Dockerfile"
+
+if [[ -n "$dockerfilePathArg" ]]; then
+    dockerfilePath="$dockerfilePathArg"
+fi
+
+if [ ! -e "$dockerContext" ]; then
+    echo "directory not found: $dockerContext"
     exit 1
 fi
 
@@ -162,7 +173,7 @@ build-and-push() {
         if ! docker build --builder $builderName -t $builderName:$safePlatform --platform $platform \
             --cache-from=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries \
             --cache-to=type=registry,ref=$dockerRepo:buildcache-$safePlatform-$tagSeries,mode=max \
-            --load $dockerLocation; then
+            --load -f "$dockerfilePath" "$dockerContext"; then
             return 1
         fi
     done
@@ -184,7 +195,7 @@ build-and-push() {
     # this could fail due to failed Dockerfile
     if ! docker build --builder $builderName "${tagFlags[@]}" \
         --platform $platformString "${cacheFromFlags[@]}" \
-        --push $dockerLocation; then
+        --push -f "$dockerfilePath" "$dockerContext"; then
         return 1
     fi
 
