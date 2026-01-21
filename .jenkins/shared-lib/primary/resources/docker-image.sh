@@ -80,7 +80,7 @@ done
 
 dockerfilePath="$dockerContext/Dockerfile"
 
-if [[ -z "$dockerfilePathArg" ]]; then
+if [[ -n "$dockerfilePathArg" ]]; then
     dockerfilePath="$dockerfilePathArg"
 fi
 
