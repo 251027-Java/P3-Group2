@@ -1,4 +1,4 @@
-package com.marketplace.auth.controller;
+package com.marketplace.auth.exception;
 
 import static org.junit.jupiter.api.Assertions.*;
 

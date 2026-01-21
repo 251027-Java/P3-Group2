@@ -50,6 +50,8 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
         loggerLevel: basic
+        decode404: true
+        decode400: true
 
 # Logging Configuration
 logging:

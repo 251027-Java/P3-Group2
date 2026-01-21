@@ -30,5 +30,8 @@ public class AuthUserResponse {
                 .passwordHash(user.getPasswordHash())
                 .role(user.getRole())
                 .build();
+    
     }
+
+
 }

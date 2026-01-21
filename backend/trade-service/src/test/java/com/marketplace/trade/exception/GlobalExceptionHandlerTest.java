@@ -6,6 +6,7 @@ package com.marketplace.trade.exception;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.marketplace.trade.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,7 @@ class GlobalExceptionHandlerTest {
     void handleResourceNotFoundException_Returns404() {
         ResourceNotFoundException ex = new ResourceNotFoundException("Trade not found: 123");
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleResourceNotFoundException(ex);
+        ResponseEntity<ErrorResponse> response = handler.handleResourceNotFoundException(ex);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -46,7 +47,7 @@ class GlobalExceptionHandlerTest {
     void handleTradeException_Returns400() {
         TradeException ex = new TradeException("Cannot create trade for your own listing");
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleTradeException(ex);
+        ResponseEntity<ErrorResponse> response = handler.handleTradeException(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -62,7 +63,7 @@ class GlobalExceptionHandlerTest {
         MissingServletRequestParameterException ex =
                 new MissingServletRequestParameterException("listingOwnerId", "Long");
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleMissingRequestParam(ex);
+        ResponseEntity<ErrorResponse> response = handler.handleMissingRequestParam(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -76,7 +77,7 @@ class GlobalExceptionHandlerTest {
         MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
         when(ex.getCause()).thenReturn(new IllegalArgumentException("invalid value"));
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleTypeMismatch(ex);
+        ResponseEntity<ErrorResponse> response = handler.handleTypeMismatch(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -90,7 +91,7 @@ class GlobalExceptionHandlerTest {
         Exception ex = new RuntimeException("Unexpected error");
         HttpServletRequest request = mock(HttpServletRequest.class);
 
-        ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handler.handleGenericException(ex, request);
+        ResponseEntity<ErrorResponse> response = handler.handleGenericException(ex, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -101,8 +102,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("ErrorResponse should allow setting status")
     void errorResponse_SetStatus() {
-        GlobalExceptionHandler.ErrorResponse errorResponse =
-                new GlobalExceptionHandler.ErrorResponse(400, "test", null);
+        ErrorResponse errorResponse = new ErrorResponse(400, "test", null);
         errorResponse.setStatus(500);
         assertEquals(500, errorResponse.getStatus());
     }
@@ -110,8 +110,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("ErrorResponse should allow setting message")
     void errorResponse_SetMessage() {
-        GlobalExceptionHandler.ErrorResponse errorResponse =
-                new GlobalExceptionHandler.ErrorResponse(400, "test", null);
+        ErrorResponse errorResponse = new ErrorResponse(400, "test", null);
         errorResponse.setMessage("new message");
         assertEquals("new message", errorResponse.getMessage());
     }
@@ -119,8 +118,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("ErrorResponse should allow setting timestamp")
     void errorResponse_SetTimestamp() {
-        GlobalExceptionHandler.ErrorResponse errorResponse =
-                new GlobalExceptionHandler.ErrorResponse(400, "test", null);
+        ErrorResponse errorResponse = new ErrorResponse(400, "test", null);
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         errorResponse.setTimestamp(now);
         assertEquals(now, errorResponse.getTimestamp());

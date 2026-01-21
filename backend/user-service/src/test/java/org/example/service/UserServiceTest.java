@@ -318,12 +318,12 @@ class UserServiceTest {
             when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
             // Act
-            AuthUserResponse result = userService.getUserForAuth("test@example.com");
+            Optional<AuthUserResponse> result = userService.getUserForAuth("test@example.com");
 
             // Assert
-            assertNotNull(result);
-            assertEquals("test@example.com", result.getEmail());
-            assertEquals("hashedpassword", result.getPasswordHash());
+            assertTrue(result.isPresent());
+            assertEquals("test@example.com", result.get().getEmail());
+            assertEquals("hashedpassword", result.get().getPasswordHash());
         }
 
         @Test

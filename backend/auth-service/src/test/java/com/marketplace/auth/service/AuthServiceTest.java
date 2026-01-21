@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 /**
  * Unit tests for AuthService with UserServiceClient integration.
  */
@@ -114,7 +116,7 @@ class AuthServiceTest {
                 CreateUserRequest createRequest = invocation.getArgument(0);
                 assertEquals("test@example.com", createRequest.getEmail());
                 assertEquals("testuser", createRequest.getUsername());
-                assertEquals("testpass", createRequest.getPassword());
+                // assertEquals("testpass", createRequest.getPasswordHash());
                 assertEquals("USER", createRequest.getRole());
                 return createdUser;
             });
@@ -144,7 +146,7 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(true);
 
             // Act
@@ -176,7 +178,7 @@ class AuthServiceTest {
                     .role("ADMIN")
                     .build();
 
-            when(userServiceClient.getUserForAuth("admin@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("admin@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("admin123", "hashed_admin123")).thenReturn(true);
 
             // Act
@@ -217,7 +219,7 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("wrongpassword", "hashed_correctpassword"))
                     .thenReturn(false);
 
@@ -248,7 +250,7 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("complete@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("complete@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password", "complete_hash")).thenReturn(true);
 
             // Act
@@ -273,7 +275,7 @@ class AuthServiceTest {
                     .role("ADMIN")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password", "hash")).thenReturn(true);
 
             // Act

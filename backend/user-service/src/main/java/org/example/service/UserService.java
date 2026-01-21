@@ -1,12 +1,15 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
+
+import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
 import org.example.model.User;
 import org.example.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +20,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
     public Optional<UserResponse> createUser(CreateUserRequest request) {
@@ -35,7 +37,8 @@ public class UserService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
-        user.setPasswordHash(hashPassword(request.getPassword()));
+        user.setPasswordHash(request.getPasswordHash());
+        log.debug("Password hash created: {}", user.getPasswordHash());
         user.setLatitude(request.getLatitude());
         user.setLongitude(request.getLongitude());
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
@@ -115,14 +118,10 @@ public class UserService {
     /**
      * Internal method for auth-service to get user with password hash.
      */
-    public org.example.dto.AuthUserResponse getUserForAuth(String email) {
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
-        return org.example.dto.AuthUserResponse.fromUser(user);
+    public Optional<AuthUserResponse> getUserForAuth(String email) {
+        return userRepository.findByEmail(email)
+                .map(AuthUserResponse::fromUser);
     }
 
-    private String hashPassword(String password) {
-        return passwordEncoder.encode(password);
-    }
+    
 }
