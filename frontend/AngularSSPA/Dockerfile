@@ -1,27 +1,55 @@
-# This file was created by Claude Sonnet 4.5
+# syntax=docker/dockerfile:1
 
-# Multi-stage Dockerfile for Angular Cards MFE
-# Stage 1: Build
-FROM node:18-alpine AS builder
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
 
-WORKDIR /app
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-# Copy package files
-COPY package.json ./
+################################################################################
+# Use node image for base image for all stages.
+FROM node:lts-alpine as base
 
-# Install dependencies
-RUN npm install
-# Copy source code
-COPY . .
+# Set working directory for all build stages.
+WORKDIR /usr/src/app
 
-# Build the application for production
+
+################################################################################
+# Create a stage for installing production dependecies.
+FROM base as deps
+
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.npm to speed up subsequent builds.
+# Leverage bind mounts to package.json and package-lock.json to avoid having to copy them
+# into this layer.
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
+
+################################################################################
+# Create a stage for building the application.
+FROM deps as build
+
+# Download additional development dependencies before building, as some projects require
+# "devDependencies" to be installed to build. If you don't need this, remove this step.
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci
+
+# Copy the rest of the source files into the image.
+COPY src src
+COPY public public
+COPY *.json .
+COPY *.js .
+
+# Run the build script.
 RUN npm run build
 
-# Stage 2: Production
-FROM nginx:alpine
+FROM nginx:alpine AS final
 
-# Copy built assets from builder stage
-COPY --from=builder /app/dist/angular-sspa /usr/share/nginx/html
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
