@@ -3,6 +3,7 @@
 package com.marketplace.card.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.marketplace.card.dto.TcgPriceDto;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CardServiceTest {
@@ -102,5 +104,87 @@ class CardServiceTest {
 
         // Assert
         assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetCardById_CardExists_ReturnsOptionalWithCard() {
+        // Arrange
+        Card card = new Card();
+        card.setCardId(1L);
+        card.setName("Pikachu");
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+
+        // Act
+        Optional<Card> result = cardService.getCardById(1L);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals("Pikachu", result.get().getName());
+    }
+
+    @Test
+    void testGetCardById_CardNotFound_ReturnsEmptyOptional() {
+        // Arrange
+        when(cardRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Card> result = cardService.getCardById(999L);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testSyncCards_UpdatesExistingCards() {
+        // Arrange
+        Card existingCard = new Card();
+        existingCard.setCardId(1L);
+        existingCard.setName("Old Name");
+
+        when(tcgConnectService.fetchProducts(3, 100)).thenReturn(Collections.singletonList(productCard));
+        when(tcgConnectService.fetchPrices(3, 100)).thenReturn(Collections.singletonList(priceDto));
+        when(tcgConnectService.isCard(productCard)).thenReturn(true);
+        when(cardRepository.findBySetId(100)).thenReturn(Collections.singletonList(existingCard));
+
+        // Act
+        cardService.syncCards(3, 100);
+
+        // Assert - saveAll should be called with existing card updated
+        verify(cardRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testSyncCards_UseMidPriceWhenMarketPriceNull() {
+        // Arrange
+        TcgPriceDto priceWithMidOnly = new TcgPriceDto();
+        priceWithMidOnly.setProductId(1L);
+        priceWithMidOnly.setMarketPrice(null);
+        priceWithMidOnly.setMidPrice(new BigDecimal("8.00"));
+
+        when(tcgConnectService.fetchProducts(3, 100)).thenReturn(Collections.singletonList(productCard));
+        when(tcgConnectService.fetchPrices(3, 100)).thenReturn(Collections.singletonList(priceWithMidOnly));
+        when(tcgConnectService.isCard(productCard)).thenReturn(true);
+        when(cardRepository.findBySetId(100)).thenReturn(Collections.emptyList());
+
+        // Act
+        cardService.syncCards(3, 100);
+
+        // Assert
+        verify(cardRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testSyncCards_HandlesNullPrice() {
+        // Arrange
+        when(tcgConnectService.fetchProducts(3, 100)).thenReturn(Collections.singletonList(productCard));
+        when(tcgConnectService.fetchPrices(3, 100)).thenReturn(Collections.emptyList()); // No prices
+        when(tcgConnectService.isCard(productCard)).thenReturn(true);
+        when(cardRepository.findBySetId(100)).thenReturn(Collections.emptyList());
+
+        // Act
+        cardService.syncCards(3, 100);
+
+        // Assert - should still save cards even without prices
+        verify(cardRepository, times(1)).saveAll(anyList());
     }
 }

@@ -24,10 +24,10 @@ public class OpenApiConfig {
     public OpenAPI listingServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Listing Service API")
-                        .description("API documentation for the Card Marketplace Listing Service. "
-                                + "This service manages card trade listings, allowing users to create, "
-                                + "update, and manage their card listings for trading.")
+                        .title("Trade Service API")
+                        .description("API documentation for the Card Marketplace Trade Service. "
+                                + "This service manages trades, allowing users to create, "
+                                + "update, and manage their trades.")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Marketplace Team")
