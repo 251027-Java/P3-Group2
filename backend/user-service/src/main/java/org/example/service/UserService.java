@@ -1,8 +1,8 @@
-package org.example.Service;
+package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.Model.User;
-import org.example.Repository.UserRepository;
+import org.example.model.User;
+import org.example.repository.UserRepository;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
@@ -13,16 +13,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.example.model.Role;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^.+@.+\\..+$");
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
     public Optional<UserResponse> createUser(CreateUserRequest request) {
+        // Validate email format
+        if (!isValidEmail(request.getEmail())) {
+            return Optional.empty();
+        }
+
         // Validate unique constraints
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -38,7 +46,7 @@ public class UserService {
         user.setPasswordHash(hashPassword(request.getPassword()));
         user.setLatitude(request.getLatitude());
         user.setLongitude(request.getLongitude());
-        user.setRole(request.getRole() != null ? request.getRole() : "USER");
+        user.setRole(request.getRole() != null ? Role.valueOf(request.getRole().toUpperCase()) : Role.USER);
 
         User savedUser = userRepository.save(user);
 
@@ -114,5 +122,9 @@ public class UserService {
 
     private String hashPassword(String password) {
         return passwordEncoder.encode(password);
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
 }

@@ -1,4 +1,4 @@
-package org.example.Model;
+package org.example.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "appUser",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"username"}), @UniqueConstraint(columnNames = {"email"})})
+@Table(name = "appUser", uniqueConstraints = { @UniqueConstraint(columnNames = { "username" }),
+        @UniqueConstraint(columnNames = { "email" }) })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +34,7 @@ public class User {
     private String passwordHash;
 
     @Column(nullable = false, length = 20)
-    private String role = "USER"; // USER or ADMIN
+    private Role role = Role.USER;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

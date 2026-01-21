@@ -3,7 +3,7 @@ package org.example.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.Model.User;
+import org.example.model.User;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +26,7 @@ public class UserResponse {
         response.setUsername(user.getUsername());
         response.setLatitude(user.getLatitude());
         response.setLongitude(user.getLongitude());
-        response.setRole(user.getRole());
+        response.setRole(user.getRole().name());
         response.setCreatedAt(user.getCreatedAt());
         return response;
     }

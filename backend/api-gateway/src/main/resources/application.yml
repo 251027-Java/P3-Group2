@@ -26,7 +26,11 @@ spring:
               predicates:
                 - Path=/api/listings/**
 
-            
+            # Route: /user/** -> user-service
+            - id: user-route
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**
 
            
 
