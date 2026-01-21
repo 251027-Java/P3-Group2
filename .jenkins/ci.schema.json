@@ -100,6 +100,10 @@
                     "type": "string",
                     "description": "The container registry repository where the built image will be pushed."
                 },
+                "context": {
+                    "type": "string",
+                    "description": "Optional build context directory to use for the docker build command."
+                },
                 "platform": {
                     "type": "object",
                     "description": "Platform configuration for single or multi-architecture builds.",
@@ -132,8 +136,7 @@
                 "tagSeries",
                 "repository",
                 "platform"
-            ],
-            "additionalProperties": false
+            ]
         }
     },
     "required": [
