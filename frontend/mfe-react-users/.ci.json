@@ -1,0 +1,28 @@
+{
+    "$schema": "../../.jenkins/ci.schema.json",
+    "dependencies": {
+        "enabled": true,
+        "command": "npm ci"
+    },
+    "lint": {
+        "enabled": true,
+        "command": "npm run lint"
+    },
+    "build": {
+        "enabled": true,
+        "command": "npm run build"
+    },
+    "image": {
+        "enabled": true,
+        "tagSeries": "fe-react-users",
+        "repository": "minidomo/gemdeck",
+        "context": "..",
+        "platform": {
+            "single": false,
+            "multi": [
+                "linux/amd64",
+                "linux/arm64"
+            ]
+        }
+    }
+}

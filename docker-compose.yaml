@@ -169,3 +169,17 @@ services:
         condition: service_started
       kafka:
         condition: service_started
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.1
+    container_name: filebeat
+    user: root
+    command: filebeat -e -strict.perms=false
+    volumes:
+      # Docker logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      # Filebeat config
+      - ./backend/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    restart: unless-stopped
