@@ -14,7 +14,7 @@ import lombok.ToString;
  * Entity representing cards offered in a trade
  */
 @Entity
-@Table(name = "TradeOfferedCards")
+@Table(name = "TradeOfferedCards", schema = "trade_management")
 @Getter
 @Setter
 @NoArgsConstructor
