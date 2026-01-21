@@ -10,6 +10,9 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: password
+  sql:
+    init:
+      mode: always
   jpa:
     # Updated for Postgres
     database-platform: org.hibernate.dialect.PostgreSQLDialect

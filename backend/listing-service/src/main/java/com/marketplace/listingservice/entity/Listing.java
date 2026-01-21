@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * Users can create listings to trade their cards with other users.
  */
 @Entity
-@Table(name = "listings")
+@Table(name = "listings", schema = "listing_management")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

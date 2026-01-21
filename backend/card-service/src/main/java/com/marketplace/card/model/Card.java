@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  * Stores essential card information including name, image, sets, and market price.
  */
 @Entity
-@Table(name = "cards")
+@Table(name = "cards", schema = "card_management")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
