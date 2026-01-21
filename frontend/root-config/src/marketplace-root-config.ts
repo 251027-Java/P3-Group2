@@ -7,6 +7,7 @@
  * Reviewed and modified by Development Team
  */
 
+import "regenerator-runtime/runtime";
 import { registerApplication, start } from "single-spa";
 import {
   constructApplications,
@@ -30,18 +31,19 @@ const routes = constructRoutes(microfrontendLayout);
 const applications = constructApplications({
   routes,
   loadApp({ name }) {
-    console.log(`[Root Config] Loading application: ${name}`);
-    return import(/* webpackIgnore: true */ name).catch((error) => {
-      console.error(`[Root Config] Failed to load ${name}:`, error);
-      errorBoundary.handleError({
-        message: `Failed to load micro-frontend: ${name}`,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-        appName: name,
-        url: window.location.href,
-      });
-      throw error;
-    });
+    return System.import(name);
+    // console.log(`[Root Config] Loading application: ${name}`);
+    // return import(/* webpackIgnore: true */ name).catch((error) => {
+    //   console.error(`[Root Config] Failed to load ${name}:`, error);
+    //   errorBoundary.handleError({
+    //     message: `Failed to load micro-frontend: ${name}`,
+    //     stack: error.stack,
+    //     timestamp: new Date().toISOString(),
+    //     appName: name,
+    //     url: window.location.href,
+    //   });
+    //   throw error;
+    // });
   },
 });
 

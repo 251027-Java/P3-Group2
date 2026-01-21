@@ -2,6 +2,7 @@
   "extends": "ts-config-single-spa",
   "files": ["src/marketplace-root-config.ts"],
   "compilerOptions": {
+    "declaration": true,
     "declarationDir": "dist"
   },
   "include": ["src/**/*"],

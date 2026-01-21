@@ -7,13 +7,16 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY ./mfe-react-users/package*.json ./
+
+# Copy shared-utils (referenced as file:../shared-utils in package.json)
+COPY ./shared-utils ../shared-utils
 
 # Install dependencies
-RUN npm ci && npm cache clean --force
+RUN npm ci
 
 # Copy source code
-COPY . .
+COPY ./mfe-react-users .
 
 # Build the application for production
 RUN npm run build
@@ -25,7 +28,7 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./mfe-react-users/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 4202
