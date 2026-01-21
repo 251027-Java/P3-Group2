@@ -20,11 +20,19 @@ def image(Map params = [:]) {
 
     try {
         docker.withRegistry('', credId) {
+            def context = settings.image.context ?: "."
+            context = "${path}/${context}"
+
+            def dockerfile = settings.image.dockerfile ?: "./Dockerfile"
+            dockerfile = "${path}/${dockerfile}"
+
             def flags = [
                 "--repo \"${settings.image.repository}\"",
                 "--series \"${settings.image.tagSeries}\"",
                 "--branch \"${branch}\"",
                 "--sha \"${gitUtil.shortSha()}\"",
+                "--context \"${context}\"",
+                "--dockerfile \"${dockerfile}\"",
             ]
 
             if (!settings.image.platform.single) {
@@ -37,9 +45,7 @@ def image(Map params = [:]) {
             }
 
             def imageScript = util.loadScript name: 'docker-image.sh'
-            dir(path) {
-                sh "${imageScript} ${flags.join(' ')}"
-            }
+            sh "${imageScript} ${flags.join(' ')}"
         }
 
         checksUtil.success name: name
