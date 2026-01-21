@@ -2,25 +2,21 @@
 // Reviewed and modified by Liam Ruiz
 package com.marketplace.auth.service;
 
+import com.marketplace.auth.client.UserServiceClient;
+import com.marketplace.auth.client.dto.AuthUserResponse;
+import com.marketplace.auth.client.dto.CreateUserRequest;
+import com.marketplace.auth.client.dto.UserResponse;
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
-import com.marketplace.auth.model.AppUser;
-import com.marketplace.auth.model.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * Service for handling user authentication.
- * Currently uses an in-memory mock user store. In production, this will
- * delegate to the AppUser-service via REST or messaging.
+ * Uses Feign client to communicate with user-service for user management.
  */
 @Service
 public class AuthService {
@@ -29,76 +25,49 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final UserServiceClient userServiceClient;
 
-    // TODO: Replace with AppUser-service feign client
-    private final Map<String, AppUser> usersByEmail = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
-
-    public AuthService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserServiceClient userServiceClient) {
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
-
-        // Seed sample users
-        seedUsers();
-    }
-
-    private void seedUsers() {
-        // Admin user
-        AppUser adminUser = AppUser.builder()
-                .id(idGenerator.getAndIncrement())
-                .email("admin@example.com")
-                .username("admin")
-                .passwordHash(passwordEncoder.encode("admin123"))
-                .role(Role.ADMIN)
-                .build();
-        usersByEmail.put(adminUser.getEmail(), adminUser);
-        log.info("Seeded admin user: {} (role: {})", adminUser.getEmail(), adminUser.getRole());
-
-        // Regular user
-        AppUser regularUser = AppUser.builder()
-                .id(idGenerator.getAndIncrement())
-                .email("user@example.com")
-                .username("user")
-                .passwordHash(passwordEncoder.encode("user123"))
-                .role(Role.USER)
-                .build();
-        usersByEmail.put(regularUser.getEmail(), regularUser);
-        log.info("Seeded regular user: {} (role: {})", regularUser.getEmail(), regularUser.getRole());
+        this.userServiceClient = userServiceClient;
     }
 
     /**
-     * Registers a new user.
+     * Registers a new user via user-service.
      *
      * @param request The registration request.
      * @return AuthResponse containing the JWT token.
-     * @throws IllegalArgumentException if email is already registered.
+     * @throws IllegalArgumentException if registration fails.
      */
     public AuthResponse register(RegisterRequest request) {
         log.info("Registering user: {}", request.getEmail());
 
-        if (usersByEmail.containsKey(request.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
-        }
-
-        AppUser user = AppUser.builder()
-                .id(idGenerator.getAndIncrement())
+        // Create user via user-service
+        CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER) // New users default to USER role
+                .password(request.getPassword())
+                .role("USER")
                 .build();
 
-        usersByEmail.put(user.getEmail(), user);
-        log.info("User registered successfully: {}", user.getUsername());
+        UserResponse createdUser = userServiceClient.createUser(createUserRequest);
 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        if (createdUser == null) {
+            log.error("Failed to create user: {}", request.getEmail());
+            throw new IllegalArgumentException("Failed to create user. Email may already be registered.");
+        }
+
+        log.info("User registered successfully: {}", createdUser.getUsername());
+
+        String token = jwtUtil.generateToken(createdUser.getUsername(), createdUser.getRole());
 
         return AuthResponse.builder()
                 .token(token)
                 .type("Bearer")
                 .expiresIn(jwtUtil.getExpiration())
-                .username(user.getUsername())
-                .role(user.getRole().name())
+                .username(createdUser.getUsername())
+                .role(createdUser.getRole())
                 .build();
     }
 
@@ -112,23 +81,28 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         log.info("Login attempt for: {}", request.getEmail());
 
-        Optional<AppUser> userOpt = Optional.ofNullable(usersByEmail.get(request.getEmail()));
+        // Get user from user-service (including password hash)
+        AuthUserResponse user = userServiceClient.getUserForAuth(request.getEmail());
 
-        AppUser user = userOpt.orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+        if (user == null) {
+            log.warn("User not found or service unavailable: {}", request.getEmail());
+            throw new IllegalArgumentException("Invalid email or password");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            log.warn("Invalid password for user: {}", request.getEmail());
             throw new IllegalArgumentException("Invalid email or password");
         }
 
         log.info("User authenticated: {} (role: {})", user.getUsername(), user.getRole());
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
         return AuthResponse.builder()
                 .token(token)
                 .type("Bearer")
                 .expiresIn(jwtUtil.getExpiration())
                 .username(user.getUsername())
-                .role(user.getRole().name())
+                .role(user.getRole())
                 .build();
     }
 }
