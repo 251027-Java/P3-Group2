@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.marketplace.trade.client.ListingServiceClient;
 import com.marketplace.trade.client.UserServiceClient;
+import com.marketplace.trade.client.ListingServiceClient.ListingStatus;
 import com.marketplace.trade.dto.TradeRequestDTO;
 import com.marketplace.trade.dto.TradeResponseDTO;
 import com.marketplace.trade.exception.ResourceNotFoundException;
@@ -70,10 +71,10 @@ class TradeServiceTest {
         listingResponse.setListingId(1L);
         listingResponse.setOwnerUserId(1L);
         listingResponse.setCardId(5L);
-        listingResponse.setListingStatus("active");
+        listingResponse.setListingStatus(ListingStatus.ACTIVE);
 
         userResponse = new UserServiceClient.UserResponse();
-        userResponse.setAppUserId(2L);
+        userResponse.setUserId(2L);
         userResponse.setUsername("testuser");
         userResponse.setEmail("test@example.com");
 
@@ -130,7 +131,7 @@ class TradeServiceTest {
 
     @Test
     void testCreateTradeRequest_InactiveListing() {
-        listingResponse.setListingStatus("completed");
+        listingResponse.setListingStatus(ListingStatus.COMPLETED);
         when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
 
         assertThrows(TradeException.class, () -> {
@@ -631,36 +632,8 @@ class TradeServiceTest {
     }
 
     @Test
-    void testCreateTradeRequest_ListingStatusUppercase() {
-        listingResponse.setListingStatus("ACTIVE");
-        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
-        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
-        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
-        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
-        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
-
-        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
-
-        assertNotNull(result);
-    }
-
-    @Test
-    void testCreateTradeRequest_ListingStatusMixedCase() {
-        listingResponse.setListingStatus("Active");
-        when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
-        when(userServiceClient.getUser(2L)).thenReturn(userResponse);
-        when(tradeRepository.findPendingTradeByListingAndUser(1L, 2L)).thenReturn(Optional.empty());
-        when(tradeRepository.save(any(Trade.class))).thenReturn(trade);
-        when(tradeOfferedCardRepository.saveAll(anyList())).thenReturn(Arrays.asList());
-
-        TradeResponseDTO result = tradeService.createTradeRequest(tradeRequestDTO);
-
-        assertNotNull(result);
-    }
-
-    @Test
     void testCreateTradeRequest_InactiveListingCancelled() {
-        listingResponse.setListingStatus("cancelled");
+        listingResponse.setListingStatus(ListingStatus.CANCELLED);
         when(listingServiceClient.getListing(1L)).thenReturn(listingResponse);
 
         assertThrows(TradeException.class, () -> {

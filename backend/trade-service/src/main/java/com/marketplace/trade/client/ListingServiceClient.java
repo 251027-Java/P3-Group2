@@ -2,10 +2,16 @@
 // Reviewed and modified by Matt Selle
 package com.marketplace.trade.client;
 
+import java.time.LocalDateTime;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Feign client for communicating with listing-service
@@ -17,62 +23,43 @@ public interface ListingServiceClient {
     ListingResponse getListing(@PathVariable("listingId") Long listingId);
 
     @PutMapping("/api/listings/{listingId}/complete")
-    void updateListingStatusToComplete(@PathVariable("listingId") Long listingId);
+    ListingResponse updateListingStatusToComplete(@PathVariable("listingId") Long listingId);
 
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     class ListingResponse {
         private Long listingId;
         private Long ownerUserId;
         private Long cardId;
-        private String listingStatus;
+        private Integer conditionRating;
+        private ListingStatus listingStatus;
+        private LocalDateTime createdAt;
+    }
 
-        public Long getListingId() {
-            return listingId;
+    public enum ListingStatus {
+        ACTIVE("active"),
+        COMPLETED("completed"),
+        CANCELLED("cancelled");
+    
+        private final String value;
+    
+        ListingStatus(String value) {
+            this.value = value;
         }
-
-        public void setListingId(Long listingId) {
-            this.listingId = listingId;
+    
+        public String getValue() {
+            return value;
         }
-
-        public Long getOwnerUserId() {
-            return ownerUserId;
-        }
-
-        public void setOwnerUserId(Long ownerUserId) {
-            this.ownerUserId = ownerUserId;
-        }
-
-        public Long getCardId() {
-            return cardId;
-        }
-
-        public void setCardId(Long cardId) {
-            this.cardId = cardId;
-        }
-
-        public String getListingStatus() {
-            return listingStatus;
-        }
-
-        public void setListingStatus(String listingStatus) {
-            this.listingStatus = listingStatus;
+    
+        public static ListingStatus fromValue(String value) {
+            for (ListingStatus status : ListingStatus.values()) {
+                if (status.value.equalsIgnoreCase(value)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown listing status: " + value);
         }
     }
 
-    class ListingStatusUpdate {
-        private String status;
-
-        public ListingStatusUpdate() {}
-
-        public ListingStatusUpdate(String status) {
-            this.status = status;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-    }
 }

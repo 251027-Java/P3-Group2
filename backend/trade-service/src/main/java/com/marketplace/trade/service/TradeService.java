@@ -57,7 +57,7 @@ public class TradeService {
             throw new ResourceNotFoundException("Listing not found: " + request.getListingId());
         }
 
-        if (!"active".equalsIgnoreCase(listing.getListingStatus())) {
+        if (!"active".equalsIgnoreCase(listing.getListingStatus().getValue())) {
             throw new TradeException("Cannot create trade request for inactive listing");
         }
 
