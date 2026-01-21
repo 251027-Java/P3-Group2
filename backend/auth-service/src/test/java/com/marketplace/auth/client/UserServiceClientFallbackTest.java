@@ -35,10 +35,10 @@ class UserServiceClientFallbackTest {
     @DisplayName("getUserForAuth should handle any email gracefully")
     void getUserForAuth_AnyEmail_ReturnsNull() {
         // Act & Assert
-        assertNull(fallback.getUserForAuth("user1@example.com"));
-        assertNull(fallback.getUserForAuth("admin@test.com"));
-        assertNull(fallback.getUserForAuth(""));
-        assertNull(fallback.getUserForAuth(null));
+        assertTrue(fallback.getUserForAuth("").isEmpty());
+        assertTrue(fallback.getUserForAuth("user1@example.com").isEmpty());
+        assertTrue(fallback.getUserForAuth("admin@test.com").isEmpty());
+        assertTrue(fallback.getUserForAuth(null).isEmpty());
     }
 
     @Test

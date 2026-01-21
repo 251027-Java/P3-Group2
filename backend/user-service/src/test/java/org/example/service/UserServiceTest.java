@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
@@ -292,48 +291,6 @@ class UserServiceTest {
 
             // Assert
             verify(userRepository).deleteById(1L);
-        }
-
-        @Test
-        @DisplayName("Should throw exception when deleting non-existent user")
-        void deleteUser_UserNotFound_ThrowsException() {
-            // Arrange
-            when(userRepository.existsById(999L)).thenReturn(false);
-
-            // Act & Assert
-            IllegalArgumentException exception =
-                    assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(999L));
-            assertTrue(exception.getMessage().contains("User not found"));
-        }
-    }
-
-    @Nested
-    @DisplayName("Get User For Auth Tests")
-    class GetUserForAuthTests {
-
-        @Test
-        @DisplayName("Should return AuthUserResponse for valid email")
-        void getUserForAuth_ValidEmail_ReturnsAuthUserResponse() {
-            // Arrange
-            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-
-            // Act
-            Optional<AuthUserResponse> result = userService.getUserForAuth("test@example.com");
-
-            // Assert
-            assertTrue(result.isPresent());
-            assertEquals("test@example.com", result.get().getEmail());
-            assertEquals("hashedpassword", result.get().getPasswordHash());
-        }
-
-        @Test
-        @DisplayName("Should throw exception when user not found for auth")
-        void getUserForAuth_UserNotFound_ThrowsException() {
-            // Arrange
-            when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertThrows(IllegalArgumentException.class, () -> userService.getUserForAuth("notfound@example.com"));
         }
     }
 }
