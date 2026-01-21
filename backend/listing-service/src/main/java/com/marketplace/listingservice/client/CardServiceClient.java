@@ -4,6 +4,9 @@
 package com.marketplace.listingservice.client;
 
 import com.marketplace.listingservice.client.dto.CardResponse;
+
+import java.util.Optional;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,5 +28,5 @@ public interface CardServiceClient {
      * @return the card details
      */
     @GetMapping("/api/cards/{cardId}")
-    CardResponse getCardById(@PathVariable("cardId") Long cardId);
+    Optional<CardResponse> getCardById(@PathVariable("cardId") Long cardId);
 }

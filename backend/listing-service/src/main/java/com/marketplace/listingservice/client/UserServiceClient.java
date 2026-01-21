@@ -4,6 +4,9 @@
 package com.marketplace.listingservice.client;
 
 import com.marketplace.listingservice.client.dto.UserResponse;
+
+import java.util.Optional;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,14 +25,8 @@ public interface UserServiceClient {
      * @return the user details
      */
     @GetMapping("/api/users/{userId}")
-    UserResponse getUserById(@PathVariable("userId") Long userId);
+    Optional<UserResponse> getUserById(@PathVariable("userId") Long userId);
 
-    /**
-     * Checks if a user exists by user ID.
-     *
-     * @param userId the user ID
-     * @return true if the user exists, false otherwise
-     */
-    @GetMapping("/api/users/{userId}/exists")
-    Boolean userExists(@PathVariable("userId") Long userId);
+
+  
 }

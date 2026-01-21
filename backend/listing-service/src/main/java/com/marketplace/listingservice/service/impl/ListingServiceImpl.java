@@ -6,6 +6,7 @@ package com.marketplace.listingservice.service.impl;
 import com.marketplace.listingservice.client.CardServiceClient;
 import com.marketplace.listingservice.client.UserServiceClient;
 import com.marketplace.listingservice.client.dto.CardResponse;
+import com.marketplace.listingservice.client.dto.UserResponse;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
 import com.marketplace.listingservice.dto.UpdateListingRequest;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -47,10 +49,16 @@ public class ListingServiceImpl implements ListingService {
         log.info("Creating new listing for card ID: {} by user ID: {}", request.getCardId(), request.getOwnerUserId());
 
         // Verify that the user exists via user service
-        validateUserExists(request.getOwnerUserId());
+        Optional<UserResponse> userResponse = userServiceClient.getUserById(request.getOwnerUserId());
+        if (userResponse.isEmpty()) {
+            throw new UserNotFoundException(request.getOwnerUserId());
+        }
 
         // Verify that the card exists via card service
-        validateCardExists(request.getCardId());
+        Optional<CardResponse> cardResponse = cardServiceClient.getCardById(request.getCardId());
+        if (cardResponse.isEmpty()) {
+            throw new CardNotFoundException(request.getCardId());
+        }
 
         Listing listing = Listing.builder()
                 .ownerUserId(request.getOwnerUserId())
@@ -222,41 +230,41 @@ public class ListingServiceImpl implements ListingService {
      * @param userId the user ID to validate
      * @throws UserNotFoundException if the user does not exist
      */
-    private void validateUserExists(Long userId) {
-        log.debug("Validating user exists with ID: {}", userId);
-        Boolean exists;
-        try {
-            exists = userServiceClient.userExists(userId);
-        } catch (FeignException e) {
-            log.warn("User service unavailable. Cannot verify user existence for user ID: {}", userId);
-            throw new UserNotFoundException(userId);
-        }
-        if (exists == null || !exists) {
-            log.warn("User validation failed - user not found with ID: {}", userId);
-            throw new UserNotFoundException(userId);
-        }
-        log.debug("User validated successfully with ID: {}", userId);
-    }
+    // private void validateUserExists(Long userId) {
+    //     log.debug("Validating user exists with ID: {}", userId);
+    //     Boolean exists;
+    //     try {
+    //         exists = userServiceClient.userExists(userId);
+    //     } catch (FeignException e) {
+    //         log.warn("User service unavailable. Cannot verify user existence for user ID: {}", userId);
+    //         throw new UserNotFoundException(userId);
+    //     }
+    //     if (exists == null || !exists) {
+    //         log.warn("User validation failed - user not found with ID: {}", userId);
+    //         throw new UserNotFoundException(userId);
+    //     }
+    //     log.debug("User validated successfully with ID: {}", userId);
+    // }
 
-    /**
-     * Validates that a card exists by calling the card service.
-     *
-     * @param cardId the card ID to validate
-     * @throws CardNotFoundException if the card does not exist
-     */
-    private void validateCardExists(Long cardId) {
-        log.debug("Validating card exists with ID: {}", cardId);
-        CardResponse cardResponse;
-        try {
-            cardResponse = cardServiceClient.getCardById(cardId);
-        } catch (FeignException e) {
-            log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
-            throw new CardNotFoundException(cardId);
-        }
-        if (cardResponse == null || cardResponse.getCardId() == null) {
-            log.warn("Card validation failed - card not found with ID: {}", cardId);
-            throw new CardNotFoundException(cardId);
-        }
-        log.debug("Card validated successfully with ID: {}", cardId);
-    }
+    // /**
+    //  * Validates that a card exists by calling the card service.
+    //  *
+    //  * @param cardId the card ID to validate
+    //  * @throws CardNotFoundException if the card does not exist
+    //  */
+    // private void validateCardExists(Long cardId) {
+    //     log.debug("Validating card exists with ID: {}", cardId);
+    //     CardResponse cardResponse;
+    //     try {
+    //         cardResponse = cardServiceClient.getCardById(cardId);
+    //     } catch (FeignException e) {
+    //         log.warn("Card service unavailable. Cannot verify card existence for card ID: {}", cardId);
+    //         throw new CardNotFoundException(cardId);
+    //     }
+    //     if (cardResponse == null || cardResponse.getCardId() == null) {
+    //         log.warn("Card validation failed - card not found with ID: {}", cardId);
+    //         throw new CardNotFoundException(cardId);
+    //     }
+    //     log.debug("Card validated successfully with ID: {}", cardId);
+    // }
 }
