@@ -30,8 +30,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Missing request parameter: " + ex.getParameterName(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
@@ -39,10 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         log.warn("Type mismatch for parameter: {}", ex.getCause());
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid value for parameter: " + ex.getCause(),
-                LocalDateTime.now()
-        );
+                HttpStatus.BAD_REQUEST.value(), "Invalid value for parameter: " + ex.getCause(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
