@@ -143,8 +143,7 @@ public class TradeService {
 
         // Update listing status to completed
         try {
-            listingServiceClient.updateListingStatusToComplete(
-                    trade.getListingId());
+            listingServiceClient.updateListingStatusToComplete(trade.getListingId());
         } catch (Exception e) {
             log.error("Failed to update listing status", e);
         }
