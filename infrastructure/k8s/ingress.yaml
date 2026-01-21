@@ -6,7 +6,7 @@ spec:
   tls:
     - hosts:
         - ec2-16-58-75-153.us-east-2.compute.amazonaws.com
-      secretName: self-signed-tls
+      secretName: tls
   rules:
     - http:
         paths:
@@ -21,20 +21,20 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: root-config
                 port:
-                  number: 80
+                  number: 9000
           - path: /react
             pathType: Prefix
             backend:
               service:
-                name: frontend # Update to React Frontend Service
+                name: mfe-react-users # Update to React Frontend Service
                 port:
-                  number: 80
+                  number: 4202
           - path: /angular
             pathType: Prefix
             backend:
               service:
-                name: frontend # Update to Angular Frontend Service
+                name: angular-sspa # Update to Angular Frontend Service
                 port:
-                  number: 80
+                  number: 4201
