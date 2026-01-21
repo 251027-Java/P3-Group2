@@ -102,7 +102,11 @@
                 },
                 "context": {
                     "type": "string",
-                    "description": "Optional build context directory to use for the docker build command."
+                    "description": "Optional build context directory, relative to the current working directory, used for the docker build command."
+                },
+                "dockerfile": {
+                    "type": "string",
+                    "description": "Optional path to the Dockerfile, relative to the current working directory, used for the docker build command."
                 },
                 "platform": {
                     "type": "object",
