@@ -37,7 +37,7 @@ public class AuthService {
     public AuthService(JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
-        
+
         // Seed sample users
         seedUsers();
     }
@@ -114,8 +114,7 @@ public class AuthService {
 
         Optional<AppUser> userOpt = Optional.ofNullable(usersByEmail.get(request.getEmail()));
 
-        AppUser user = userOpt.orElseThrow(() -> 
-                new IllegalArgumentException("Invalid email or password"));
+        AppUser user = userOpt.orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password");
@@ -123,9 +122,6 @@ public class AuthService {
 
         log.info("User authenticated: {} (role: {})", user.getUsername(), user.getRole());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-
-
-
 
         return AuthResponse.builder()
                 .token(token)

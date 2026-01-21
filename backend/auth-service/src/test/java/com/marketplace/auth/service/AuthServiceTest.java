@@ -1,5 +1,9 @@
 package com.marketplace.auth.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
@@ -10,10 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for AuthService.
@@ -36,7 +36,7 @@ class AuthServiceTest {
     void setUp() {
         // Setup mock behavior for password encoder
         when(passwordEncoder.encode(anyString())).thenAnswer(invocation -> "encoded_" + invocation.getArgument(0));
-        
+
         // Setup mock behavior for JwtUtil
         lenient().when(jwtUtil.generateToken(anyString(), anyString())).thenReturn(TEST_TOKEN);
         lenient().when(jwtUtil.getExpiration()).thenReturn(EXPIRATION);
@@ -60,7 +60,7 @@ class AuthServiceTest {
         assertEquals("newuser", response.getUsername());
         assertEquals("USER", response.getRole());
         assertEquals(EXPIRATION, response.getExpiresIn());
-        
+
         verify(passwordEncoder).encode("password123");
         verify(jwtUtil).generateToken("newuser", "USER");
     }
@@ -72,8 +72,8 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest("admin@example.com", "newadmin", "password");
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
-                () -> authService.register(request));
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> authService.register(request));
         assertEquals("Email already registered", exception.getMessage());
     }
 
@@ -121,8 +121,8 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("nonexistent@example.com", "password");
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> authService.login(request));
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> authService.login(request));
         assertEquals("Invalid email or password", exception.getMessage());
     }
 
@@ -134,8 +134,8 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("admin@example.com", "wrongpassword");
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> authService.login(request));
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> authService.login(request));
         assertEquals("Invalid email or password", exception.getMessage());
     }
 
@@ -144,10 +144,10 @@ class AuthServiceTest {
     void registerAndLogin_NewUser_WorksSuccessfully() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest("test@example.com", "testuser", "testpass");
-        
+
         // Act - Register
         AuthResponse registerResponse = authService.register(registerRequest);
-        
+
         // Assert registration
         assertNotNull(registerResponse);
         assertEquals("testuser", registerResponse.getUsername());
@@ -155,7 +155,7 @@ class AuthServiceTest {
         // Arrange - Login
         when(passwordEncoder.matches("testpass", "encoded_testpass")).thenReturn(true);
         LoginRequest loginRequest = new LoginRequest("test@example.com", "testpass");
-        
+
         // Act - Login
         AuthResponse loginResponse = authService.login(loginRequest);
 

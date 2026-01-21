@@ -8,12 +8,12 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import javax.crypto.SecretKey;
 
 /**
  * Service for generating and validating JWT tokens.
@@ -45,7 +45,7 @@ public class JwtUtil {
     public String generateToken(String username) {
         return generateToken(new HashMap<>(), username);
     }
-    
+
     public String generateToken(String username, String role) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", role);
