@@ -15,16 +15,6 @@ import {
   constructLayoutEngine,
 } from "single-spa-layout";
 import microfrontendLayout from "./microfrontend-layout.html";
-import { environment } from "./config/environment";
-import { errorBoundary } from "./components/error-boundary";
-import { healthCheckService } from "./services/health-check";
-
-// Initialize error boundary
-errorBoundary.clearErrors();
-
-// Log environment configuration
-console.log(`[Root Config] Starting in ${environment.environment} mode`);
-console.log(`[Root Config] API Gateway URL: ${environment.apiGatewayUrl}`);
 
 // Construct routes and applications from layout
 const routes = constructRoutes(microfrontendLayout);
@@ -32,18 +22,6 @@ const applications = constructApplications({
   routes,
   loadApp({ name }) {
     return System.import(name);
-    // console.log(`[Root Config] Loading application: ${name}`);
-    // return import(/* webpackIgnore: true */ name).catch((error) => {
-    //   console.error(`[Root Config] Failed to load ${name}:`, error);
-    //   errorBoundary.handleError({
-    //     message: `Failed to load micro-frontend: ${name}`,
-    //     stack: error.stack,
-    //     timestamp: new Date().toISOString(),
-    //     appName: name,
-    //     url: window.location.href,
-    //   });
-    //   throw error;
-    // });
   },
 });
 
@@ -60,26 +38,5 @@ layoutEngine.activate();
 start({
   urlRerouteOnly: true,
 });
-
-// Start health monitoring in development/staging
-if (environment.enableDevTools) {
-  healthCheckService.startMonitoring((results) => {
-    const overallStatus = healthCheckService.getOverallStatus(results);
-    console.log(`[Health Check] Overall Status: ${overallStatus}`, results);
-  });
-}
-
-// Expose utilities globally for debugging (dev only)
-if (environment.enableDevTools) {
-  (window as any).__marketplace__ = {
-    environment,
-    errorBoundary,
-    healthCheckService,
-    applications,
-  };
-  console.log(
-    "[Root Config] Debug utilities available at window.__marketplace__"
-  );
-}
 
 console.log("[Root Config] Application started successfully");
