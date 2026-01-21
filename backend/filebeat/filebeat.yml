@@ -1,0 +1,19 @@
+filebeat.inputs:
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+
+  - add_fields:
+      target: ""
+      fields:
+        environment: local
+        stack: marketplace
+
+output.logstash:
+  hosts: ["ec2-3-129-76-151.us-east-2.compute.amazonaws.com:5044"]
+
+logging.level: info
