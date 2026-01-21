@@ -28,11 +28,11 @@ const AuroraContainer = styled.div`
   z-index: -1;
   background: linear-gradient(
     -45deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #4facfe 75%,
-    #00f2fe 100%
+    #9F7AEA 0%,
+    #6B46C1 25%,
+    #B794F4 50%,
+    #805AD5 75%,
+    #D6BCFA 100%
   );
   background-size: 400% 400%;
   animation: ${gradientAnimation} 15s ease infinite;

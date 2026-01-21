@@ -9,7 +9,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { getAuthToken, clearAuthTokens, userState, getUserData } from '@marketplace/shared-utils';
+import { FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
+import { getAuthToken, clearAuthTokens, getUserData } from '../utils/auth';
 import AuthService from '../services/AuthService';
 
 const HeaderContainer = styled.div`
@@ -29,7 +30,7 @@ const AuthButton = styled.button`
   color: #333;
 
   &:hover {
-    background-color: rgba(102, 126, 234, 0.1);
+    background-color: rgba(159, 122, 234, 0.1);
   }
 `;
 
@@ -44,7 +45,7 @@ const AvatarPlaceholder = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #9F7AEA 0%, #6B46C1 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,9 +101,14 @@ const DropdownItem = styled.a<{ $danger?: boolean }>`
   text-align: left;
   font-size: 0.95rem;
 
+  svg {
+    font-size: 1.1rem;
+    color: ${(props) => (props.$danger ? '#f44336' : '#9F7AEA')};
+  }
+
   &:hover {
     background-color: ${(props) =>
-      props.$danger ? 'rgba(244, 67, 54, 0.1)' : 'rgba(102, 126, 234, 0.1)'};
+      props.$danger ? 'rgba(244, 67, 54, 0.1)' : 'rgba(159, 122, 234, 0.1)'};
   }
 
   &:first-child {
@@ -166,15 +172,17 @@ const AuthHeaderComponent: React.FC<AuthHeaderComponentProps> = ({
       fetchUserData();
     }
 
-    // Listen for user state changes
-    const unsubscribe = userState.subscribe(() => {
+    // Check auth periodically (simplified without userState)
+    const checkAuth = () => {
       const token = getAuthToken();
       if (!token) {
-        navigate('/users/auth/login');
+        window.location.href = '/login';
       }
-    });
+    };
+    
+    const interval = setInterval(checkAuth, 5000); // Check every 5 seconds
 
-    return unsubscribe;
+    return () => clearInterval(interval);
   }, []);
 
   const fetchUserData = async () => {
@@ -199,7 +207,7 @@ const AuthHeaderComponent: React.FC<AuthHeaderComponentProps> = ({
     if (onLogoutClick) {
       onLogoutClick();
     } else {
-      navigate('/users/auth/login');
+      window.location.href = '/login';
     }
   };
 
@@ -242,14 +250,14 @@ const AuthHeaderComponent: React.FC<AuthHeaderComponentProps> = ({
 
       <DropdownMenu $open={dropdownOpen}>
         <DropdownItem as="div" onClick={handleProfileClick} role="button">
-          👤 My Profile
+          <FiUser /> My Profile
         </DropdownItem>
         <DropdownItem as="div" onClick={handleSettingsClick} role="button">
-          ⚙️ Settings
+          <FiSettings /> Settings
         </DropdownItem>
         <Divider />
         <DropdownItem as="div" onClick={handleLogout} $danger role="button">
-          🚪 Logout
+          <FiLogOut /> Logout
         </DropdownItem>
       </DropdownMenu>
     </HeaderContainer>

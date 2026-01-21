@@ -2,7 +2,7 @@
  * This file was created by Claude Sonnet 4.5
  */
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getAuthToken, clearAuthTokens } from '@marketplace/shared-utils';
+import { getAuthToken, clearAuthTokens } from '../utils/auth';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({

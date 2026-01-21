@@ -1,13 +1,19 @@
 {
   "imports": {
     "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js",
+    "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js",
+    "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js",
+    "@remix-run/router": "https://cdn.jsdelivr.net/npm/@remix-run/router@1.11.0/dist/router.umd.min.js",
+    "react-router": "https://cdn.jsdelivr.net/npm/react-router@6.18.0/dist/umd/react-router.production.min.js",
+    "react-router-dom": "https://cdn.jsdelivr.net/npm/react-router-dom@6.18.0/dist/umd/react-router-dom.production.min.js",
+    "styled-components": "https://cdn.jsdelivr.net/npm/styled-components@6.1.1/dist/styled-components.min.js",
     "@marketplace/root-config": "//localhost:9000/marketplace-root-config.js",
     "@marketplace/mfe-angular-cards": "//localhost:4201/main.js",
     "@marketplace/mfe-react-users": "//localhost:4202/marketplace-mfe-react-users.js",
     "@marketplace/home": "//localhost:4201/main.js",
     "@marketplace/navbar": "//localhost:9000/marketplace-root-config.js",
     "@marketplace/footer": "//localhost:9000/marketplace-root-config.js",
-    "@marketplace/not-found": "//localhost:9000/marketplace-root-config.js",
+    "@marketplace/not-found": "//localhost:9000/marketplace-not-found.js",
     "@marketplace/shared-utils": "//localhost:4202/marketplace-mfe-react-users.js",
     "@single-spa/welcome": "https://cdn.jsdelivr.net/npm/single-spa-welcome/dist/single-spa-welcome.min.js"
   }

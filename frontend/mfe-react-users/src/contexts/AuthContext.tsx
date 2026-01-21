@@ -3,7 +3,7 @@
  */
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAuthToken, clearAuthTokens, userState, getUserData } from '@marketplace/shared-utils';
+import { getAuthToken, clearAuthTokens, getUserData } from '../utils/auth';
 import AuthService from '../services/AuthService';
 
 interface User {
@@ -48,13 +48,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   const sessionTimeoutCleanupRef = React.useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    // Subscribe to user state changes
-    const unsubscribe = userState.subscribe(() => {
+    // Check for auth changes periodically
+    const checkAuth = () => {
       const token = getAuthToken();
       const userData = getUserData();
       setIsAuthenticated(!!token);
       setUser(userData as User | null);
-    });
+    };
+
+    // Check immediately
+    checkAuth();
 
     // Setup session timeout if user is authenticated
     if (isAuthenticated) {
@@ -62,7 +65,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
 
     return () => {
-      unsubscribe();
       if (sessionTimeoutCleanupRef.current) {
         sessionTimeoutCleanupRef.current();
       }
@@ -81,18 +83,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       await AuthService.logout();
       setIsAuthenticated(false);
       setUser(null);
-      navigate('/users/auth/login', { replace: true });
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
       // Still clear auth even if API call fails
       clearAuthTokens();
       setIsAuthenticated(false);
       setUser(null);
-      navigate('/users/auth/login', { replace: true });
+      window.location.href = '/login';
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {

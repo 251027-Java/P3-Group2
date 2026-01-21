@@ -13,11 +13,6 @@
 
   <!-- Main Content Area with Route-based MFE Loading -->
   <main>
-    <!-- Welcome/Home Page -->
-    <route path="/">
-      <application name="@marketplace/home"></application>
-    </route>
-
     <!-- Testing Route -->
      <route path="testing">
       <application name="@single-spa/welcome"></application>
@@ -28,20 +23,27 @@
       <application name="@marketplace/mfe-angular-cards"></application>
     </route>
 
-    <!-- User Management MFE (React) -->
-    <route path="auth">
-      <application name="@marketplace/mfe-react-users"></application>
-    </route>
-    <route path="profile">
-      <application name="@marketplace/mfe-react-users"></application>
-    </route>
-    <route path="settings">
+    <!-- User Management MFE (React) - All /users/* routes -->
+    <route path="users">
       <application name="@marketplace/mfe-react-users"></application>
     </route>
 
-    <!-- Fallback for 404 -->
+    <!-- Angular pages (login, signup, marketplace) -->
+    <route path="login">
+      <application name="@marketplace/home"></application>
+    </route>
+    
+    <route path="signup">
+      <application name="@marketplace/home"></application>
+    </route>
+    
+    <route path="marketplace">
+      <application name="@marketplace/home"></application>
+    </route>
+
+    <!-- Default route - React home/profile -->
     <route default>
-      <application name="@marketplace/not-found"></application>
+      <application name="@marketplace/mfe-react-users"></application>
     </route>
   </main>
 

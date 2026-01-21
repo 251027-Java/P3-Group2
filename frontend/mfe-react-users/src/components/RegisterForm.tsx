@@ -60,7 +60,7 @@ const StepDot = styled.div<{ $active?: boolean; $completed?: boolean }>`
   font-size: 0.9rem;
   font-weight: 600;
   background-color: ${(props) =>
-    props.$completed ? '#667eea' : props.$active ? '#667eea' : '#e0e0e0'};
+    props.$completed ? '#9F7AEA' : props.$active ? '#9F7AEA' : '#e0e0e0'};
   color: ${(props) => (props.$completed || props.$active ? 'white' : '#999')};
   transition: all 0.3s;
 `;
@@ -87,8 +87,8 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #9F7AEA;
+    box-shadow: 0 0 0 3px rgba(159, 122, 234, 0.1);
   }
 
   &:disabled {
@@ -144,7 +144,7 @@ const CheckboxLabel = styled.label`
   line-height: 1.4;
 
   a {
-    color: #667eea;
+    color: #9F7AEA;
     text-decoration: none;
 
     &:hover {
@@ -181,7 +181,7 @@ const Button = styled.button<{ $primary?: boolean }>`
   flex: 1;
   padding: 0.875rem 1rem;
   background: ${(props) =>
-    props.$primary ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#e0e0e0'};
+    props.$primary ? 'linear-gradient(135deg, #9F7AEA 0%, #6B46C1 100%)' : '#e0e0e0'};
   color: ${(props) => (props.$primary ? 'white' : '#333')};
   border: none;
   border-radius: 8px;
@@ -193,7 +193,7 @@ const Button = styled.button<{ $primary?: boolean }>`
   &:hover:not(:disabled) {
     transform: ${(props) => (props.$primary ? 'translateY(-2px)' : 'none')};
     box-shadow: ${(props) =>
-      props.$primary ? '0 10px 20px rgba(102, 126, 234, 0.3)' : 'none'};
+      props.$primary ? '0 10px 20px rgba(159, 122, 234, 0.3)' : 'none'};
   }
 
   &:disabled {
