@@ -1,16 +1,14 @@
 package com.example.gateway.security;
 
-import java.util.Date;
-import java.util.function.Function;
-
-import javax.crypto.SecretKey;
-
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.function.Function;
+import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtil {
@@ -19,8 +17,7 @@ public class JwtUtil {
 
     private Long expiration;
 
-    public JwtUtil(@Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration}") Long expiration) {
+    public JwtUtil(@Value("${jwt.secret}") String secretKey, @Value("${jwt.expiration}") Long expiration) {
         this.secretKey = secretKey;
         this.expiration = expiration;
     }
@@ -42,13 +39,11 @@ public class JwtUtil {
     public String extractListenerId(String token) {
 
         return extractClaim(token, Claims::getSubject);
-
     }
 
     public Boolean validateToken(String token, String listenerId) {
         final String extractId = extractListenerId(token);
         return (extractId.equals(listenerId) && !isTokenExpired(token));
-
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -83,5 +78,4 @@ public class JwtUtil {
     public String extractRefreshToken(String token) {
         return extractListenerId(token);
     }
-
 }

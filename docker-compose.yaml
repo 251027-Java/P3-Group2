@@ -20,7 +20,7 @@ services:
       KAFKA_KRAFT_MODE: "true"
       KAFKA_PROCESS_ROLES: controller,broker
       KAFKA_NODE_ID: 1
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:${KAFKA_CONTROLLER_PORT:-9093}"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       # Single Listener on 9092
       KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
@@ -46,7 +46,7 @@ services:
     ports:
       - "8761:8761"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/eureka/apps"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/eureka/apps" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,8 +85,10 @@ services:
       # Kafka Configuration for Spring Boot
       # SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - db
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_started
 
   listing-service:
     build: ./backend/listing-service
@@ -94,14 +96,49 @@ services:
     ports:
       - "${LISTING_SERVICE_PORT}:8082"
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: ${SHARED_DB_NAME}
+      DB_HOST: ${LISTING_DB_HOST}
+      DB_PORT: ${LISTING_DB_PORT}
+      DB_NAME: ${LISTING_DB_NAME}
       DB_USERNAME: ${LISTING_DB_USER}
       DB_PASSWORD: ${LISTING_DB_PASSWORD}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_URI: http://eureka-server:8761/eureka
     depends_on:
-      - db
-      - kafka
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_started
+      kafka:
+        condition: service_started
+
+  user-service:
+    build: ./backend/user-service
+    container_name: user-service
+    ports:
+      - "${USER_SERVICE_PORT}:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${USER_DB_HOST}:${USER_DB_PORT}/${USER_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${USER_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${USER_DB_PASSWORD}
+      EUREKA_URI: http://eureka-server:8761/eureka
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_started
+
+
+  auth-service:
+    build: ./backend/auth-service
+    container_name: auth-service
+    ports:
+      - "${AUTH_SERVICE_PORT}:8084"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      EUREKA_URI: http://eureka-server:8761/eureka
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_started

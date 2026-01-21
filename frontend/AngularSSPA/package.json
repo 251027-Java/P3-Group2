@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:single-spa:AngularSSPA": "ng build AngularSSPA --configuration production",
@@ -19,6 +20,7 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "regenerator-runtime": "^0.14.1",
     "rxjs": "~7.8.0",
     "single-spa": ">=4.0.0",
     "single-spa-angular": "9.2.0",
@@ -26,7 +28,7 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "19.0.1",
+    "@angular-builders/custom-webpack": "^19.0.1",
     "@angular-devkit/build-angular": "^19.2.19",
     "@angular/cli": "^19.2.19",
     "@angular/compiler-cli": "^19.2.0",

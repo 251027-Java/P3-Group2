@@ -16,8 +16,14 @@ def isPrToDefaultBranch() {
     return env.CHANGE_TARGET == getDefaultBranchName()
 }
 
-def getRecommendedRevspec() {
-    if (isPrToDefaultBranch() && (isPrCreated() || currentBuild.previousBuild?.result == 'FAILURE')) {
+def getRecommendedRevspec(isPrToDefaultAttribute) {
+    def prDefault = isPrToDefaultAttribute || isPrToDefaultBranch()
+    def prCreated = isPrCreated()
+    def prevResult = "${currentBuild.previousBuild?.result}".toString()
+
+    echo "PrDefault: ${prDefault} | PrCreate: ${prCreated} | PrevResult: ${prevResult}"
+
+    if (prDefault && (prCreated || prevResult == 'FAILURE')) {
         def path = util.loadScript name: 'fetch-latest.sh'
         def name = getDefaultBranchName()
 
@@ -26,12 +32,12 @@ def getRecommendedRevspec() {
         return 'FETCH_HEAD'
     }
 
-    return isPrCreated() ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
+    return prCreated ? 'HEAD~1' : "HEAD~${currentBuild.changeSets.first().items.size()}"
 }
 
-def getChanges() {
+def getChanges(isPrToDefaultAttribute) {
     def path = util.loadScript name: 'git-changes.sh'
-    def revspec = getRecommendedRevspec()
+    def revspec = getRecommendedRevspec(isPrToDefaultAttribute)
 
     def output = sh(script: "${path} ${revspec}", returnStdout: true).trim()
 

@@ -6,7 +6,7 @@
     },
     "test": {
         "enabled": true,
-        "command": "mvn -B test"
+        "command": "mvn -B test -DfailIfNoTests"
     },
     "build": {
         "enabled": true,

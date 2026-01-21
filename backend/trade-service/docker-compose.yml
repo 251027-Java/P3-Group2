@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  trade-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trade-service
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_HOST=postgres-trade
+      - DB_PORT=5432
+      - DB_NAME=marketplace
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=password
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - EUREKA_URI=http://eureka-server:8761/eureka
+    depends_on:
+      postgres-trade:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - marketplace-network
+    restart: unless-stopped
+
+  postgres-trade:
+    image: postgres:16
+    container_name: postgres-trade
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=marketplace
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - marketplace-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - marketplace-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+      - "${KAFKA_CONTROLLER_PORT:-9093}:9093"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:${KAFKA_CONTROLLER_PORT:-9093}"
+      KAFKA_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT:-9092},CONTROLLER://kafka:${KAFKA_CONTROLLER_PORT:-9093}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT:-9092}
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDM2Qk"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    networks:
+      - marketplace-network
+
+networks:
+  marketplace-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
