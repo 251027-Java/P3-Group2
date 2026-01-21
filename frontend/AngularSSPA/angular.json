@@ -15,7 +15,7 @@
           "options": {
             "outputPath": "dist/angular-sspa",
             "index": "src/index.html",
-            "browser": "src/main.ts",
+            "main": "src/main.single-spa.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -30,13 +30,10 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "main": "src/main.single-spa.ts",
             "customWebpackConfig": {
-              "path": "extra-webpack.config.js",
-              "libraryName": "AngularSSPA",
-              "libraryTarget": "umd"
+              "path": "extra-webpack.config.js"
             },
-            "deployUrl": "http://localhost:4200/"
+            "deployUrl": "http://localhost:4201/"
           },
           "configurations": {
             "production": {
@@ -58,7 +55,13 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "outputHashing": "none"
+              "outputHashing": "none",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

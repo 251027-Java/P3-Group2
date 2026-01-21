@@ -1,15 +1,20 @@
 const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-ts");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path');
 
 module.exports = (webpackConfigEnv, argv) => {
   const orgName = "marketplace";
+  const isLocal = webpackConfigEnv && webpackConfigEnv.isLocal;
+
   const defaultConfig = singleSpaDefaults({
     orgName,
     projectName: "root-config",
     webpackConfigEnv,
     argv,
     disableHtmlGeneration: true,
+    outputSystemJS: true,
   });
 
   return merge(defaultConfig, {
@@ -23,22 +28,28 @@ module.exports = (webpackConfigEnv, argv) => {
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
         "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
       },
-      client: {
-        overlay: {
-          errors: true,
-          warnings: false,
-        },
-      },
+      static: [
+        {
+          directory: path.join(__dirname, 'src/styles'),
+          publicPath: '/styles',
+        }
+      ]
     },
-    // modify the webpack config however you'd like to by adding to this object
     plugins: [
       new HtmlWebpackPlugin({
         inject: false,
         template: "src/index.ejs",
         templateParameters: {
-          isLocal: webpackConfigEnv && webpackConfigEnv.isLocal,
+          isLocal,
           orgName,
         },
+      }),
+      // Copy static assets for production builds
+      new CopyWebpackPlugin({
+        patterns: [
+          { from: "src/styles", to: "styles" },
+          { from: "src/importmap.json", to: "importmap.json" },
+        ],
       }),
     ],
   });

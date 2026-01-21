@@ -7,16 +7,21 @@
   -->
 
   <!-- Global Header/Navigation -->
-  <header>
+  <!-- <header>
     <application name="@marketplace/navbar"></application>
-  </header>
+  </header> -->
 
   <!-- Main Content Area with Route-based MFE Loading -->
   <main>
     <!-- Welcome/Home Page -->
-    <route default path="/">
+    <route path="/">
       <application name="@marketplace/home"></application>
     </route>
+
+    <!-- Testing Route -->
+     <route path="testing">
+      <application name="@single-spa/welcome"></application>
+     </route>
 
     <!-- Card Marketplace MFE (Angular) -->
     <route path="cards">
@@ -35,13 +40,13 @@
     </route>
 
     <!-- Fallback for 404 -->
-    <route path="404">
+    <route default>
       <application name="@marketplace/not-found"></application>
     </route>
   </main>
 
   <!-- Global Footer -->
-  <footer>
+  <!-- <footer>
     <application name="@marketplace/footer"></application>
-  </footer>
+  </footer> -->
 </single-spa-router>
