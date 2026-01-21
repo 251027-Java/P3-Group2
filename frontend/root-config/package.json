@@ -19,6 +19,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@babel/runtime": "^7.23.3",
     "concurrently": "^6.2.1",
+    "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -46,6 +47,9 @@
     "regenerator-runtime": "^0.14.1",
     "single-spa": "^5.9.3",
     "single-spa-layout": "^1.6.0"
+  },
+  "overrides": {
+    "standalone-single-spa-webpack-plugin": "2.1.0"
   },
   "types": "dist/marketplace-root-config.d.ts"
 }
