@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
@@ -68,7 +67,9 @@ public class UserController {
     }
 
     @GetMapping("/internal/email/{email}")
-    @Operation(summary = "Get user by email for internal use", description = "Retrieves a user by their email for internal use")
+    @Operation(
+            summary = "Get user by email for internal use",
+            description = "Retrieves a user by their email for internal use")
     public ResponseEntity<AuthUserResponse> getUserByEmailForInternal(@PathVariable String email) {
         return ResponseEntity.of(userService.getUserForAuth(email));
     }

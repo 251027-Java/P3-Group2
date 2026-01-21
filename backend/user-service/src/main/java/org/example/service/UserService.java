@@ -1,7 +1,6 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-
 import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
@@ -119,9 +118,6 @@ public class UserService {
      * Internal method for auth-service to get user with password hash.
      */
     public Optional<AuthUserResponse> getUserForAuth(String email) {
-        return userRepository.findByEmail(email)
-                .map(AuthUserResponse::fromUser);
+        return userRepository.findByEmail(email).map(AuthUserResponse::fromUser);
     }
-
-    
 }
