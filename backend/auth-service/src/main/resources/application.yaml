@@ -18,6 +18,17 @@ eureka:
   instance:
     prefer-ip-address: true
 
+# Feign Client Configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+        decode404: true
+        decode400: true
+
 # Logging Configuration
 logging:
   level:

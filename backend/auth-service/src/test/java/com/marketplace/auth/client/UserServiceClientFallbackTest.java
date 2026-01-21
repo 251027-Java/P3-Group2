@@ -2,7 +2,6 @@ package com.marketplace.auth.client;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.marketplace.auth.client.dto.AuthUserResponse;
 import com.marketplace.auth.client.dto.CreateUserRequest;
 import com.marketplace.auth.client.dto.UserResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,20 +25,20 @@ class UserServiceClientFallbackTest {
     @DisplayName("getUserForAuth should return null when service unavailable")
     void getUserForAuth_ServiceUnavailable_ReturnsNull() {
         // Act
-        AuthUserResponse result = fallback.getUserForAuth("test@example.com");
+        var result = fallback.getUserForAuth("test@example.com");
 
-        // Assert
-        assertNull(result);
+        // Assert empty optional
+        assertTrue(result.isEmpty());
     }
 
     @Test
     @DisplayName("getUserForAuth should handle any email gracefully")
     void getUserForAuth_AnyEmail_ReturnsNull() {
         // Act & Assert
-        assertNull(fallback.getUserForAuth("user1@example.com"));
-        assertNull(fallback.getUserForAuth("admin@test.com"));
-        assertNull(fallback.getUserForAuth(""));
-        assertNull(fallback.getUserForAuth(null));
+        assertTrue(fallback.getUserForAuth("").isEmpty());
+        assertTrue(fallback.getUserForAuth("user1@example.com").isEmpty());
+        assertTrue(fallback.getUserForAuth("admin@test.com").isEmpty());
+        assertTrue(fallback.getUserForAuth(null).isEmpty());
     }
 
     @Test
@@ -49,7 +48,7 @@ class UserServiceClientFallbackTest {
         CreateUserRequest request = CreateUserRequest.builder()
                 .email("newuser@example.com")
                 .username("newuser")
-                .password("password123")
+                .passwordHash("password123")
                 .role("USER")
                 .build();
 
@@ -67,14 +66,14 @@ class UserServiceClientFallbackTest {
         CreateUserRequest userRequest = CreateUserRequest.builder()
                 .email("user@example.com")
                 .username("user")
-                .password("pass")
+                .passwordHash("pass")
                 .role("USER")
                 .build();
 
         CreateUserRequest adminRequest = CreateUserRequest.builder()
                 .email("admin@example.com")
                 .username("admin")
-                .password("adminpass")
+                .passwordHash("adminpass")
                 .role("ADMIN")
                 .build();
 

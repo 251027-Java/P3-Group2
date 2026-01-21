@@ -81,8 +81,8 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("POST /api/users - should return 400 when user creation fails")
-        void createUser_DuplicateUser_Returns400() throws Exception {
+        @DisplayName("POST /api/users - should return 409 when user creation fails")
+        void createUser_DuplicateUser_Returns409() throws Exception {
             // Arrange
             CreateUserRequest request =
                     new CreateUserRequest("existing@example.com", "existinguser", "password123", null, null, null);
@@ -92,7 +92,7 @@ class UserControllerTest {
             mockMvc.perform(post("/api/users")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isConflict());
         }
     }
 

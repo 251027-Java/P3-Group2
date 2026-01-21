@@ -2,7 +2,9 @@ package org.example.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
@@ -24,11 +26,11 @@ public class UserController {
 
     @PostMapping
     @Operation(summary = "Create a new user", description = "Creates a new user in the system")
-    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
         Optional<UserResponse> response = userService.createUser(request);
         return response.map(userResponse ->
                         ResponseEntity.status(HttpStatus.CREATED).body(userResponse))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT).build());
     }
 
     @GetMapping("/{userId}")
@@ -62,6 +64,14 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/internal/email/{email}")
+    @Operation(
+            summary = "Get user by email for internal use",
+            description = "Retrieves a user by their email for internal use")
+    public ResponseEntity<AuthUserResponse> getUserByEmailForInternal(@PathVariable String email) {
+        return ResponseEntity.of(userService.getUserForAuth(email));
     }
 
     @GetMapping

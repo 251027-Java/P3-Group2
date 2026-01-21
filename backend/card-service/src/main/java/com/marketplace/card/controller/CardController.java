@@ -71,10 +71,5 @@ public class CardController {
     public ResponseEntity<Card> getCardById(@PathVariable Long cardId) {
         Optional<Card> card = cardService.getCardById(cardId);
         return ResponseEntity.of(card);
-        // if (card.isPresent()) {
-        //     return ResponseEntity.ok(card.get());
-        // } else {
-        //     return ResponseEntity.notFound().build();
-        // }
     }
 }
