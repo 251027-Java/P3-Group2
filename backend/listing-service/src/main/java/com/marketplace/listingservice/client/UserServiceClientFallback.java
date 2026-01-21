@@ -5,10 +5,9 @@ package com.marketplace.listingservice.client;
 
 import com.marketplace.listingservice.client.dto.UserResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-
-import org.springframework.stereotype.Component;
 
 /**
  * Fallback implementation for UserServiceClient.

@@ -218,7 +218,8 @@ class AuthServiceTest {
                     .build();
 
             when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
-            when(passwordEncoder.matches("wrongpassword", "hashed_correctpassword")).thenReturn(false);
+            when(passwordEncoder.matches("wrongpassword", "hashed_correctpassword"))
+                    .thenReturn(false);
 
             // Act & Assert
             IllegalArgumentException exception =

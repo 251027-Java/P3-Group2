@@ -1,11 +1,11 @@
-package org.example.Service;
+package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.Model.User;
-import org.example.Repository.UserRepository;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
+import org.example.model.User;
+import org.example.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

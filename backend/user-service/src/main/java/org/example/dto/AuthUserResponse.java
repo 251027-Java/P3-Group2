@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.Model.User;
+import org.example.model.User;
 
 /**
  * DTO for internal authentication responses.

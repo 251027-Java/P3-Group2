@@ -6,10 +6,8 @@ import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
 import com.marketplace.auth.service.AuthService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

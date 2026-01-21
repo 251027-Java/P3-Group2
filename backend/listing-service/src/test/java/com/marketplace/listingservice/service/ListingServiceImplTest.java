@@ -94,7 +94,8 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should create listing successfully")
         void createListing_Success() {
-            UserResponse userResponse = UserResponse.builder().userId(100L).username("testuser").build();
+            UserResponse userResponse =
+                    UserResponse.builder().userId(100L).username("testuser").build();
             CardResponse cardResponse =
                     CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.getUserById(100L)).thenReturn(Optional.of(userResponse));
@@ -121,7 +122,8 @@ class ListingServiceImplTest {
         @DisplayName("Should create listing with custom status")
         void createListing_WithCustomStatus() {
             createRequest.setListingStatus(ListingStatus.ACTIVE);
-            UserResponse userResponse = UserResponse.builder().userId(100L).username("testuser").build();
+            UserResponse userResponse =
+                    UserResponse.builder().userId(100L).username("testuser").build();
             CardResponse cardResponse =
                     CardResponse.builder().cardId(200L).name("Test Card").build();
             when(userServiceClient.getUserById(100L)).thenReturn(Optional.of(userResponse));
@@ -152,7 +154,8 @@ class ListingServiceImplTest {
         @Test
         @DisplayName("Should throw CardNotFoundException when card does not exist")
         void createListing_CardNotFound() {
-            UserResponse userResponse = UserResponse.builder().userId(100L).username("testuser").build();
+            UserResponse userResponse =
+                    UserResponse.builder().userId(100L).username("testuser").build();
             when(userServiceClient.getUserById(100L)).thenReturn(Optional.of(userResponse));
             when(cardServiceClient.getCardById(200L)).thenReturn(Optional.empty());
 

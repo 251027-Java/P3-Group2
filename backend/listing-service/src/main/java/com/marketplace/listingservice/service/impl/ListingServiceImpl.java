@@ -19,7 +19,6 @@ import com.marketplace.listingservice.exception.UserNotFoundException;
 import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.ListingService;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
