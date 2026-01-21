@@ -1,0 +1,26 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: auth-service-test
+  main:
+    allow-bean-definition-overriding: true
+
+# JWT Configuration for testing
+jwt:
+  secret: test-secret-key-for-testing-purposes-256-bit-minimum
+  expiration: 86400000
+
+# Disable Eureka for tests
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+# Logging Configuration
+logging:
+  level:
+    root: WARN
+    com.marketplace.auth: DEBUG
