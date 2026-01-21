@@ -1,11 +1,11 @@
 // Generated with Assistance By Clause Opus 4.5
-// Reviewed and modified by Marcus Wright 
+// Reviewed and modified by Marcus Wright
 
 package com.marketplace.listingservice.service.impl;
 
 import com.marketplace.listingservice.client.CardServiceClient;
-import com.marketplace.listingservice.client.dto.CardResponse;
 import com.marketplace.listingservice.client.UserServiceClient;
+import com.marketplace.listingservice.client.dto.CardResponse;
 import com.marketplace.listingservice.dto.CreateListingRequest;
 import com.marketplace.listingservice.dto.ListingResponse;
 import com.marketplace.listingservice.dto.UpdateListingRequest;
@@ -18,11 +18,11 @@ import com.marketplace.listingservice.exception.UserNotFoundException;
 import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.ListingService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import feign.FeignException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +44,7 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public ListingResponse createListing(CreateListingRequest request) {
-        log.info("Creating new listing for card ID: {} by user ID: {}", 
-                request.getCardId(), request.getOwnerUserId());
+        log.info("Creating new listing for card ID: {} by user ID: {}", request.getCardId(), request.getOwnerUserId());
 
         // Verify that the user exists via user service
         validateUserExists(request.getOwnerUserId());
@@ -57,8 +56,7 @@ public class ListingServiceImpl implements ListingService {
                 .ownerUserId(request.getOwnerUserId())
                 .cardId(request.getCardId())
                 .conditionRating(request.getConditionRating())
-                .listingStatus(request.getListingStatus() != null ? 
-                        request.getListingStatus() : ListingStatus.ACTIVE)
+                .listingStatus(request.getListingStatus() != null ? request.getListingStatus() : ListingStatus.ACTIVE)
                 .build();
 
         Listing savedListing = listingRepository.save(listing);
@@ -74,10 +72,10 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public ListingResponse getListingById(Long listingId) {
         log.debug("Fetching listing with ID: {}", listingId);
-        
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException(listingId));
-        
+
+        Listing listing =
+                listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException(listingId));
+
         return ListingResponse.fromEntity(listing);
     }
 
@@ -85,7 +83,7 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getAllListings() {
         log.debug("Fetching all listings");
-        
+
         return listingRepository.findAll().stream()
                 .map(ListingResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -95,7 +93,7 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getListingsByOwnerUserId(Long ownerUserId) {
         log.debug("Fetching listings for owner user ID: {}", ownerUserId);
-        
+
         return listingRepository.findByOwnerUserId(ownerUserId).stream()
                 .map(ListingResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -105,7 +103,7 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getListingsByCardId(Long cardId) {
         log.debug("Fetching listings for card ID: {}", cardId);
-        
+
         return listingRepository.findByCardId(cardId).stream()
                 .map(ListingResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -115,7 +113,7 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getListingsByStatus(ListingStatus status) {
         log.debug("Fetching listings with status: {}", status);
-        
+
         return listingRepository.findByListingStatus(status).stream()
                 .map(ListingResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -125,7 +123,7 @@ public class ListingServiceImpl implements ListingService {
     @Transactional(readOnly = true)
     public List<ListingResponse> getActiveListings() {
         log.debug("Fetching all active listings");
-        
+
         return listingRepository.findByListingStatus(ListingStatus.ACTIVE).stream()
                 .map(ListingResponse::fromEntity)
                 .collect(Collectors.toList());
@@ -135,13 +133,12 @@ public class ListingServiceImpl implements ListingService {
     public ListingResponse updateListing(Long listingId, UpdateListingRequest request) {
         log.info("Updating listing with ID: {}", listingId);
 
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException(listingId));
+        Listing listing =
+                listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException(listingId));
 
         if (listing.getListingStatus() != ListingStatus.ACTIVE) {
             throw new InvalidListingOperationException(
-                    "Cannot update a listing that is not active. Current status: " + 
-                    listing.getListingStatus());
+                    "Cannot update a listing that is not active. Current status: " + listing.getListingStatus());
         }
 
         if (request.getConditionRating() != null) {
@@ -165,13 +162,12 @@ public class ListingServiceImpl implements ListingService {
     public ListingResponse cancelListing(Long listingId) {
         log.info("Cancelling listing with ID: {}", listingId);
 
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException(listingId));
+        Listing listing =
+                listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException(listingId));
 
         if (listing.getListingStatus() != ListingStatus.ACTIVE) {
             throw new InvalidListingOperationException(
-                    "Cannot cancel a listing that is not active. Current status: " + 
-                    listing.getListingStatus());
+                    "Cannot cancel a listing that is not active. Current status: " + listing.getListingStatus());
         }
 
         listing.setListingStatus(ListingStatus.CANCELLED);
@@ -188,13 +184,12 @@ public class ListingServiceImpl implements ListingService {
     public ListingResponse completeListing(Long listingId) {
         log.info("Completing listing with ID: {}", listingId);
 
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException(listingId));
+        Listing listing =
+                listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException(listingId));
 
         if (listing.getListingStatus() != ListingStatus.ACTIVE) {
             throw new InvalidListingOperationException(
-                    "Cannot complete a listing that is not active. Current status: " + 
-                    listing.getListingStatus());
+                    "Cannot complete a listing that is not active. Current status: " + listing.getListingStatus());
         }
 
         listing.setListingStatus(ListingStatus.COMPLETED);
@@ -211,8 +206,8 @@ public class ListingServiceImpl implements ListingService {
     public void deleteListing(Long listingId) {
         log.info("Deleting listing with ID: {}", listingId);
 
-        Listing listing = listingRepository.findById(listingId)
-                .orElseThrow(() -> new ListingNotFoundException(listingId));
+        Listing listing =
+                listingRepository.findById(listingId).orElseThrow(() -> new ListingNotFoundException(listingId));
 
         listingRepository.delete(listing);
         log.info("Listing deleted successfully with ID: {}", listingId);

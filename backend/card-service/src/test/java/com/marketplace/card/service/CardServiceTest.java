@@ -2,6 +2,9 @@
 // Reviewed and modified by Liam Ruiz
 package com.marketplace.card.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 import com.marketplace.card.dto.TcgPriceDto;
 import com.marketplace.card.dto.TcgProductDto;
 import com.marketplace.card.model.Card;
@@ -17,10 +20,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CardServiceTest {
@@ -63,7 +62,7 @@ class CardServiceTest {
         when(tcgConnectService.fetchPrices(3, 100)).thenReturn(Collections.singletonList(priceDto));
         when(tcgConnectService.isCard(productCard)).thenReturn(true);
         when(tcgConnectService.isCard(productBooster)).thenReturn(false);
-        
+
         // Mock existing card check (empty list -> new cards)
         when(cardRepository.findBySetId(100)).thenReturn(Collections.emptyList());
 
