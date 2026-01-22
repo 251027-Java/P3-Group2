@@ -14,6 +14,7 @@ interface AuthResponse{
 })
 export class AuthService {
   private _isAuthenticated = false;
+  private readonly TOKEN_KEY = 'dummy jwt';
 
   constructor(private http: HttpClient) {}
 
@@ -33,7 +34,7 @@ export class AuthService {
     this._isAuthenticated = true;
   }
 
-  getAuthentication(): void {
-    // return value of is Auth.
+  getAuthentication(): boolean {
+    return this._isAuthenticated;
   }
 }
