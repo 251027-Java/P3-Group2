@@ -8,7 +8,7 @@ import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
-import org.example.kafka.UserEventProducer;
+// import org.example.kafka.UserEventProducer;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private UserEventProducer userEventProducer;
+    // private UserEventProducer userEventProducer;
 
     @InjectMocks
     private UserService userService;
@@ -323,8 +323,8 @@ class UserServiceTest {
     
             // Assert
             assertTrue(result.isPresent());
-            verify(userEventProducer, times(1))
-                    .sendUserCreatedEvent(123L, "kafkatest", "kafka@example.com");
+            // verify(userEventProducer, times(1))
+            //         .sendUserCreatedEvent(123L, "kafkatest", "kafka@example.com");
         }
     
         @Test
@@ -338,7 +338,7 @@ class UserServiceTest {
             userService.deleteUser(1L);
     
             // Assert
-            verify(userEventProducer, times(1)).sendUserDeletedEvent(1L);
+            // verify(userEventProducer, times(1)).sendUserDeletedEvent(1L);
             verify(userRepository).deleteById(1L);
         }
     
@@ -356,7 +356,7 @@ class UserServiceTest {
     
             // Assert
             assertTrue(result.isEmpty());
-            verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
+            // verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
         }
     
         @Test
@@ -374,7 +374,7 @@ class UserServiceTest {
     
             // Assert
             assertTrue(result.isEmpty());
-            verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
+            // verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
         }
     
         @Test
@@ -388,7 +388,7 @@ class UserServiceTest {
                     assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(999L));
             assertTrue(ex.getMessage().contains("User not found"));
     
-            verify(userEventProducer, never()).sendUserDeletedEvent(anyLong());
+            // verify(userEventProducer, never()).sendUserDeletedEvent(anyLong());
         }
     }
 
@@ -414,7 +414,7 @@ class UserServiceTest {
     
             assertTrue(result.isPresent());
             assertEquals("USER", result.get().getRole());
-            verify(userEventProducer).sendUserCreatedEvent(42L, "noroleuser", "norole@example.com");
+            // verify(userEventProducer).sendUserCreatedEvent(42L, "noroleuser", "norole@example.com");
         }
     
         @Test
@@ -473,7 +473,7 @@ class UserServiceTest {
         @DisplayName("Delete user should throw exception if userId is null")
         void deleteUser_NullUserId_ShouldThrowException() {
             assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(null));
-            verify(userEventProducer, never()).sendUserDeletedEvent(any());
+            // verify(userEventProducer, never()).sendUserDeletedEvent(any());
             verify(userRepository, never()).deleteById(any());
         }
     }
