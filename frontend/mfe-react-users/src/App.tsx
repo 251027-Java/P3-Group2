@@ -9,26 +9,24 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import TestPage from './pages/TestPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  console.log('[React MFE] App rendering, current path:', window.location.pathname);
+  console.log('[React MFE] Available routes: /test, /profile, /auth/login, /auth/register, /settings');
+  
   return (
     <>
       <GlobalStyles />
       <Navigation />
       <Routes>
+        <Route path="/test" element={<TestPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
         <Route path="/auth" element={<Navigate to="/auth/login" replace />} />
         
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/settings"
           element={
@@ -38,8 +36,8 @@ function App() {
           }
         />
         
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
-        <Route path="*" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/" element={<Navigate to="/users/profile" replace />} />
+        <Route path="*" element={<Navigate to="/users/profile" replace />} />
       </Routes>
     </>
   );

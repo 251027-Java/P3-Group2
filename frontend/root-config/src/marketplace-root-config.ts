@@ -29,10 +29,17 @@ const applications = constructApplications({
 const layoutEngine = constructLayoutEngine({ routes, applications });
 
 // Register all applications
+console.log('[Root Config] Registering applications:', applications.map(a => a.name));
 applications.forEach(registerApplication);
 
 // Activate layout engine
 layoutEngine.activate();
+
+// Debug: Log route changes
+window.addEventListener('single-spa:before-routing-event', (evt: any) => {
+  console.log('[Root Config] Routing to:', window.location.pathname);
+  console.log('[Root Config] Active apps:', evt.detail?.newAppStatuses);
+});
 
 // Start Single-SPA
 start({

@@ -1,0 +1,35 @@
+<main class="trade">
+  <section class="trade__hero">
+    <span class="trade__pill">Trade request</span>
+    <div class="trade__banner" [class.trade__banner--visible]="requestSent">
+      Request sent. Returning to marketplace...
+    </div>
+    <h1 class="trade__title">Make a trade</h1>
+    <p class="trade__subtitle">
+      Which card would you like in exchange for
+      <span class="trade__focus">{{ selectedCard }}</span>?
+    </p>
+  </section>
+
+  <section class="trade__grid" aria-label="Select a trade target">
+    @for (card of availableCards; track card.id) {
+    <button
+      class="trade-card"
+      [class.trade-card--active]="selectedTrades.has(card.title)"
+      type="button"
+      (click)="toggleTrade(card.title)"
+    >
+      <span class="trade-card__title">{{ card.title }}</span>
+      <span class="trade-card__meta">{{ card.set }} • {{ card.rarity }}</span>
+    </button>
+    }
+  </section>
+
+  <section class="trade__footer">
+    <div class="trade__count">{{ selectedTrades.size }} selected</div>
+    <button class="trade__cta" type="button" [disabled]="selectedTrades.size === 0" (click)="submitTrade()">
+      Request trade
+    </button>
+    <a class="trade__ghost" routerLink="/marketplace">Back to marketplace</a>
+  </section>
+</main>

@@ -7,7 +7,7 @@
  * Handles user profile and settings API calls
  */
 import apiClient from './apiClient';
-import { hasRole } from '@marketplace/shared-utils';
+import { hasRole } from '../utils/auth';
 
 export interface UserProfile {
   id: string;
