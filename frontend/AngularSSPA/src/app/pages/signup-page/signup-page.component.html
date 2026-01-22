@@ -1,18 +1,10 @@
 <section class="signup-shell">
-  <header class="intro">
-    <span class="pill">Register</span>
-    <h1>Build your profile.</h1>
-    <p>
-      Create an account to make your own listings and trade cards.
-    </p>
-  </header>
-
   <div class="card">
     <h2>Create your account</h2>
     <form class="signup-form" (ngSubmit)="onSubmit()">
       <label>
         Username
-        <input name="username" type="text" placeholder="Alex Morgan" [(ngModel)]="username" />
+        <input name="username" type="text" placeholder="Enter your username" [(ngModel)]="username" />
       </label>
       <label>
         Email
@@ -27,5 +19,7 @@
     <p class="fine-print">
       By creating an account, you agree to our Terms and the AI usage policy.
     </p>
+    
+    <button type="button" class="nav-button" routerLink="/login">Login</button>
   </div>
 </section>

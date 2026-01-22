@@ -2,6 +2,7 @@
   "imports": {
     "@marketplace/root-config": "$MKPL_ROOT_CONFIG_URL",
     "@marketplace/mfe-react-users": "$MKPL_REACT_USERS_URL",
+    "@marketplace/mfe-react-navbar": "$MKPL_REACT_NAVBAR_URL",
     "@marketplace/home": "$MKPL_HOME_URL",
     "@marketplace/navbar": "$MKPL_NAVBAR_URL",
     "@marketplace/footer": "$MKPL_FOOTER_URL",

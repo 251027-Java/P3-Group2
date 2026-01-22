@@ -19,6 +19,7 @@ services:
       MKPL_FOOTER_URL: http://localhost:9000/marketplace-root-config.js
       MKPL_NOT_FOUND_URL: http://localhost:9000/marketplace-root-config.js
       MKPL_SHARED_UTIL_URL: http://localhost:4202/marketplace-mfe-react-users.js
+      MKPL_REACT_NAVBAR_URL: http://localhost:4202/marketplace-mfe-react-navbar.js
     networks:
       - frontend-network
 

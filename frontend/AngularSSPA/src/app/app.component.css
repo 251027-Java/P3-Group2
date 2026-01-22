@@ -1,9 +1,17 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #fef9f2 0%, #f2f4f8 45%, #eef0ff 100%);
-  color: #1a1a1f;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 25%, #0a0a0a 50%, #16213e 75%, #0a0a0a 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  color: #ffffff;
   font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 
@@ -11,9 +19,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  gap: 1.5rem;
-  background: transparent; 
+  padding: 0;
+  margin: 0;
+  gap: 0;
+  background: transparent;
 }
 
 
@@ -25,7 +34,7 @@
 
 
 .app-shell--marketplace .top-nav {
-  margin: 24px;
+  margin: 0;
 }
 
 .app-shell--marketplace .page-slot {
@@ -76,10 +85,14 @@
 .page-slot {
   flex: 1;
   display: flex;
+  padding: 0;
+  margin: 0;
 }
 
 .page-slot>* {
   flex: 1;
+  padding: 0;
+  margin: 0;
 }
 
 @media (max-width: 700px) {

@@ -12,15 +12,22 @@ import { filter } from 'rxjs/operators';
 export class AppComponent implements OnDestroy {
   title = 'AngularSSPA';
   isMarketplace = false;
+  hideHeader = false;
   private routeSub: Subscription;
 
   constructor(private router: Router) {
     this.isMarketplace = this.router.url.startsWith('/marketplace');
+    this.hideHeader = this.shouldHideHeader(this.router.url);
     this.routeSub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
         this.isMarketplace = event.urlAfterRedirects.startsWith('/marketplace');
+        this.hideHeader = this.shouldHideHeader(event.urlAfterRedirects);
       });
+  }
+
+  private shouldHideHeader(url: string): boolean {
+    return url.startsWith('/marketplace') || url.startsWith('/login') || url.startsWith('/signup');
   }
 
   ngOnDestroy(): void {

@@ -5,8 +5,9 @@
   "scripts": {
     "start": "webpack serve --port 4202",
     "start:standalone": "webpack serve --env standalone --port 4202",
-    "build": "webpack --mode=production",
-    "build:dev": "webpack --mode=development",
+    "build": "webpack --mode=production && webpack --mode=production --env navbar",
+    "build:dev": "webpack --mode=development && webpack --mode=development --env navbar",
+    "build:navbar": "webpack --mode=production --env navbar",
     "analyze": "webpack-bundle-analyzer build/bundle-stats.json",
     "test": "jest",
     "test:watch": "jest --watch",
