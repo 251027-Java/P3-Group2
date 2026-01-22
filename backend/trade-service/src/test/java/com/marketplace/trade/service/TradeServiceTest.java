@@ -84,6 +84,7 @@ class TradeServiceTest {
         trade.setTradeId(1L);
         trade.setListingId(1L);
         trade.setRequestingUserId(2L);
+        trade.setListingOwnerUserId(1L);
         trade.setTradeStatus(TradeStatus.pending);
         trade.setCreatedAt(LocalDateTime.now());
 
@@ -291,6 +292,7 @@ class TradeServiceTest {
         savedTrade.setTradeId(1L);
         savedTrade.setListingId(tradeRequestDTO.getListingId());
         savedTrade.setRequestingUserId(tradeRequestDTO.getRequestingUserId());
+        savedTrade.setListingOwnerUserId(1L);
         savedTrade.setTradeStatus(TradeStatus.pending);
         savedTrade.setOfferedCards(List.of()); // no offered cards
 
@@ -311,6 +313,7 @@ class TradeServiceTest {
         Trade anotherTrade = new Trade();
         anotherTrade.setTradeId(2L);
         anotherTrade.setListingId(1L);
+        anotherTrade.setListingOwnerUserId(1L);
         anotherTrade.setTradeStatus(TradeStatus.pending);
         anotherTrade.setRequestingUserId(3L);
 
@@ -393,12 +396,14 @@ class TradeServiceTest {
         another1.setTradeId(2L);
         another1.setTradeStatus(TradeStatus.pending);
         another1.setListingId(1L);
+        another1.setListingOwnerUserId(1L);
         another1.setRequestingUserId(3L);
 
         Trade another2 = new Trade();
         another2.setTradeId(3L);
         another2.setTradeStatus(TradeStatus.pending);
         another2.setListingId(1L);
+        another2.setListingOwnerUserId(1L);
         another2.setRequestingUserId(4L);
 
         when(tradeRepository.findByIdWithOfferedCards(1L)).thenReturn(Optional.of(trade));
@@ -422,6 +427,7 @@ class TradeServiceTest {
         trade.setTradeId(1L);
         trade.setListingId(10L);
         trade.setRequestingUserId(20L);
+        trade.setListingOwnerUserId(99L);
         trade.setTradeStatus(Trade.TradeStatus.pending);
 
         ListingResponse listing = new ListingResponse();
@@ -445,6 +451,7 @@ class TradeServiceTest {
         trade.setTradeId(1L);
         trade.setListingId(2L);
         trade.setRequestingUserId(3L);
+        trade.setListingOwnerUserId(1L);
         trade.setTradeStatus(Trade.TradeStatus.pending);
         trade.setOfferedCards(null);
 
@@ -463,11 +470,13 @@ class TradeServiceTest {
         accepted.setTradeId(1L);
         accepted.setListingId(50L);
         accepted.setRequestingUserId(60L);
+        accepted.setListingOwnerUserId(99L);
         accepted.setTradeStatus(Trade.TradeStatus.pending);
 
         Trade other = new Trade();
         other.setTradeId(2L);
         other.setListingId(50L);
+        other.setListingOwnerUserId(99L);
         other.setTradeStatus(Trade.TradeStatus.pending);
 
         ListingResponse listing = new ListingResponse();
@@ -624,6 +633,7 @@ class TradeServiceTest {
         trade2.setTradeId(2L);
         trade2.setListingId(2L);
         trade2.setRequestingUserId(3L);
+        trade2.setListingOwnerUserId(1L);
         trade2.setTradeStatus(TradeStatus.accepted);
 
         when(tradeRepository.findAll()).thenReturn(Arrays.asList(trade, trade2));
@@ -649,6 +659,7 @@ class TradeServiceTest {
         trade2.setTradeId(2L);
         trade2.setListingId(1L);
         trade2.setRequestingUserId(3L);
+        trade2.setListingOwnerUserId(1L);
         trade2.setTradeStatus(TradeStatus.rejected);
 
         when(tradeRepository.findByListingId(1L)).thenReturn(Arrays.asList(trade, trade2));
@@ -665,6 +676,7 @@ class TradeServiceTest {
         trade2.setTradeId(2L);
         trade2.setListingId(2L);
         trade2.setRequestingUserId(2L);
+        trade2.setListingOwnerUserId(1L);
         trade2.setTradeStatus(TradeStatus.accepted);
 
         when(tradeRepository.findByRequestingUserId(2L)).thenReturn(Arrays.asList(trade, trade2));
@@ -740,6 +752,7 @@ class TradeServiceTest {
         savedTrade.setTradeId(1L);
         savedTrade.setListingId(1L);
         savedTrade.setRequestingUserId(2L);
+        savedTrade.setListingOwnerUserId(1L);
         savedTrade.setTradeStatus(TradeStatus.pending);
 
         TradeOfferedCard card = new TradeOfferedCard();
@@ -767,6 +780,7 @@ class TradeServiceTest {
         savedTrade.setTradeId(1L);
         savedTrade.setListingId(1L);
         savedTrade.setRequestingUserId(2L);
+        savedTrade.setListingOwnerUserId(1L);
         savedTrade.setTradeStatus(TradeStatus.pending);
         savedTrade.setOfferedCards(Arrays.asList());
 

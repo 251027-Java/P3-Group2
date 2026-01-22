@@ -94,6 +94,14 @@ credentials:
               fileName: "kubeconfig"
               id: "kubeconfig"
               secretBytes: ${kubeconfig}
+          - basicSSHUserPrivateKey:
+              description: "SSH credentials for app server"
+              id: "app-server-ssh"
+              privateKeySource:
+                directEntry:
+                  privateKey: ${app_server_key}
+              username: "${app_server_user}@${app_server_hostname}"
+              usernameSecret: true
         domain: {}
 
 # https://github.com/jenkinsci/job-dsl-plugin/wiki/JCasC

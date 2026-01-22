@@ -8,7 +8,6 @@
     "react-router-dom": "https://cdn.jsdelivr.net/npm/react-router-dom@6.18.0/dist/umd/react-router-dom.production.min.js",
     "styled-components": "https://cdn.jsdelivr.net/npm/styled-components@6.1.1/dist/styled-components.min.js",
     "@marketplace/root-config": "$MKPL_ROOT_CONFIG_URL",
-    "@marketplace/mfe-angular-cards": "$MKPL_ANGULAR_CARDS_URL",
     "@marketplace/mfe-react-users": "$MKPL_REACT_USERS_URL",
     "@marketplace/home": "$MKPL_HOME_URL",
     "@marketplace/navbar": "$MKPL_NAVBAR_URL",

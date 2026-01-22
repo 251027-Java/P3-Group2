@@ -3,6 +3,8 @@
  */
 const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
+const { DefinePlugin } = require("webpack");
+const dotenv = require('dotenv');
 
 module.exports = (webpackConfigEnv, argv) => {
   const defaultConfig = singleSpaDefaults({
@@ -11,6 +13,12 @@ module.exports = (webpackConfigEnv, argv) => {
     webpackConfigEnv,
     argv,
   });
+
+  if (defaultConfig.mode === 'production') {
+    dotenv.config({ path: '.env.production' });
+  } else {
+    dotenv.config();
+  }
 
   return merge(defaultConfig, {
     // Hot Module Replacement
@@ -32,5 +40,10 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     // Externals for shared dependencies
     externals: ["react", "react-dom", "react-router-dom", "single-spa"],
+    plugins: [
+      new DefinePlugin({
+        "process.env.API_URL": JSON.stringify(process.env.API_URL),
+      })
+    ]
   });
 };

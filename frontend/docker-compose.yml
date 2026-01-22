@@ -13,7 +13,6 @@ services:
       - "9000:9000"
     environment:
       MKPL_ROOT_CONFIG_URL: http://localhost:9000/marketplace-root-config.js
-      MKPL_ANGULAR_CARDS_URL: http://localhost:4201/main.js
       MKPL_REACT_USERS_URL: http://localhost:4202/marketplace-mfe-react-users.js
       MKPL_HOME_URL: http://localhost:4201/main.js
       MKPL_NAVBAR_URL: http://localhost:9000/marketplace-root-config.js
@@ -30,6 +29,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4201:4201"
+    environment:
+      MKPL_API_URL: http://localhost:52172
     networks:
       - frontend-network
 
@@ -40,6 +41,8 @@ services:
       dockerfile: ./mfe-react-users/Dockerfile
     ports:
       - "4202:4202"
+    environment:
+      MKPL_API_URL: http://localhost:52172
     networks:
       - frontend-network
 

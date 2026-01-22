@@ -65,6 +65,7 @@ RUN --mount=type=bind,source=mfe-react-users/package.json,target=package.json \
 COPY ./mfe-react-users/src src
 COPY ./mfe-react-users/*.json .
 COPY ./mfe-react-users/*.js .
+COPY ./mfe-react-users/.env.production .
 
 # Run the build script.
 RUN npm run build
@@ -80,9 +81,10 @@ COPY ./mfe-react-users/nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port
 EXPOSE 4202
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:4202/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=3s \
+  CMD wget -qO- http://127.0.0.1:4202/health > /dev/null || exit 1
 
 # Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+COPY --chmod=755 ./mfe-react-users/start-nginx.sh /usr/local/bin/
+
+ENTRYPOINT [ "start-nginx.sh" ]
