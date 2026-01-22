@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -13,12 +14,18 @@ export class LoginPageComponent {
   email : string = "";
   password: string = "";
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   onSubmit() {
     // Call to auth service to login
-    console.log('Login with this email:', this.email, ' and this password:', this.password);
-
-    this.router.navigateByUrl('marketplace');
+    this.auth.login(this.email, this.password).subscribe({
+      next: (response) => {
+        console.log('Login success', response);
+        this.router.navigateByUrl('marketplace');
+      },
+      error: (err) => {
+        console.error('Login failed', err);
+      }
+    })
   }
 }
