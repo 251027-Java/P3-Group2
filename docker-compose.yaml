@@ -206,6 +206,8 @@ services:
     container_name: angular-sspa
     ports:
       - ${ANGULAR_SSPA_PORT}:4201
+    environment:
+      MKPL_API_URL: http://localhost:${GATEWAY_PORT}
   
   react-users:
     build:

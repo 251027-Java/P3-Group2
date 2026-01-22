@@ -81,6 +81,9 @@ COPY ./mfe-react-users/nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port
 EXPOSE 4202
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=3s \
+  CMD wget -qO- http://127.0.0.1:4202/health > /dev/null || exit 1
+
 # Start nginx
 COPY --chmod=755 ./mfe-react-users/start-nginx.sh /usr/local/bin/
 

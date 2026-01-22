@@ -56,6 +56,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port
 EXPOSE 9000
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=3s \
+  CMD wget -qO- http://127.0.0.1:9000/health > /dev/null || exit 1
+
 # Start nginx
 COPY --chmod=755 ./start-nginx.sh /usr/local/bin/
 

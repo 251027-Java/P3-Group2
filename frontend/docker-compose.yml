@@ -29,6 +29,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4201:4201"
+    environment:
+      MKPL_API_URL: http://localhost:52172
     networks:
       - frontend-network
 

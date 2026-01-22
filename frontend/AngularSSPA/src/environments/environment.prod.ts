@@ -1,3 +1,6 @@
+const PREFIX = 'MKPL';
+
 export const environment = {
-    production: true
+  production: true,
+  apiUrl: `$${PREFIX}_API_URL`,
 };
