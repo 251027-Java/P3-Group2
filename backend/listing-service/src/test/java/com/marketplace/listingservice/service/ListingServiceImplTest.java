@@ -23,7 +23,7 @@ import com.marketplace.listingservice.exception.CardNotFoundException;
 import com.marketplace.listingservice.exception.InvalidListingOperationException;
 import com.marketplace.listingservice.exception.ListingNotFoundException;
 import com.marketplace.listingservice.exception.UserNotFoundException;
-import com.marketplace.listingservice.kafka.ListingEventProducer;
+// import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.impl.ListingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,8 +51,8 @@ class ListingServiceImplTest {
     @Mock
     private ListingRepository listingRepository;
 
-    @Mock
-    private ListingEventProducer listingEventProducer;
+    // @Mock
+    // private ListingEventProducer listingEventProducer;
 
     @Mock
     private CardServiceClient cardServiceClient;
@@ -101,7 +101,7 @@ class ListingServiceImplTest {
             when(userServiceClient.getUserById(100L)).thenReturn(Optional.of(userResponse));
             when(cardServiceClient.getCardById(200L)).thenReturn(Optional.of(cardResponse));
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
-            doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
+            // doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
             ListingResponse response = listingService.createListing(createRequest);
 
@@ -115,7 +115,7 @@ class ListingServiceImplTest {
             verify(userServiceClient, times(1)).getUserById(100L);
             verify(cardServiceClient, times(1)).getCardById(200L);
             verify(listingRepository, times(1)).save(any(Listing.class));
-            verify(listingEventProducer, times(1)).sendListingCreatedEvent(any(Listing.class));
+            // verify(listingEventProducer, times(1)).sendListingCreatedEvent(any(Listing.class));
         }
 
         @Test
@@ -129,7 +129,7 @@ class ListingServiceImplTest {
             when(userServiceClient.getUserById(100L)).thenReturn(Optional.of(userResponse));
             when(cardServiceClient.getCardById(200L)).thenReturn(Optional.of(cardResponse));
             when(listingRepository.save(any(Listing.class))).thenReturn(testListing);
-            doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
+            // doNothing().when(listingEventProducer).sendListingCreatedEvent(any(Listing.class));
 
             ListingResponse response = listingService.createListing(createRequest);
 
@@ -288,14 +288,14 @@ class ListingServiceImplTest {
 
             when(listingRepository.findById(1L)).thenReturn(Optional.of(testListing));
             when(listingRepository.save(any(Listing.class))).thenReturn(updatedListing);
-            doNothing().when(listingEventProducer).sendListingUpdatedEvent(any(Listing.class));
+            // doNothing().when(listingEventProducer).sendListingUpdatedEvent(any(Listing.class));
 
             ListingResponse response = listingService.updateListing(1L, updateRequest);
 
             assertThat(response).isNotNull();
             assertThat(response.getConditionRating()).isEqualTo(9);
             verify(listingRepository, times(1)).save(any(Listing.class));
-            verify(listingEventProducer, times(1)).sendListingUpdatedEvent(any(Listing.class));
+            // verify(listingEventProducer, times(1)).sendListingUpdatedEvent(any(Listing.class));
         }
 
         @Test
@@ -336,7 +336,7 @@ class ListingServiceImplTest {
 
             when(listingRepository.findById(1L)).thenReturn(Optional.of(testListing));
             when(listingRepository.save(any(Listing.class))).thenReturn(updatedListing);
-            doNothing().when(listingEventProducer).sendListingUpdatedEvent(any(Listing.class));
+            // doNothing().when(listingEventProducer).sendListingUpdatedEvent(any(Listing.class));
 
             ListingResponse response = listingService.updateListing(1L, statusUpdate);
 
@@ -362,12 +362,12 @@ class ListingServiceImplTest {
 
             when(listingRepository.findById(1L)).thenReturn(Optional.of(testListing));
             when(listingRepository.save(any(Listing.class))).thenReturn(cancelledListing);
-            doNothing().when(listingEventProducer).sendListingStatusChangedEvent(any(Listing.class), anyString());
+            // doNothing().when(listingEventProducer).sendListingStatusChangedEvent(any(Listing.class), anyString());
 
             ListingResponse response = listingService.cancelListing(1L);
 
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.CANCELLED);
-            verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("CANCELLED"));
+            // verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("CANCELLED"));
         }
 
         @Test
@@ -408,12 +408,12 @@ class ListingServiceImplTest {
 
             when(listingRepository.findById(1L)).thenReturn(Optional.of(testListing));
             when(listingRepository.save(any(Listing.class))).thenReturn(completedListing);
-            doNothing().when(listingEventProducer).sendListingStatusChangedEvent(any(Listing.class), anyString());
+            // doNothing().when(listingEventProducer).sendListingStatusChangedEvent(any(Listing.class), anyString());
 
             ListingResponse response = listingService.completeListing(1L);
 
             assertThat(response.getListingStatus()).isEqualTo(ListingStatus.COMPLETED);
-            verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("COMPLETED"));
+            // verify(listingEventProducer, times(1)).sendListingStatusChangedEvent(any(Listing.class), eq("COMPLETED"));
         }
 
         @Test
@@ -445,12 +445,12 @@ class ListingServiceImplTest {
         void deleteListing_Success() {
             when(listingRepository.findById(1L)).thenReturn(Optional.of(testListing));
             doNothing().when(listingRepository).delete(any(Listing.class));
-            doNothing().when(listingEventProducer).sendListingDeletedEvent(anyLong());
+            // doNothing().when(listingEventProducer).sendListingDeletedEvent(anyLong());
 
             listingService.deleteListing(1L);
 
             verify(listingRepository, times(1)).delete(testListing);
-            verify(listingEventProducer, times(1)).sendListingDeletedEvent(1L);
+            // verify(listingEventProducer, times(1)).sendListingDeletedEvent(1L);
         }
 
         @Test

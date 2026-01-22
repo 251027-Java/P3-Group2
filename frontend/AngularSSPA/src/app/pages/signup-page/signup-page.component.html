@@ -1,51 +1,31 @@
 <section class="signup-shell">
   <header class="intro">
-    <span class="pill">Early access</span>
-    <h1>Build your marketplace HQ.</h1>
+    <span class="pill">Register</span>
+    <h1>Build your profile.</h1>
     <p>
-      Create a workspace to manage inventory, approvals, and supplier discovery.
-      Everything you need, in one shared command center.
+      Create an account to make your own listings and trade cards.
     </p>
   </header>
 
   <div class="card">
     <h2>Create your account</h2>
-    <form class="signup-form">
+    <form class="signup-form" (ngSubmit)="onSubmit()">
       <label>
-        Full name
-        <input type="text" placeholder="Alex Morgan" />
+        Username
+        <input name="username" type="text" placeholder="Alex Morgan" [(ngModel)]="username" />
       </label>
       <label>
-        Work email
-        <input type="email" placeholder="alex@company.com" />
-      </label>
-      <label>
-        Team size
-        <select>
-          <option>1-5 people</option>
-          <option>6-25 people</option>
-          <option>26-100 people</option>
-          <option>100+ people</option>
-        </select>
+        Email
+        <input name="email" type="email" placeholder="Enter your email" [(ngModel)]="email" />
       </label>
       <label>
         Password
-        <input type="password" placeholder="Create a password" />
+        <input name="password" type="password" placeholder="Create a password" [(ngModel)]="password" />
       </label>
-      <button type="button" class="primary">Create workspace</button>
-      <button type="button" class="ghost">Start with a demo workspace</button>
+      <button type="submit" class="primary">Register</button>
     </form>
     <p class="fine-print">
       By creating an account, you agree to our Terms and the AI usage policy.
     </p>
   </div>
-
-  <aside class="benefits">
-    <h3>What you get</h3>
-    <ul>
-      <li>Shared approval flows for every purchase request</li>
-      <li>Live pricing updates from verified vendors</li>
-      <li>Automated insights on spend and delivery risk</li>
-    </ul>
-  </aside>
 </section>
