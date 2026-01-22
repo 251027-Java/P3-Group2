@@ -16,7 +16,7 @@ import com.marketplace.listingservice.exception.CardNotFoundException;
 import com.marketplace.listingservice.exception.InvalidListingOperationException;
 import com.marketplace.listingservice.exception.ListingNotFoundException;
 import com.marketplace.listingservice.exception.UserNotFoundException;
-import com.marketplace.listingservice.kafka.ListingEventProducer;
+// import com.marketplace.listingservice.kafka.ListingEventProducer;
 import com.marketplace.listingservice.repository.ListingRepository;
 import com.marketplace.listingservice.service.ListingService;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepository;
-    private final ListingEventProducer listingEventProducer;
+    // private final ListingEventProducer listingEventProducer;
     private final CardServiceClient cardServiceClient;
     private final UserServiceClient userServiceClient;
 
@@ -70,7 +70,7 @@ public class ListingServiceImpl implements ListingService {
         log.info("Listing created successfully with ID: {}", savedListing.getListingId());
 
         // Publish listing created event
-        listingEventProducer.sendListingCreatedEvent(savedListing);
+        // listingEventProducer.sendListingCreatedEvent(savedListing);
 
         return ListingResponse.fromEntity(savedListing);
     }
@@ -160,7 +160,7 @@ public class ListingServiceImpl implements ListingService {
         log.info("Listing updated successfully with ID: {}", updatedListing.getListingId());
 
         // Publish listing updated event
-        listingEventProducer.sendListingUpdatedEvent(updatedListing);
+        // listingEventProducer.sendListingUpdatedEvent(updatedListing);
 
         return ListingResponse.fromEntity(updatedListing);
     }
@@ -182,7 +182,7 @@ public class ListingServiceImpl implements ListingService {
         log.info("Listing cancelled successfully with ID: {}", cancelledListing.getListingId());
 
         // Publish listing cancelled event
-        listingEventProducer.sendListingStatusChangedEvent(cancelledListing, "CANCELLED");
+        // listingEventProducer.sendListingStatusChangedEvent(cancelledListing, "CANCELLED");
 
         return ListingResponse.fromEntity(cancelledListing);
     }
@@ -204,7 +204,7 @@ public class ListingServiceImpl implements ListingService {
         log.info("Listing completed successfully with ID: {}", completedListing.getListingId());
 
         // Publish listing completed event
-        listingEventProducer.sendListingStatusChangedEvent(completedListing, "COMPLETED");
+        // listingEventProducer.sendListingStatusChangedEvent(completedListing, "COMPLETED");
 
         return ListingResponse.fromEntity(completedListing);
     }
@@ -220,7 +220,7 @@ public class ListingServiceImpl implements ListingService {
         log.info("Listing deleted successfully with ID: {}", listingId);
 
         // Publish listing deleted event
-        listingEventProducer.sendListingDeletedEvent(listingId);
+        // listingEventProducer.sendListingDeletedEvent(listingId);
     }
 
     /**
