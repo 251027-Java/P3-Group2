@@ -195,6 +195,7 @@ services:
     environment:
       MKPL_ROOT_CONFIG_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
       MKPL_REACT_USERS_URL: http://localhost:${REACT_USERS_PORT}/marketplace-mfe-react-users.js
+      MKPL_REACT_NAVBAR_URL: http://localhost:${REACT_USERS_PORT}/marketplace-mfe-react-navbar.js
       MKPL_HOME_URL: http://localhost:${ANGULAR_SSPA_PORT}/main.js
       MKPL_NAVBAR_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
       MKPL_FOOTER_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js

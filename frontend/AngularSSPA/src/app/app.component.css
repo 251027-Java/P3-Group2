@@ -11,8 +11,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  gap: 1.5rem;
+  padding: 0;
+  gap: 0;
   background: transparent; 
 }
 
@@ -25,7 +25,7 @@
 
 
 .app-shell--marketplace .top-nav {
-  margin: 24px;
+  margin: 0;
 }
 
 .app-shell--marketplace .page-slot {
