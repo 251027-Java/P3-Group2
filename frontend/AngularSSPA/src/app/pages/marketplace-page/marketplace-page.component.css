@@ -192,6 +192,11 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  position: static;
 }
 
 .modal__eyebrow {
@@ -314,6 +319,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  position: static;
 }
 
 .modal__ghost,
