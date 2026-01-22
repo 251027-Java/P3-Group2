@@ -21,6 +21,7 @@ export interface UserProfile {
     action: string;
     timestamp: string;
   }>;
+  createdAt: Date;
 }
 
 export interface UpdateProfileRequest {
