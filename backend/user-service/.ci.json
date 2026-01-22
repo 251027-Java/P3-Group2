@@ -23,5 +23,9 @@
                 "linux/arm64"
             ]
         }
+    },
+    "deploy": {
+        "enabled": true,
+        "name": "user-service"
     }
 }
