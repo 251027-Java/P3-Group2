@@ -30,7 +30,8 @@ services:
     ports:
       - "4201:4201"
     environment:
-      MKPL_API_URL: http://localhost:52172
+      MKPL_API_URL: https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com
+ 
     networks:
       - frontend-network
 
@@ -42,7 +43,8 @@ services:
     ports:
       - "4202:4202"
     environment:
-      MKPL_API_URL: http://localhost:52172
+      MKPL_API_URL: https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com
+ 
     networks:
       - frontend-network
 

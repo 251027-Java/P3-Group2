@@ -45,6 +45,18 @@ export interface ChangePasswordRequest {
 
 class UserService {
   /**
+   * Get user by ID
+   */
+  async getUserById(userId: string): Promise<UserProfile> {
+    try {
+      const response = await apiClient.get<UserProfile>(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Get user profile
    */
   async getProfile(): Promise<UserProfile> {

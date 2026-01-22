@@ -7,11 +7,12 @@ import { environment } from '../utils/environment';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: environment.apiUrl || 'http://localhost:8081',
+  baseURL: environment.apiUrl || 'http://localhost:8080',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false,
 });
 
 // Request interceptor - Add auth token to requests

@@ -17,7 +17,9 @@ import {
   FiLock
 } from 'react-icons/fi';
 import { getUserData } from '../utils/auth';
-import { environment } from '../utils/environment';
+import TradeService, { Trade } from '../services/TradeService';
+import ListingService, { Listing } from '../services/ListingService';
+import UserService, { UserProfile } from '../services/UserService';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -348,43 +350,49 @@ const ProfilePage: React.FC = () => {
     rating: 'New Trainer'
   });
   const [loading, setLoading] = useState(true);
-  const [userFullData, setUserFullData] = useState<any>(null);
+  const [userFullData, setUserFullData] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const userData = getUserData();
-  const userId = userData?.userId || null;
-  const username = userData?.username || 'Guest Trainer';
-  const email = userData?.email || 'trainer@pokemarketplace.com';
+  const userId = userData?.userId || userData?.id || null;
+  const username = userFullData?.username || userData?.username || 'Guest Trainer';
+  const email = userFullData?.email || userData?.email || 'trainer@pokemarketplace.com';
   
   useEffect(() => {
     const fetchUserStats = async () => {
       if (!userId) {
         setLoading(false);
+        setError('No user ID found. Please log in.');
         return;
       }
 
       try {
         setLoading(true);
-        const apiGateway = environment.apiUrl || 'http://localhost:8080';
+        setError(null);
+        
+        console.log('[ProfilePage] Fetching data for userId:', userId);
         
         // Fetch user details
-        const userResponse = await fetch(`${apiGateway}/api/users/${userId}`);
-        if (userResponse.ok) {
-          const user = await userResponse.json();
+        try {
+          const user = await UserService.getUserById(userId);
           setUserFullData(user);
+          console.log('[ProfilePage] User data fetched:', user);
+        } catch (err) {
+          console.error('[ProfilePage] Error fetching user:', err);
         }
 
         // Fetch user's trades
-        const tradesResponse = await fetch(`${apiGateway}/api/trades/user/${userId}`);
-        const trades = tradesResponse.ok ? await tradesResponse.json() : [];
+        const trades = await TradeService.getUserTrades(userId);
+        console.log('[ProfilePage] Trades fetched:', trades.length);
         
         // Fetch user's listings
-        const listingsResponse = await fetch(`${apiGateway}/api/listings/user/${userId}`);
-        const listings = listingsResponse.ok ? await listingsResponse.json() : [];
+        const listings = await ListingService.getUserListings(userId);
+        console.log('[ProfilePage] Listings fetched:', listings.length);
         
         // Calculate statistics
-        const completedTrades = trades.filter((t: any) => t.tradeStatus === 'ACCEPTED').length;
-        const pendingTrades = trades.filter((t: any) => t.tradeStatus === 'PENDING').length;
-        const activeListings = listings.filter((l: any) => l.listingStatus === 'ACTIVE').length;
+        const completedTrades = trades.filter((t: Trade) => t.tradeStatus === 'ACCEPTED' || t.tradeStatus === 'COMPLETED').length;
+        const pendingTrades = trades.filter((t: Trade) => t.tradeStatus === 'PENDING').length;
+        const activeListings = listings.filter((l: Listing) => l.listingStatus === 'ACTIVE').length;
         
         // Calculate rating based on completed trades
         let rating = 'New Trainer';
@@ -403,9 +411,15 @@ const ProfilePage: React.FC = () => {
           rating: rating
         });
         
-        console.log('[ProfilePage] Stats fetched:', { trades: trades.length, listings: listings.length });
-      } catch (error) {
+        console.log('[ProfilePage] Stats calculated:', { 
+          totalTrades: trades.length, 
+          completedTrades, 
+          totalListings: listings.length, 
+          activeListings 
+        });
+      } catch (error: any) {
         console.error('[ProfilePage] Error fetching user stats:', error);
+        setError(error.response?.data?.message || error.message || 'Failed to load profile data');
       } finally {
         setLoading(false);
       }
