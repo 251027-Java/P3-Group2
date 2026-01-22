@@ -269,6 +269,61 @@ public class TradeService {
         }
     }
 
+    @Transactional
+    public void handleUserDeleted(Long userId) {
+        log.info("Handling user deleted event for userId={}", userId);
+
+        // Trades requested BY the user
+        List<Trade> requestedTrades =
+                tradeRepository.findByRequestingUserId(userId);
+
+        for (Trade trade : requestedTrades) {
+            if (trade.getTradeStatus() == TradeStatus.pending) {
+                trade.setTradeStatus(TradeStatus.cancelled);
+                tradeRepository.save(trade);
+
+                publishTradeEvent(
+                    "TRADE_CANCELLED_USER_DELETED",
+                    trade.getTradeId(),
+                    trade.getListingId(),
+                    trade.getRequestingUserId()
+                );
+
+                log.info(
+                    "Cancelled trade {} because requesting user {} was deleted",
+                    trade.getTradeId(),
+                    userId
+                );
+            }
+        }
+
+        // (Optional but recommended)
+        // Trades where user OWNS the listing
+        List<Trade> listingOwnerTrades =
+                tradeRepository.findTradesByListingOwnerUserId(userId);
+
+        for (Trade trade : listingOwnerTrades) {
+            if (trade.getTradeStatus() == TradeStatus.pending) {
+                trade.setTradeStatus(TradeStatus.cancelled);
+                tradeRepository.save(trade);
+
+                publishTradeEvent(
+                    "TRADE_CANCELLED_LISTING_OWNER_DELETED",
+                    trade.getTradeId(),
+                    trade.getListingId(),
+                    trade.getRequestingUserId()
+                );
+
+                log.info(
+                    "Cancelled trade {} because listing owner {} was deleted",
+                    trade.getTradeId(),
+                    userId
+                );
+            }
+        }
+    }
+
+
 
     /**
      * Publish trade event to Kafka

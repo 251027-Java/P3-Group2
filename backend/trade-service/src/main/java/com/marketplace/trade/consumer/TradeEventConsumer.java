@@ -58,6 +58,28 @@ public class TradeEventConsumer {
     @KafkaListener(topics = "user-events", groupId = "trade-service-group")
     public void consumeUserEvent(Map<String, Object> event) {
         log.info("Received user event: {}", event);
-        // Handle user events if needed
-    }
+    
+        try {
+            String eventType = (String) event.get("eventType");
+    
+            if (!"USER_DELETED".equals(eventType)) {
+                return; // Ignore other user events
+            }
+    
+            Object userIdObj = event.get("userId");
+    
+            if (userIdObj == null) {
+                log.warn("USER_DELETED event missing userId: {}", event);
+                return;
+            }
+    
+            Long userId = Long.valueOf(userIdObj.toString());
+    
+            tradeService.handleUserDeleted(userId);
+    
+        } catch (Exception ex) {
+            log.error("Failed to process user event: {}", event, ex);
+            throw ex; // enables Kafka retry / DLQ
+        }
+    }    
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
+import org.example.kafka.UserEventProducer;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserEventProducer userEventProducer;
 
     @InjectMocks
     private UserService userService;

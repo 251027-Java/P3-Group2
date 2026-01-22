@@ -33,4 +33,13 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     @Query("SELECT t FROM Trade t JOIN FETCH t.offeredCards WHERE t.tradeId = :tradeId")
     Optional<Trade> findByIdWithOfferedCards(@Param("tradeId") Long tradeId);
+
+    @Query("""
+    SELECT t FROM Trade t
+    WHERE t.listingId IN (
+            SELECT l.listingId FROM Listing l WHERE l.ownerUserId = :userId
+    )
+    """)
+    List<Trade> findTradesByListingOwnerUserId(Long userId);
+
 }
