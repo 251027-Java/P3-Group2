@@ -476,7 +476,7 @@ Services communicate asynchronously via Kafka:
 
 Eureka enables:
 
-- Automatic service registration
+- Automatic service registration 
 - Dynamic load balancing
 - Health monitoring
 - Fault tolerance
