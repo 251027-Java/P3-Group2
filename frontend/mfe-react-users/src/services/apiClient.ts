@@ -3,7 +3,10 @@
  */
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken, clearAuthTokens } from '../utils/auth';
+<<<<<<< HEAD
 import { environment } from '../utils/environment';
+=======
+>>>>>>> origin/frontendLoginSignup
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({

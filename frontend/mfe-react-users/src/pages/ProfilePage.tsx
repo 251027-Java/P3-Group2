@@ -19,6 +19,7 @@ import {
 import { getUserData } from '../utils/auth';
 import { environment } from '../utils/environment';
 
+
 const PageContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 25%, #0a0a0a 50%, #16213e 75%, #0a0a0a 100%);
@@ -365,6 +366,7 @@ const ProfilePage: React.FC = () => {
       try {
         setLoading(true);
         const apiGateway = environment.apiUrl || 'http://localhost:8080';
+
         
         // Fetch user details
         const userResponse = await fetch(`${apiGateway}/api/users/${userId}`);
