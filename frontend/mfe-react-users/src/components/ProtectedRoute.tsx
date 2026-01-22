@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { getAuthToken, isTokenExpired } from '@marketplace/shared-utils';
+import { getAuthToken, isTokenExpired } from '../utils/auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

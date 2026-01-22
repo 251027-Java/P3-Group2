@@ -7,7 +7,7 @@
  * Handles all authentication-related API calls and token management
  */
 import apiClient from './apiClient';
-import { setAuthToken, clearAuthTokens, getRefreshToken, setUserData } from '@marketplace/shared-utils';
+import { setAuthToken, clearAuthTokens, getRefreshToken, setUserData } from '../utils/auth';
 
 export interface LoginCredentials {
   email: string;
