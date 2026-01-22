@@ -5,6 +5,7 @@ import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
+import org.example.kafka.UserEventProducer;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
+    private final UserEventProducer userEventProducer;
 
     @Transactional
     public Optional<UserResponse> createUser(CreateUserRequest request) {
@@ -43,6 +45,12 @@ public class UserService {
         user.setRole(request.getRole() != null ? request.getRole() : "USER");
 
         User savedUser = userRepository.save(user);
+
+        userEventProducer.sendUserCreatedEvent(
+            savedUser.getUserId(),
+            savedUser.getUsername(),
+            savedUser.getEmail()
+        );
 
         return Optional.of(UserResponse.fromUser(savedUser));
     }
@@ -111,6 +119,7 @@ public class UserService {
             throw new IllegalArgumentException("User not found with ID: " + userId);
         }
 
+        userEventProducer.sendUserDeletedEvent(userId);
         userRepository.deleteById(userId);
     }
 
