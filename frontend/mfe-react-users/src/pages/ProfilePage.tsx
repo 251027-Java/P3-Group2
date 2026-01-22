@@ -429,16 +429,15 @@ const ProfilePage: React.FC = () => {
     <PageContainer>
       <ContentWrapper>
         <Header>
-          <Title>Trainer Profile</Title>
-          <Subtitle>Your journey through the Pokémon Trading Marketplace</Subtitle>
+          <Title>{username}'s Profile</Title>
         </Header>
 
         <TrainerCard>
-          <CardTitle>Trainer Information</CardTitle>
+          <CardTitle>User Information</CardTitle>
           <InfoRow>
             <InfoLabel>
               <FiUser />
-              <span>Trainer ID</span>
+              <span>Username</span>
             </InfoLabel>
             <InfoValue>{username}</InfoValue>
           </InfoRow>
