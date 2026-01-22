@@ -64,7 +64,8 @@
   "dependencies": {
     "@marketplace/shared-utils": "file:../shared-utils",
     "axios": "^1.6.0",
-    "framer-motion": "^10.16.0",
+    "framer-motion": "^10.18.0",
+    "ogl": "^1.0.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
