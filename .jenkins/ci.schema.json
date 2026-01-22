@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Service Pipeline Config",
-    "description": "Configuration file controlling linting, testing, building, and image tagging for a service.",
+    "description": "Configuration file controlling linting, testing, building, image tagging, and Kubernetes deployment for a service.",
     "type": "object",
     "properties": {
         "$schema": {
@@ -140,7 +140,28 @@
                 "tagSeries",
                 "repository",
                 "platform"
-            ]
+            ],
+            "additionalProperties": false
+        },
+        "deploy": {
+            "type": "object",
+            "description": "Configuration for Kubernetes deployments.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether the deploy stage should run."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The Kubernetes Deployment resource name.",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "enabled",
+                "name"
+            ],
+            "additionalProperties": false
         }
     },
     "required": [

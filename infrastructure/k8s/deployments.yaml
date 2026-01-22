@@ -1,0 +1,853 @@
+# user service : minidomo/gemdeck:be-user-service-latest
+# trade service : minidomo/gemdeck:be-trade-service-latest
+# card service : minidomo/gemdeck:be-card-service-latest
+# listing service : minidomo/gemdeck:be-listing-service-latest
+# eureka server : minidomo/gemdeck:be-eureka-server-latest
+# api gateway : minidomo/gemdeck:be-gateway-latest
+# auth service : minidomo/gemdeck:be-auth-service-latest
+# react frontend : minidomo/gemdeck:fe-react-users-latest
+# angular frontend : minidomo/gemdeck:fe-angular-sspa-latest
+# root config frontend : minidomo/gemdeck:fe-root-config-latest
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: card-marketplace-config
+data:
+  # Eureka configuration
+  EUREKA_SERVER_URI: "http://eureka-server:8761/eureka"
+  # Database configuration (external)
+  SHARED_DB_HOST: "cardmarketplace.ctooayyuiz2j.us-east-2.rds.amazonaws.com"
+  SHARED_DB_PORT: "5432"
+  SHARED_DB_NAME: "postgres"
+  SHARED_DB_CONNECTION_URL: "jdbc:postgresql://cardmarketplace.ctooayyuiz2j.us-east-2.rds.amazonaws.com:5432/postgres"
+  # Kafka configuration (external)
+  KAFKA_BOOTSTRAP_SERVERS: "ec2-3-129-76-151.us-east-2.compute.amazonaws.com:9092"
+  LOGSTASH_URL: "ec2-3-129-76-151.us-east-2.compute.amazonaws.com:5044"
+  # Service ports
+  GATEWAY_PORT: "8080"
+  CARD_SERVICE_PORT: "8081"
+  LISTING_SERVICE_PORT: "8082"
+  USER_SERVICE_PORT: "8083"
+  AUTH_SERVICE_PORT: "8084"
+  TRADE_SERVICE_PORT: "8085"
+
+# ============================================
+# EUREKA SERVER
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+        - name: eureka-server
+          image: minidomo/gemdeck:be-eureka-server-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8761
+          readinessProbe:
+            httpGet:
+              path: /eureka/apps
+              port: 8761
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /eureka/apps
+              port: 8761
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server
+spec:
+  selector:
+    app: eureka-server  
+  ports:
+    - protocol: TCP
+      port: 8761
+      targetPort: 8761
+  type: ClusterIP
+
+# ============================================
+# API GATEWAY
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: minidomo/gemdeck:be-gateway-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: JWT_EXPIRATION
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    app: api-gateway  
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+
+# ============================================
+# CARD SERVICE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: card-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: card-service
+  template:
+    metadata:
+      labels:
+        app: card-service
+    spec:
+      containers:
+        - name: card-service
+          image: minidomo/gemdeck:be-card-service-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_CONNECTION_URL
+            - name: SHARED_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_HOST
+            - name: SHARED_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_PORT
+            - name: SHARED_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_NAME
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_PASSWORD
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: CARD_SERVICE_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: card-service
+spec:
+  selector:
+    app: card-service  
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: ClusterIP
+
+# ============================================
+# LISTING SERVICE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: listing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: listing-service
+  template:
+    metadata:
+      labels:
+        app: listing-service
+    spec:
+      containers:
+        - name: listing-service
+          image: minidomo/gemdeck:be-listing-service-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_PASSWORD
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: LISTING_SERVICE_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: listing-service
+spec:
+  selector:
+    app: listing-service  
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+  type: ClusterIP
+
+# ============================================
+# USER SERVICE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: minidomo/gemdeck:be-user-service-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SHARED_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_HOST
+            - name: SHARED_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_PORT
+            - name: SHARED_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_NAME
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(SHARED_DB_HOST):$(SHARED_DB_PORT)/$(SHARED_DB_NAME)"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_PASSWORD
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: USER_SERVICE_PORT
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: KAFKA_BOOTSTRAP_SERVERS
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-service  
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
+  type: ClusterIP
+
+# ============================================
+# AUTH SERVICE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: minidomo/gemdeck:be-auth-service-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8084
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: JWT_EXPIRATION
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: AUTH_SERVICE_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth-service  
+  ports:
+    - protocol: TCP
+      port: 8084
+      targetPort: 8084
+  type: ClusterIP
+
+# ============================================
+# TRADE SERVICE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trade-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trade-service
+  template:
+    metadata:
+      labels:
+        app: trade-service
+    spec:
+      containers:
+        - name: trade-service
+          image: minidomo/gemdeck:be-trade-service-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: SHARED_DB_NAME
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: card-marketplace-secrets
+                  key: SHARED_DB_PASSWORD
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: KAFKA_BOOTSTRAP_SERVERS
+            - name: EUREKA_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_SERVER_URI
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: TRADE_SERVICE_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trade-service
+spec:
+  selector:
+    app: trade-service  
+  ports:
+    - protocol: TCP
+      port: 8085
+      targetPort: 8085
+  type: ClusterIP
+
+# ============================================
+# FRONTEND CONFIG
+# ============================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  # Root Config URLs
+  MKPL_ROOT_CONFIG_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_ANGULAR_CARDS_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
+  MKPL_REACT_USERS_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+  MKPL_HOME_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
+  MKPL_NAVBAR_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_FOOTER_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_NOT_FOUND_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
+  MKPL_SHARED_UTIL_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+
+# ============================================
+# FRONTEND - ROOT CONFIG (Single-SPA Orchestrator)
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: root-config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: root-config
+  template:
+    metadata:
+      labels:
+        app: root-config
+    spec:
+      containers:
+        - name: root-config
+          image: minidomo/gemdeck:fe-root-config-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+          env:
+            - name: MKPL_ROOT_CONFIG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_ROOT_CONFIG_URL
+            - name: MKPL_ANGULAR_CARDS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_ANGULAR_CARDS_URL
+            - name: MKPL_REACT_USERS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_REACT_USERS_URL
+            - name: MKPL_HOME_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_HOME_URL
+            - name: MKPL_NAVBAR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_NAVBAR_URL
+            - name: MKPL_FOOTER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_FOOTER_URL
+            - name: MKPL_NOT_FOUND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_NOT_FOUND_URL
+            - name: MKPL_SHARED_UTIL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_SHARED_UTIL_URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: root-config
+spec:
+  selector:
+    app: root-config  
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: LoadBalancer
+
+# ============================================
+# FRONTEND - ANGULAR SSPA MFE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-sspa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angular-sspa
+  template:
+    metadata:
+      labels:
+        app: angular-sspa
+    spec:
+      containers:
+        - name: angular-sspa
+          image: minidomo/gemdeck:fe-angular-sspa-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4201
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-sspa
+spec:
+  selector:
+    app: angular-sspa  
+  ports:
+    - protocol: TCP
+      port: 4201
+      targetPort: 4201
+  type: LoadBalancer
+
+# ============================================
+# FRONTEND - REACT USERS MFE
+# ============================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-react-users
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mfe-react-users
+  template:
+    metadata:
+      labels:
+        app: mfe-react-users
+    spec:
+      containers:
+        - name: mfe-react-users
+          image: minidomo/gemdeck:fe-react-users-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4202
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mfe-react-users
+spec:
+  selector:
+    app: mfe-react-users  
+  ports:
+    - protocol: TCP
+      port: 4202
+      targetPort: 4202
+  type: LoadBalancer
+
+# ============================================
+# FILEBEAT
+# ============================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  labels:
+    app: filebeat
+data:
+  filebeat.yml: |-
+    filebeat.autodiscover:
+      providers:
+        - type: kubernetes
+          node: ${NODE_NAME}
+          hints.enabled: true
+          hints.default_config:
+            type: container
+            paths:
+              - /var/log/containers/*${data.kubernetes.container.id}.log
+    processors:
+      - add_cloud_metadata:
+      - add_host_metadata:
+    
+    output.logstash:
+      hosts: '${LOGSTASH_URL}'
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  labels:
+    app: filebeat
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      serviceAccountName: filebeat
+      terminationGracePeriodSeconds: 30
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: filebeat
+        image: docker.elastic.co/beats/filebeat:7.8.0
+        args: [
+          "-c", "/etc/filebeat.yml",
+          "-e",
+        ]
+        env:
+        - name: LOGSTASH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: card-marketplace-config
+              key: LOGSTASH_URL
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        securityContext:
+          runAsUser: 0
+          # If using Red Hat OpenShift uncomment this:
+          #privileged: true
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/filebeat.yml
+          readOnly: true
+          subPath: filebeat.yml
+        - name: data
+          mountPath: /usr/share/filebeat/data
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: filebeat-config
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: varlog
+        hostPath:
+          path: /var/log
+      # data folder stores a registry of read status for all files, so we don't send everything again on a Filebeat pod restart
+      - name: data
+        hostPath:
+          path: /var/lib/filebeat-data
+          type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: filebeat
+  labels:
+    app: filebeat
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: filebeat
+  labels:
+    app: filebeat
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces", "nodes"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+subjects:
+  - kind: ServiceAccount
+    name: filebeat
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: filebeat
+  apiGroup: rbac.authorization.k8s.io
