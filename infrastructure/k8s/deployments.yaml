@@ -32,6 +32,7 @@ data:
   USER_SERVICE_PORT: "8083"
   AUTH_SERVICE_PORT: "8084"
   TRADE_SERVICE_PORT: "8085"
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
 
 # ============================================
 # EUREKA SERVER
@@ -216,6 +217,11 @@ spec:
                 configMapKeyRef:
                   name: card-marketplace-config
                   key: CARD_SERVICE_PORT
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              valueFrom: 
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
 ---
 apiVersion: v1
@@ -296,6 +302,11 @@ spec:
                 configMapKeyRef:
                   name: card-marketplace-config
                   key: LISTING_SERVICE_PORT
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              valueFrom: 
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
 ---
 apiVersion: v1
@@ -378,6 +389,11 @@ spec:
                 configMapKeyRef:
                   name: card-marketplace-config
                   key: KAFKA_BOOTSTRAP_SERVERS
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              valueFrom: 
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
 ---
 apiVersion: v1
@@ -438,6 +454,11 @@ spec:
                 configMapKeyRef:
                   name: card-marketplace-config
                   key: AUTH_SERVICE_PORT
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              valueFrom: 
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
 ---
 apiVersion: v1
@@ -518,6 +539,11 @@ spec:
                 configMapKeyRef:
                   name: card-marketplace-config
                   key: TRADE_SERVICE_PORT
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              valueFrom: 
+                configMapKeyRef:
+                  name: card-marketplace-config
+                  key: EUREKA_INSTANCE_PREFER_IP_ADDRESS
 
 ---
 apiVersion: v1
@@ -546,6 +572,7 @@ data:
   MKPL_ROOT_CONFIG_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
   MKPL_ANGULAR_CARDS_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
   MKPL_REACT_USERS_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+  MKPL_REACT_NAVBAR_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-navbar.js"
   MKPL_HOME_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/angular/main.js"
   MKPL_NAVBAR_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
   MKPL_FOOTER_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
@@ -593,6 +620,11 @@ spec:
                 configMapKeyRef:
                   name: frontend-config
                   key: MKPL_REACT_USERS_URL
+            - name: MKPL_REACT_NAVBAR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_REACT_NAVBAR_URL
             - name: MKPL_HOME_URL
               valueFrom:
                 configMapKeyRef:
