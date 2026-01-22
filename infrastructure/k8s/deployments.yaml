@@ -551,6 +551,7 @@ data:
   MKPL_FOOTER_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
   MKPL_NOT_FOUND_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/marketplace-root-config.js"
   MKPL_SHARED_UTIL_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com/react/marketplace-mfe-react-users.js"
+  MKPL_API_URL: "https://ec2-16-58-75-153.us-east-2.compute.amazonaws.com"
 
 # ============================================
 # FRONTEND - ROOT CONFIG (Single-SPA Orchestrator)
@@ -656,6 +657,12 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 4201
+          env:
+            - name: MKPL_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_API_URL
 
 ---
 apiVersion: v1
@@ -695,6 +702,12 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 4202
+          env:
+            - name: MKPL_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: MKPL_API_URL
 
 ---
 apiVersion: v1
