@@ -17,6 +17,7 @@ import {
   FiLock
 } from 'react-icons/fi';
 import { getUserData } from '../utils/auth';
+import { environment } from '../utils/environment';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -363,7 +364,7 @@ const ProfilePage: React.FC = () => {
 
       try {
         setLoading(true);
-        const apiGateway = process.env.REACT_APP_API_GATEWAY || 'http://localhost:8080';
+        const apiGateway = environment.apiUrl || 'http://localhost:8080';
         
         // Fetch user details
         const userResponse = await fetch(`${apiGateway}/api/users/${userId}`);

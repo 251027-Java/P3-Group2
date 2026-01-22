@@ -19,5 +19,9 @@
                 "linux/arm64"
             ]
         }
+    },
+    "deploy": {
+        "enabled": true,
+        "name": "angular-sspa"
     }
 }

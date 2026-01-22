@@ -183,3 +183,38 @@ services:
       # Filebeat config
       - ./backend/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     restart: unless-stopped
+
+  root-config:
+    build: ./frontend/root-config
+    container_name: root-config
+    depends_on:
+      - angular-sspa
+      - react-users
+    ports:
+      - ${ROOT_CONFIG_PORT}:9000
+    environment:
+      MKPL_ROOT_CONFIG_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
+      MKPL_REACT_USERS_URL: http://localhost:${REACT_USERS_PORT}/marketplace-mfe-react-users.js
+      MKPL_HOME_URL: http://localhost:${ANGULAR_SSPA_PORT}/main.js
+      MKPL_NAVBAR_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
+      MKPL_FOOTER_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
+      MKPL_NOT_FOUND_URL: http://localhost:${ROOT_CONFIG_PORT}/marketplace-root-config.js
+      MKPL_SHARED_UTIL_URL: http://localhost:${REACT_USERS_PORT}/marketplace-mfe-react-users.js
+  
+  angular-sspa:
+    build: ./frontend/AngularSSPA
+    container_name: angular-sspa
+    ports:
+      - ${ANGULAR_SSPA_PORT}:4201
+    environment:
+      MKPL_API_URL: http://localhost:${GATEWAY_PORT}
+  
+  react-users:
+    build:
+      context: ./frontend
+      dockerfile: ./mfe-react-users/Dockerfile
+    container_name: react-users
+    ports:
+      - ${REACT_USERS_PORT}:4202
+    environment:
+      MKPL_API_URL: http://localhost:${GATEWAY_PORT}

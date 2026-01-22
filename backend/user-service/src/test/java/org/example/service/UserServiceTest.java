@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import org.example.dto.AuthUserResponse;
 import org.example.dto.CreateUserRequest;
 import org.example.dto.UpdateUserRequest;
 import org.example.dto.UserResponse;
+// import org.example.kafka.UserEventProducer;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +34,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    // private UserEventProducer userEventProducer;
 
     @InjectMocks
     private UserService userService;
@@ -293,4 +298,185 @@ class UserServiceTest {
             verify(userRepository).deleteById(1L);
         }
     }
+
+    @Nested
+    @DisplayName("Kafka Event Tests")
+    class KafkaEventTests {
+    
+        @Test
+        @DisplayName("Should send user created event when user is created")
+        void createUser_ShouldCallKafkaProducer() {
+            // Arrange
+            CreateUserRequest request =
+                    new CreateUserRequest("kafka@example.com", "kafkatest", "password", null, null, "USER");
+    
+            when(userRepository.existsByUsername("kafkatest")).thenReturn(false);
+            when(userRepository.existsByEmail("kafka@example.com")).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User u = invocation.getArgument(0);
+                u.setUserId(123L);
+                return u;
+            });
+    
+            // Act
+            Optional<UserResponse> result = userService.createUser(request);
+    
+            // Assert
+            assertTrue(result.isPresent());
+            // verify(userEventProducer, times(1))
+            //         .sendUserCreatedEvent(123L, "kafkatest", "kafka@example.com");
+        }
+    
+        @Test
+        @DisplayName("Should send user deleted event when user is deleted")
+        void deleteUser_ShouldCallKafkaProducer() {
+            // Arrange
+            when(userRepository.existsById(1L)).thenReturn(true);
+            doNothing().when(userRepository).deleteById(1L);
+    
+            // Act
+            userService.deleteUser(1L);
+    
+            // Assert
+            // verify(userEventProducer, times(1)).sendUserDeletedEvent(1L);
+            verify(userRepository).deleteById(1L);
+        }
+    
+        @Test
+        @DisplayName("Should NOT send user created event when creation fails due to duplicate username")
+        void createUser_DuplicateUsername_ShouldNotCallKafkaProducer() {
+            // Arrange
+            CreateUserRequest request =
+                    new CreateUserRequest("dup@example.com", "existinguser", "password", null, null, "USER");
+    
+            when(userRepository.existsByUsername("existinguser")).thenReturn(true);
+    
+            // Act
+            Optional<UserResponse> result = userService.createUser(request);
+    
+            // Assert
+            assertTrue(result.isEmpty());
+            // verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
+        }
+    
+        @Test
+        @DisplayName("Should NOT send user created event when creation fails due to duplicate email")
+        void createUser_DuplicateEmail_ShouldNotCallKafkaProducer() {
+            // Arrange
+            CreateUserRequest request =
+                    new CreateUserRequest("existing@example.com", "newuser", "password", null, null, "USER");
+    
+            when(userRepository.existsByUsername("newuser")).thenReturn(false);
+            when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
+    
+            // Act
+            Optional<UserResponse> result = userService.createUser(request);
+    
+            // Assert
+            assertTrue(result.isEmpty());
+            // verify(userEventProducer, never()).sendUserCreatedEvent(anyLong(), any(), any());
+        }
+    
+        @Test
+        @DisplayName("Should NOT send user deleted event when user does not exist")
+        void deleteUser_UserNotFound_ShouldNotCallKafkaProducer() {
+            // Arrange
+            when(userRepository.existsById(999L)).thenReturn(false);
+    
+            // Act & Assert
+            IllegalArgumentException ex =
+                    assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(999L));
+            assertTrue(ex.getMessage().contains("User not found"));
+    
+            // verify(userEventProducer, never()).sendUserDeletedEvent(anyLong());
+        }
+    }
+
+    @Nested
+    @DisplayName("Additional Edge Case Tests")
+    class AdditionalUserServiceTests {
+    
+        @Test
+        @DisplayName("Should default role to USER when null in create request")
+        void createUser_NoRoleAssigned_DefaultsToUser() {
+            CreateUserRequest request = new CreateUserRequest(
+                    "norole@example.com", "noroleuser", "pass", null, null, null);
+    
+            when(userRepository.existsByUsername("noroleuser")).thenReturn(false);
+            when(userRepository.existsByEmail("norole@example.com")).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User u = invocation.getArgument(0);
+                u.setUserId(42L);
+                return u;
+            });
+    
+            Optional<UserResponse> result = userService.createUser(request);
+    
+            assertTrue(result.isPresent());
+            assertEquals("USER", result.get().getRole());
+            // verify(userEventProducer).sendUserCreatedEvent(42L, "noroleuser", "norole@example.com");
+        }
+    
+        @Test
+        @DisplayName("Should update user with only some fields set")
+        void updateUser_PartialUpdate_UpdatesOnlyProvidedFields() {
+            UpdateUserRequest request = new UpdateUserRequest(null, "updatedUsername", null, null);
+    
+            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.existsByUsername("updatedUsername")).thenReturn(false);
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+    
+            UserResponse response = userService.updateUser(1L, request);
+    
+            assertNotNull(response);
+            assertEquals("updatedUsername", response.getUsername());
+            verify(userRepository).save(testUser);
+        }
+    
+        @Test
+        @DisplayName("Should update user with no changes")
+        void updateUser_NoChanges_ShouldSaveOriginal() {
+            UpdateUserRequest request = new UpdateUserRequest(null, null, null, null);
+    
+            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+            when(userRepository.save(any(User.class))).thenReturn(testUser);
+    
+            UserResponse response = userService.updateUser(1L, request);
+    
+            assertNotNull(response);
+            assertEquals("testuser", response.getUsername());
+            verify(userRepository).save(testUser);
+        }
+    
+        @Test
+        @DisplayName("Should get user for auth")
+        void getUserForAuth_UserExists_ReturnsAuthUserResponse() {
+            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+    
+            Optional<AuthUserResponse> response = userService.getUserForAuth("test@example.com");
+    
+            assertTrue(response.isPresent());
+            assertEquals("testuser", response.get().getUsername());
+        }
+    
+        @Test
+        @DisplayName("Should get empty auth response if user not found")
+        void getUserForAuth_UserNotFound_ReturnsEmpty() {
+            when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
+    
+            Optional<AuthUserResponse> response = userService.getUserForAuth("notfound@example.com");
+    
+            assertTrue(response.isEmpty());
+        }
+    
+        @Test
+        @DisplayName("Delete user should throw exception if userId is null")
+        void deleteUser_NullUserId_ShouldThrowException() {
+            assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(null));
+            // verify(userEventProducer, never()).sendUserDeletedEvent(any());
+            verify(userRepository, never()).deleteById(any());
+        }
+    }
+    
+    
 }

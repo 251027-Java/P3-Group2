@@ -1,90 +1,95 @@
-<section class="market-shell">
-  <header class="market-header">
-    <div>
-      <span class="pill">Marketplace</span>
-      <h1>Curated inventory for modern teams.</h1>
-      <p>Discover trusted suppliers, compare live pricing, and order instantly.</p>
+<main class="marketplace">
+  <section class="marketplace__hero">
+    <div class="marketplace__topbar">
+      <div class="marketplace__logo">
+        <span class="marketplace__spark">✦</span>
+        Pokemon Trader
+      </div>
+      <div class="marketplace__nav">
+        <button class="marketplace__ghost">Secondary</button>
+        <button class="marketplace__cta">Call to action</button>
+      </div>
     </div>
-    <div class="header-actions">
-      <button class="ghost">Request sourcing</button>
-      <button class="primary">Start new order</button>
-    </div>
-  </header>
-
-  <div class="filters">
-    <div class="search">
-      <input type="search" placeholder="Search products, vendors, or tags" />
-    </div>
-    <div class="chips">
-      <button class="chip">Office</button>
-      <button class="chip">Hardware</button>
-      <button class="chip">SaaS</button>
-      <button class="chip">Logistics</button>
-      <button class="chip">Energy</button>
-    </div>
-  </div>
-
-  <div class="grid">
-    <article class="card">
-      <span class="tag">Priority</span>
-      <h3>Everlight LED Panels</h3>
-      <p>Bulk lighting kits with 24-hour shipping.</p>
-      <div class="meta">
-        <span>$98 / unit</span>
-        <span>In stock</span>
-      </div>
-      <button class="ghost">View supplier</button>
-    </article>
-    <article class="card">
-      <span class="tag">Trending</span>
-      <h3>Workflow Design Suite</h3>
-      <p>Annual licenses with team onboarding support.</p>
-      <div class="meta">
-        <span>$24 / seat</span>
-        <span>48-hour setup</span>
-      </div>
-      <button class="ghost">View supplier</button>
-    </article>
-    <article class="card">
-      <span class="tag">Verified</span>
-      <h3>CarbonZero Logistics</h3>
-      <p>Net-zero freight lanes across 120+ cities.</p>
-      <div class="meta">
-        <span>$3.1 / mile</span>
-        <span>Low risk</span>
-      </div>
-      <button class="ghost">View supplier</button>
-    </article>
-    <article class="card">
-      <span class="tag">New</span>
-      <h3>Cloud Access Badges</h3>
-      <p>Secure NFC badges with 7-day delivery.</p>
-      <div class="meta">
-        <span>$4.5 / badge</span>
-        <span>Pre-order</span>
-      </div>
-      <button class="ghost">View supplier</button>
-    </article>
-  </div>
-
-  <section class="insights">
-    <h2>Spend insights</h2>
-    <div class="insight-grid">
-      <div>
-        <span class="label">Forecasted spend</span>
-        <span class="value">$240,500</span>
-        <span class="delta">+12% vs last month</span>
-      </div>
-      <div>
-        <span class="label">Supplier health</span>
-        <span class="value">92%</span>
-        <span class="delta">Stable delivery window</span>
-      </div>
-      <div>
-        <span class="label">Approval queue</span>
-        <span class="value">6 requests</span>
-        <span class="delta">2 flagged for review</span>
+    <div class="marketplace__headline">
+      <p class="marketplace__eyebrow">Shimmering finds. Legendary deals.</p>
+      <h1 class="marketplace__title">Marketplace</h1>
+      <p class="marketplace__subtitle">Trade holo-heavy favorites, chase promos, and snag grails before the next drop hits.</p>
+      <div class="marketplace__actions">
+        <button class="marketplace__cta">Browse drops</button>
+        <button class="marketplace__ghost">List a card</button>
       </div>
     </div>
   </section>
-</section>
+  <section class="marketplace__grid" aria-label="Featured cards">
+    <article class="card card--xl card--mint">
+      <div class="card__frame">
+        <div class="card__badge">Legendary</div>
+        <h3 class="card__name">Mewtwo VSTAR</h3>
+        <p class="card__rarity">Prismatic Holo • 186/198</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Mewtwo VSTAR' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--wide card--aqua">
+      <div class="card__frame">
+        <div class="card__badge">Ultra Rare</div>
+        <h3 class="card__name">Greninja EX</h3>
+        <p class="card__rarity">Wave Splash • 046/091</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Greninja EX' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--wide card--holo">
+      <div class="card__frame">
+        <div class="card__badge">Secret</div>
+        <h3 class="card__name">Rayquaza GX</h3>
+        <p class="card__rarity">Sky Rift • 176/172</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Rayquaza GX' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--tall card--aurora">
+      <div class="card__frame">
+        <div class="card__badge">Gallery</div>
+        <h3 class="card__name">Eevee</h3>
+        <p class="card__rarity">Dreamlight • TG11/TG30</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Eevee' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--tall card--sunburst">
+      <div class="card__frame">
+        <div class="card__badge">Promo</div>
+        <h3 class="card__name">Pikachu</h3>
+        <p class="card__rarity">Spark Edge • SWSH234</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Pikachu' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--wide card--ember">
+      <div class="card__frame">
+        <div class="card__badge">Chase</div>
+        <h3 class="card__name">Charizard</h3>
+        <p class="card__rarity">Molten Shard • 199/190</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Charizard' }">Make a trade</a>
+      </div>
+    </article>
+    <article class="card card--wide card--nebula">
+      <div class="card__frame">
+        <div class="card__badge">Mythic</div>
+        <h3 class="card__name">Lugia V</h3>
+        <p class="card__rarity">Storm Drift • 138/195</p>
+      </div>
+      <div class="card__overlay">
+        <a class="card__trade" routerLink="/trade" [queryParams]="{ card: 'Lugia V' }">Make a trade</a>
+      </div>
+    </article>
+  </section>
+</main>

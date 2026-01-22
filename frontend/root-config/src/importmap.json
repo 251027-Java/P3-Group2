@@ -1,7 +1,6 @@
 {
   "imports": {
     "@marketplace/root-config": "$MKPL_ROOT_CONFIG_URL",
-    "@marketplace/mfe-angular-cards": "$MKPL_ANGULAR_CARDS_URL",
     "@marketplace/mfe-react-users": "$MKPL_REACT_USERS_URL",
     "@marketplace/home": "$MKPL_HOME_URL",
     "@marketplace/navbar": "$MKPL_NAVBAR_URL",

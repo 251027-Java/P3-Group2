@@ -13,7 +13,7 @@ services:
       - ./configs:/var/jenkins_home/casc_configs
       - ./ssh:/custom/ssh:ro
     environment:
-      JAVA_OPTS: '-Djenkins.install.runSetupWizard=false'
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
       DOCKER_TLS_VERIFY: 1
       DOCKER_CERT_PATH: /certs/client
       DOCKER_HOST: tcp://docker:2376
@@ -25,6 +25,7 @@ services:
       - secrets.properties
       - github_app_team_key
       - kubeconfig
+      - app_server_key
 
   jdocker:
     image: docker:dind
@@ -56,3 +57,5 @@ secrets:
     file: ./secrets/github_app_team_key.pem
   kubeconfig:
     file: ./secrets/kubeconfig.yml
+  app_server_key:
+    file: ./secrets/app-server-key
