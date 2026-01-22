@@ -86,6 +86,7 @@ public class TradeService {
         Trade trade = new Trade();
         trade.setListingId(request.getListingId());
         trade.setRequestingUserId(request.getRequestingUserId());
+        trade.setListingOwnerUserId(listing.getOwnerUserId());
         trade.setTradeStatus(TradeStatus.pending);
 
         Trade savedTrade = tradeRepository.save(trade);
@@ -300,7 +301,7 @@ public class TradeService {
         // (Optional but recommended)
         // Trades where user OWNS the listing
         List<Trade> listingOwnerTrades =
-                tradeRepository.findTradesByListingOwnerUserId(userId);
+                tradeRepository.findByListingOwnerUserId(userId);
 
         for (Trade trade : listingOwnerTrades) {
             if (trade.getTradeStatus() == TradeStatus.pending) {

@@ -150,11 +150,12 @@ class TradeModelsExtendedTests {
     void tradeAllArgsConstructor() {
         LocalDateTime now = LocalDateTime.now();
 
-        Trade trade = new Trade(1L, 10L, 20L, Trade.TradeStatus.pending, now, null);
+        Trade trade = new Trade(1L, 10L, 20L, 30L, Trade.TradeStatus.pending, now, null);
 
         assertThat(trade.getTradeId()).isEqualTo(1L);
         assertThat(trade.getListingId()).isEqualTo(10L);
         assertThat(trade.getRequestingUserId()).isEqualTo(20L);
+        assertThat(trade.getListingOwnerUserId()).isEqualTo(30L);
         assertThat(trade.getTradeStatus()).isEqualTo(Trade.TradeStatus.pending);
         assertThat(trade.getCreatedAt()).isEqualTo(now);
     }
