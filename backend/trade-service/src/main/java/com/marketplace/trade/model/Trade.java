@@ -33,6 +33,10 @@ public class Trade {
     @ToString.Include
     private Long requestingUserId;
 
+    @Column(name = "listingOwnerUserId", nullable = false)
+    @ToString.Include
+    private Long listingOwnerUserId;
+
     @Column(name = "tradeStatus", nullable = false, length = 50, columnDefinition = "VARCHAR(50) DEFAULT 'pending'")
     @Enumerated(EnumType.STRING)
     @ToString.Include

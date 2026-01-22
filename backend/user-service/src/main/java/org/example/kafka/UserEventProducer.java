@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class UserEventProducer {
 
-    private final KafkaTemplate<String, UserEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${kafka.topics.user-created:user-created}")
     private String userCreatedTopic;
@@ -63,7 +63,7 @@ public class UserEventProducer {
     private void sendEvent(String topic, String key, UserEvent event) {
         log.info("Sending user event to topic {}: {}", topic, event);
 
-        CompletableFuture<SendResult<String, UserEvent>> future =
+        CompletableFuture<SendResult<String, Object>> future =
                 kafkaTemplate.send(topic, key, event);
 
         future.whenComplete((result, ex) -> {
