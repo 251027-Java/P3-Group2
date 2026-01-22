@@ -208,13 +208,7 @@ export class MarketplacePageComponent implements OnInit {
   }
 
   private resolveOwnerUserId() {
-    const userData = this.getUserData();
-    const userId = userData?.userId ?? userData?.id;
-    if (userId) {
-      return of(userId);
-    }
-
-    const username = userData?.username;
+    const username = this.auth.username;
     if (!username) {
       return of(null).pipe(
         switchMap(() => {
@@ -239,15 +233,6 @@ export class MarketplacePageComponent implements OnInit {
           return of(id);
         }),
       );
-  }
-
-  private getUserData(): UserResponse | null {
-    try {
-      const raw = localStorage.getItem('marketplace_user_data');
-      return raw ? (JSON.parse(raw) as UserResponse) : null;
-    } catch {
-      return null;
-    }
   }
 
   private getAuthHeaders(): HttpHeaders {
