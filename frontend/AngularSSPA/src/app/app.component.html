@@ -1,5 +1,5 @@
 <div class="app-shell" [class.app-shell--marketplace]="isMarketplace">
-  <header class="top-nav" *ngIf="!isMarketplace">
+  <header class="top-nav" *ngIf="!hideHeader">
     <div class="brand">AllRev</div>
     <nav class="nav-links">
       <a routerLink="/login" routerLinkActive="active">Login</a>
