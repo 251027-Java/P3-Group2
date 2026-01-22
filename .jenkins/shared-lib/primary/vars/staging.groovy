@@ -123,7 +123,7 @@ def deploy(Map params = [:]) {
 
     def command = [
         "kubectl rollout restart deployment ${settings.deploy.name}",
-        "kubectl rollout status deployment ${settings.deploy.name} --timeout=30s",
+        "kubectl rollout status deployment ${settings.deploy.name} --timeout=120s",
     ].join(' && ')
 
     def successRet = false
