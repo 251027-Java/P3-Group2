@@ -238,6 +238,38 @@ public class TradeService {
         return trades.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    @Transactional
+    public void handleListingDeleted(Long listingId) {
+        log.info("Handling listing deleted event for listingId={}", listingId);
+
+        List<Trade> trades = tradeRepository.findByListingId(listingId);
+
+        if (trades.isEmpty()) {
+            log.info("No trades found for listingId={}", listingId);
+            return;
+        }
+
+        for (Trade trade : trades) {
+            if (trade.getTradeStatus() == TradeStatus.pending) {
+                trade.setTradeStatus(TradeStatus.cancelled);
+                tradeRepository.save(trade);
+
+                publishTradeEvent(
+                    "TRADE_CANCELLED_LISTING_DELETED",
+                    trade.getTradeId(),
+                    trade.getListingId(),
+                    trade.getRequestingUserId()
+                );
+
+                log.info(
+                    "Trade {} cancelled due to listing deletion",
+                    trade.getTradeId()
+                );
+            }
+        }
+    }
+
+
     /**
      * Publish trade event to Kafka
      */
