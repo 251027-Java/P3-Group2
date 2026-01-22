@@ -39,6 +39,8 @@ services:
       dockerfile: ./mfe-react-users/Dockerfile
     ports:
       - "4202:4202"
+    environment:
+      MKPL_API_URL: http://localhost:52172
     networks:
       - frontend-network
 
