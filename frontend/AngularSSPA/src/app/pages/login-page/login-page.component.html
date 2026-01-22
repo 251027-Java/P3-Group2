@@ -1,49 +1,31 @@
 <section class="auth-shell">
   <div class="hero-panel">
-    <div class="hero-badge">AllRev Marketplace</div>
-    <h1>Welcome back to a smarter marketplace.</h1>
+    <div class="hero-badge">Pokemon Marketplace</div>
+    <h1>Welcome back.</h1>
     <p>
-      Track orders, compare suppliers, and move faster with AI-assisted
-      procurement insights built for growing teams.
+      Trade, Catch, Win.
     </p>
-    <div class="hero-stats">
-      <div>
-        <span class="stat-value">1.2k</span>
-        <span class="stat-label">Active vendors</span>
-      </div>
-      <div>
-        <span class="stat-value">48h</span>
-        <span class="stat-label">Average delivery</span>
-      </div>
-      <div>
-        <span class="stat-value">98%</span>
-        <span class="stat-label">On-time rate</span>
-      </div>
-    </div>
   </div>
 
   <div class="form-panel">
     <h2>Sign in</h2>
-    <p class="form-subtitle">Use your team credentials to continue.</p>
+    <p class="form-subtitle">Use your credentials to continue.</p>
 
-    <form class="auth-form">
+    <form class="auth-form" (ngSubmit)="onSubmit()">
       <label>
         Email
-        <input type="email" placeholder="Enter your email address" />
+        <input type="email" placeholder="Enter your email" [(ngModel)]="email" />
       </label>
       <label>
         Password
-        <input type="password" placeholder="Enter your password" />
+        <input type="password" placeholder="Enter your password" [(ngModel)]="password" />
       </label>
+
       <div class="form-row">
-        <label class="checkbox">
-          <input type="checkbox" />
-          Remember me
-        </label>
         <a class="link" href="#">Forgot password?</a>
       </div>
-      <button type="button" class="primary">Sign in</button>
-      <button type="button" class="secondary">Continue with SSO</button>
+      
+      <button type="submit" class="primary">Sign in</button>
     </form>
 
     <p class="form-footer">
