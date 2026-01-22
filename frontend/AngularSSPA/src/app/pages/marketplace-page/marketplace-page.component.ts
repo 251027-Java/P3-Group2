@@ -6,6 +6,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
 
 interface ListingResponse {
   listingId: number;
@@ -46,7 +47,7 @@ interface UserResponse {
   standalone: true,
   imports: [RouterLink, FormsModule],
   templateUrl: './marketplace-page.component.html',
-  styleUrl: './marketplace-page.component.css'
+  styleUrl: './marketplace-page.component.css',
 })
 export class MarketplacePageComponent implements OnInit {
   isListModalOpen = false;
@@ -61,7 +62,10 @@ export class MarketplacePageComponent implements OnInit {
   conditionRating = 8;
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadListings();
@@ -97,7 +101,10 @@ export class MarketplacePageComponent implements OnInit {
 
     this.searchTimer = setTimeout(() => {
       this.http
-        .get<CardResponse[]>(`${environment.apiUrl}/api/cards?name=${encodeURIComponent(value.trim())}`)
+        .get<CardResponse[]>(
+          `${environment.apiUrl}/api/cards?name=${encodeURIComponent(value.trim())}`,
+          { headers: this.getAuthHeaders() },
+        )
         .pipe(catchError(() => of([])))
         .subscribe((results) => {
           this.cardSearchResults = results.slice(0, 8);
@@ -122,23 +129,27 @@ export class MarketplacePageComponent implements OnInit {
         const payload = {
           ownerUserId,
           cardId: this.selectedCard!.cardId,
-          conditionRating: this.conditionRating
+          conditionRating: this.conditionRating,
         };
 
-        this.http.post(`${environment.apiUrl}/api/listings`, payload, { headers: this.getAuthHeaders() }).subscribe({
-          next: () => {
-            this.listingSuccess = 'Listing published.';
-            this.loadListings();
-            setTimeout(() => this.closeListModal(), 800);
-          },
-          error: () => {
-            this.listingError = 'Unable to publish listing.';
-          }
-        });
+        this.http
+          .post(`${environment.apiUrl}/api/listings`, payload, {
+            headers: this.getAuthHeaders(),
+          })
+          .subscribe({
+            next: () => {
+              this.listingSuccess = 'Listing published.';
+              this.loadListings();
+              setTimeout(() => this.closeListModal(), 800);
+            },
+            error: () => {
+              this.listingError = 'Unable to publish listing.';
+            },
+          });
       },
       error: () => {
         this.listingError = 'Login required to publish a listing.';
-      }
+      },
     });
   }
 
@@ -147,24 +158,35 @@ export class MarketplacePageComponent implements OnInit {
     this.loadError = '';
 
     this.http
-      .get<ListingResponse[]>(`${environment.apiUrl}/api/listings/active`)
+      .get<ListingResponse[]>(`${environment.apiUrl}/api/listings/active`, {
+        headers: this.getAuthHeaders(),
+      })
       .pipe(
         switchMap((listings) => {
           if (!listings.length) {
             return of({ listings, cards: [] as (CardResponse | null)[] });
           }
-          const cardIds = Array.from(new Set(listings.map((listing) => listing.cardId)));
+          const cardIds = Array.from(
+            new Set(listings.map((listing) => listing.cardId)),
+          );
           return forkJoin(
             cardIds.map((cardId) =>
-              this.http.get<CardResponse>(`${environment.apiUrl}/api/cards/${cardId}`).pipe(catchError(() => of(null)))
-            )
+              this.http
+                .get<CardResponse>(
+                  `${environment.apiUrl}/api/cards/${cardId}`,
+                  { headers: this.getAuthHeaders() },
+                )
+                .pipe(catchError(() => of(null))),
+            ),
           ).pipe(map((cards) => ({ listings, cards })));
-        })
+        }),
       )
       .subscribe({
         next: ({ listings, cards }) => {
           const cardMap = new Map<number, CardResponse>();
-          cards.filter(Boolean).forEach((card) => cardMap.set(card!.cardId, card!));
+          cards
+            .filter(Boolean)
+            .forEach((card) => cardMap.set(card!.cardId, card!));
           this.listings = listings.map((listing) => {
             const card = cardMap.get(listing.cardId);
             return {
@@ -173,7 +195,7 @@ export class MarketplacePageComponent implements OnInit {
               name: card?.name ?? 'Unknown card',
               imageUrl: card?.imageUrl ?? '',
               conditionRating: listing.conditionRating,
-              price: card?.price
+              price: card?.price,
             };
           });
           this.isLoading = false;
@@ -181,7 +203,7 @@ export class MarketplacePageComponent implements OnInit {
         error: () => {
           this.isLoading = false;
           this.loadError = 'Unable to load listings right now.';
-        }
+        },
       });
   }
 
@@ -197,14 +219,17 @@ export class MarketplacePageComponent implements OnInit {
       return of(null).pipe(
         switchMap(() => {
           throw new Error('Missing username');
-        })
+        }),
       );
     }
 
     return this.http
-      .get<UserResponse>(`${environment.apiUrl}/api/users/username/${encodeURIComponent(username)}`, {
-        headers: this.getAuthHeaders()
-      })
+      .get<UserResponse>(
+        `${environment.apiUrl}/api/users/username/${encodeURIComponent(username)}`,
+        {
+          headers: this.getAuthHeaders(),
+        },
+      )
       .pipe(
         map((user) => user.userId ?? user.id ?? 0),
         switchMap((id) => {
@@ -212,7 +237,7 @@ export class MarketplacePageComponent implements OnInit {
             throw new Error('Missing user id');
           }
           return of(id);
-        })
+        }),
       );
   }
 
@@ -226,12 +251,12 @@ export class MarketplacePageComponent implements OnInit {
   }
 
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('marketplace_auth_token');
+    const token = this.auth.getToken();
     if (!token) {
       return new HttpHeaders();
     }
     return new HttpHeaders({
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
   }
 }
