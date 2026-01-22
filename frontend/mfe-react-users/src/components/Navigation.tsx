@@ -5,9 +5,12 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { getAuthToken, clearAuthTokens, getUserData } from '../utils/auth';
+import logo from '../assets/navbarLogo.png';
 
 const HeaderContainer = styled.header`
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 25%, #0a0a0a 50%, #16213e 75%, #0a0a0a 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(159, 122, 234, 0.2);
   padding: 1rem 2rem;
@@ -17,6 +20,12 @@ const HeaderContainer = styled.header`
   border-bottom: 2px solid transparent;
   border-image: linear-gradient(90deg, #9F7AEA 0%, #C471ED 50%, #FF6B9D 100%);
   border-image-slice: 1;
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 `;
 
 const Nav = styled.nav`
@@ -27,19 +36,21 @@ const Nav = styled.nav`
   margin: 0 auto;
 `;
 
-const Logo = styled(Link)`
-  font-size: 1.5rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #9F7AEA 0%, #C471ED 50%, #FF6B9D 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+const LogoLink = styled(Link)`
+  display: flex;
+  align-items: center;
   text-decoration: none;
   transition: filter 0.2s ease;
 
   &:hover {
     filter: brightness(1.2);
   }
+`;
+
+const LogoImage = styled.img`
+  height: 50px;
+  width: auto;
+  filter: drop-shadow(0 0 10px rgba(159, 122, 234, 0.5));
 `;
 
 const NavLinks = styled.div`
@@ -49,6 +60,33 @@ const NavLinks = styled.div`
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean }>`
+  color: ${props => props.$active ? '#9F7AEA' : '#e0e0e0'};
+  text-decoration: none;
+  font-weight: ${props => props.$active ? '600' : '500'};
+  transition: color 0.2s;
+  position: relative;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: ${props => props.$active ? '100%' : '0'};
+    height: 2px;
+    background: linear-gradient(90deg, #9F7AEA 0%, #C471ED 100%);
+    transition: width 0.2s ease;
+  }
+
+  &:hover {
+    color: #9F7AEA;
+    
+    &:after {
+      width: 100%;
+    }
+  }
+`;
+
+const ExternalNavLink = styled.a<{ $active?: boolean }>`
   color: ${props => props.$active ? '#9F7AEA' : '#e0e0e0'};
   text-decoration: none;
   font-weight: ${props => props.$active ? '600' : '500'};
@@ -123,50 +161,34 @@ const Navigation: React.FC = () => {
   return (
     <HeaderContainer>
       <Nav>
-        <Logo to="/users">Marketplace</Logo>
+        <LogoLink to="/users">
+          <LogoImage src={logo} alt="Marketplace" />
+        </LogoLink>
         
         <NavLinks>
-          {!isAuthenticated ? (
-            <>
-              <a href="/login" style={{ 
-                color: location.pathname === '/login' ? '#9F7AEA' : '#e0e0e0',
-                textDecoration: 'none',
-                fontWeight: location.pathname === '/login' ? 600 : 500,
-                transition: 'color 0.2s ease',
-                position: 'relative'
-              }}>
-                Login
-              </a>
-              <a href="/signup" style={{ 
-                color: location.pathname === '/signup' ? '#9F7AEA' : '#e0e0e0',
-                textDecoration: 'none',
-                fontWeight: location.pathname === '/signup' ? 600 : 500,
-                transition: 'color 0.2s ease',
-                position: 'relative'
-              }}>
-                Register
-              </a>
-            </>
-          ) : (
+          <ExternalNavLink 
+            href="/marketplace" 
+            $active={location.pathname === '/marketplace'}
+          >
+            Marketplace
+          </ExternalNavLink>
+          
+          <ExternalNavLink 
+            href="/users/profile" 
+            $active={location.pathname === '/users/profile'}
+          >
+            Profile
+          </ExternalNavLink>
+          
+          {isAuthenticated && (
             <>
               <NavLink 
-                to="/users/profile" 
-                $active={isActive('/users/profile')}
-              >
-                Profile
-              </NavLink>
-              <NavLink 
-                to="/users/settings" 
+                to="/settings" 
                 $active={isActive('/users/settings')}
               >
                 Settings
               </NavLink>
-              <UserInfo>
-                {currentUser?.username && (
-                  <UserName>Hello, {currentUser.username}</UserName>
-                )}
-                <Button onClick={handleLogout}>Logout</Button>
-              </UserInfo>
+              <Button onClick={handleLogout}>Logout</Button>
             </>
           )}
         </NavLinks>
