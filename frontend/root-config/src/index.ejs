@@ -17,6 +17,11 @@
   <!-- Zone.js for Angular -->
   <script src="https://cdn.jsdelivr.net/npm/zone.js@0.15.0/bundles/zone.umd.min.js"></script>
 
+  <!-- Process polyfill for React UMD builds -->
+  <script>
+    window.process = { env: { NODE_ENV: 'production' } };
+  </script>
+
   <!-- SystemJS -->
   <script src="https://cdn.jsdelivr.net/npm/systemjs@6.15.1/dist/system.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/systemjs@6.15.1/dist/extras/amd.min.js"></script>
@@ -25,7 +30,13 @@
   <script type="systemjs-importmap">
     {
       "imports": {
-        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js"
+        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@6.0.3/lib/es2015/system/single-spa.min.js",
+        "react": "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js",
+        "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js",
+        "@remix-run/router": "https://cdn.jsdelivr.net/npm/@remix-run/router@1.11.0/dist/router.umd.min.js",
+        "react-router": "https://cdn.jsdelivr.net/npm/react-router@6.18.0/dist/umd/react-router.production.min.js",
+        "react-router-dom": "https://cdn.jsdelivr.net/npm/react-router-dom@6.18.0/dist/umd/react-router-dom.production.min.js",
+        "styled-components": "https://cdn.jsdelivr.net/npm/styled-components@6.1.1/dist/styled-components.min.js"
       }
     }
   </script>
@@ -41,7 +52,6 @@
     {
       "imports": {
         "@marketplace/root-config": "//localhost:9000/marketplace-root-config.js",
-        "@marketplace/mfe-angular-cards": "//localhost:4201/main.js",
         "@marketplace/mfe-react-users": "//localhost:4202/marketplace-mfe-react-users.js",
         "@marketplace/navbar": "//localhost:8081/marketplace-navbar.js",
         "@marketplace/footer": "//localhost:8082/marketplace-footer.js",
@@ -61,7 +71,6 @@
   <noscript>
     You need to enable JavaScript to run this app.
   </noscript>
-  <main></main>
   <script>
     System.import('@marketplace/root-config');
   </script>

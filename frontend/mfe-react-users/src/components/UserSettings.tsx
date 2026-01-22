@@ -34,7 +34,7 @@ const CardTitle = styled.h2`
   color: #333;
   margin: 0 0 1.5rem 0;
   font-size: 1.3rem;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #9F7AEA;
   padding-bottom: 0.75rem;
 `;
 
@@ -96,8 +96,8 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #9F7AEA;
+    box-shadow: 0 0 0 3px rgba(159, 122, 234, 0.1);
   }
 
   &:disabled {
@@ -117,8 +117,8 @@ const Select = styled.select`
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #9F7AEA;
+    box-shadow: 0 0 0 3px rgba(159, 122, 234, 0.1);
   }
 `;
 
@@ -135,7 +135,7 @@ const Button = styled.button<{ $danger?: boolean; $secondary?: boolean }>`
       ? '#f44336'
       : props.$secondary
         ? '#f0f0f0'
-        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+        : 'linear-gradient(135deg, #9F7AEA 0%, #6B46C1 100%)'};
   color: ${(props) => (props.$secondary ? '#333' : 'white')};
   border: none;
   border-radius: 8px;

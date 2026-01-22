@@ -6,7 +6,6 @@ module.exports = (config, options) => {
   // Align the SystemJS module name with the import map entry used by root-config.
   singleSpaWebpackConfig.output = {
     ...singleSpaWebpackConfig.output,
-    library: "@marketplace/mfe-angular-cards",
   };
 
   return singleSpaWebpackConfig;

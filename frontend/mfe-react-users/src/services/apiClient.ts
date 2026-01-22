@@ -2,11 +2,12 @@
  * This file was created by Claude Sonnet 4.5
  */
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getAuthToken, clearAuthTokens } from '@marketplace/shared-utils';
+import { getAuthToken, clearAuthTokens } from '../utils/auth';
+import { environment } from '../utils/environment';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.API_URL || 'http://localhost:8081',
+  baseURL: environment.apiUrl || 'http://localhost:8081',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
