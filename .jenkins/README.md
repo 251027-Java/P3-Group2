@@ -39,6 +39,7 @@ To run commands, you'll need a `.env` file. See [this section](#initialization) 
 | GitHub checks and commit statuses     | Pipeline status, such as success/failure, can be viewed on GitHub per commit.                                                                                                    |
 | Automatic Docker Hub image publishing | Images are automatically built upon pushes to the `main` branch.                                                                                                                 |
 | Multi-platform image build support    | Configuration for building multi-platform images using [native nodes](https://docs.docker.com/build/building/multi-platform/#multiple-native-nodes) via SSH is available.        |
+| Automatic deployment                  | Deployments are made automatically after image publishing on the `main` branch.                                                                                                  |
 
 ### Pipeline file configuration
 
@@ -102,18 +103,19 @@ git commit -m "a [pr:default] summary" # Parses [pr:default]
 
 #### Supported attributes
 
-|   Attributes   |           Example            | Description                                                                                                              |
-| :------------: | :--------------------------: | ------------------------------------------------------------------------------------------------------------------------ |
-|     `skip`     |              -               | Skips testing-related stages. This includes the `lint`, `test`, and `build` stages.                                      |
-|     `run`      |              -               | Force all testing-related stages to run. Use in tandem with `frontend` and/or `backend` to depict which services to run. |
-|   `frontend`   |              -               | Enters the `frontend` stage and check the `frontend/` directory.                                                         |
-|   `backend`    |              -               | Enters the `backend` stage and check the `backend/` directory.                                                           |
-|   `default`    |              -               | Interprets the commit as if on the default branch. Allows for pushing `latest` image variants if images are built.       |
-|    `latest`    |              -               | Pushes `latest` image variants if images are built.                                                                      |
-|  `pr:default`  |              -               | Interprets the commit as if on a PR targetting the default branch.                                                       |
-|   `imageall`   |              -               | Build and pushes all images.                                                                                             |
-| `build:<path>` | `build:backend/user-service` | Indicates a success build for the given service. Allows for an image to be built.                                        |
-| `image:<path>` | `image:backend/user-service` | Build an image for the given service.                                                                                    |
+|   Attributes    |            Example            | Description                                                                                                              |
+| :-------------: | :---------------------------: | ------------------------------------------------------------------------------------------------------------------------ |
+|     `skip`      |               -               | Skips testing-related stages. This includes the `lint`, `test`, and `build` stages.                                      |
+|      `run`      |               -               | Force all testing-related stages to run. Use in tandem with `frontend` and/or `backend` to depict which services to run. |
+|   `frontend`    |               -               | Enters the `frontend` stage and check the `frontend/` directory.                                                         |
+|    `backend`    |               -               | Enters the `backend` stage and check the `backend/` directory.                                                           |
+|    `default`    |               -               | Interprets the commit as if on the default branch. Allows for pushing `latest` image variants if images are built.       |
+|    `latest`     |               -               | Pushes `latest` image variants if images are built.                                                                      |
+|  `pr:default`   |               -               | Interprets the commit as if on a PR targetting the default branch.                                                       |
+|   `imageall`    |               -               | Build and pushes all images.                                                                                             |
+| `build:<path>`  | `build:backend/user-service`  | Indicates a success build for the given service. Allows for an image to be built.                                        |
+| `image:<path>`  | `image:backend/user-service`  | Build an image for the given service.                                                                                    |
+| `deploy:<path>` | `deploy:backend/user-service` | Deploy the given service.                                                                                                |
 
 #### Usage examples
 
@@ -191,6 +193,22 @@ The `<platform>` should be named after the platform that your node natively buil
 ```sh
 docker version --format '{{.Server.Os}}-{{.Server.Arch}}' | tr '/' '-'
 ```
+
+### Automatic deployment
+
+Deployment is handled by SSHing into your application server and executing the following command onto your Kubernetes cluster:
+
+```sh
+kubectl rollout restart deployment <name>
+```
+
+Generate an SSH key to be used for this process:
+
+```sh
+ssh-keygen -t ed25519 -a 100 -f secrets/app-server-key -C "app-server-key" -N ""
+```
+
+Store the private key in the `secrets/` directory named `app-server-key` and add your public key to your application server's `~/.ssh/authorized_keys` file. Lastly, update `app_server_user` and `app_server_hostname` in `secrets/secrets.properties` with your SSH specifications.
 
 ## Initialization
 

@@ -53,6 +53,7 @@ init-files:
     file="./secrets/secrets.properties"; if [ ! -f "$file" ]; then cp ${file}.example $file; echo "Created $file"; fi
     file="./secrets/github_app_team_key.pem"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
     file="./secrets/kubeconfig.yml"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
+    file="./secrets/app-server-key"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
     file="./ssh/config"; if [ ! -f "$file" ]; then touch $file; echo "Created $file"; fi
 
 # Start Jenkins

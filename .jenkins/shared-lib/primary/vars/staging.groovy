@@ -114,6 +114,41 @@ ${settings.dependencies.command}
     return successRet
 }
 
+def deploy(Map params = [:]) {
+    def path = params.path
+    def settings = params.settings
+
+    def name = "deploy / ${checksUtil.nameFromDirectory([path: path])}"
+    checksUtil.pending name: name
+
+    def command = [
+        "kubectl rollout restart deployment ${settings.deploy.name}",
+        "kubectl rollout status deployment ${settings.deploy.name} --timeout=30s",
+    ].join(' && ')
+
+    def successRet = false
+    def summary = """
+```sh
+${command}
+```
+""".trim()
+
+    try {
+        withCredentials([sshUserPrivateKey(credentialsId: 'app-server-ssh', keyFileVariable: 'SSH_KEY',
+            usernameVariable: 'SSH_USER_HOST')]) {
+            sh "ssh -o StrictHostKeyChecking=no -i \$SSH_KEY \$SSH_USER_HOST '${command}'"
+        }
+        checksUtil.success name: name, summary: summary
+        successRet = true
+    } catch (err) {
+        echo "${err}"
+        pipelineUtil.failStage()
+        checksUtil.failed name: name, summary: summary
+    }
+
+    return successRet
+}
+
 def execute(Map params = [:]) {
     def dockerCredentialsId = params.dockerCredentialsId
     def attributes = params.attributes
@@ -192,6 +227,19 @@ def executeDir(Map params = [:]) {
         stage("image ${path}") {
             def success = dockerUtil.image path: path, settings: settings,
                 credId: dockerCredentialsId, latest: pushLatest
+            allSuccessful &= success
+            attributes["image-push:${path}".toString()] = success
+        }
+    }
+
+    def shouldDeploy = (
+        attributes["image-push:${path}".toString()] 
+        && attributes['default']
+    ) || attributes["deploy:${path}".toString()]
+
+    if (settings.deploy?.enabled && shouldDeploy) {
+        stage("deploy ${path}") {
+            def success = deploy path: path, settings: settings
             allSuccessful &= success
         }
     }
