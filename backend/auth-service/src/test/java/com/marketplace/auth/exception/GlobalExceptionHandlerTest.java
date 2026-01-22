@@ -1,8 +1,7 @@
-package com.marketplace.auth.controller;
+package com.marketplace.auth.exception;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.marketplace.auth.exception.InvalidLoginException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

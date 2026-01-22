@@ -9,10 +9,13 @@ import com.marketplace.auth.client.dto.UserResponse;
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
+import com.marketplace.auth.exception.InvalidLoginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * Service for handling user authentication.
@@ -47,7 +50,7 @@ public class AuthService {
         CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .passwordHash(passwordEncoder.encode(request.getPassword())) // encode
                 .role("USER")
                 .build();
 
@@ -82,17 +85,21 @@ public class AuthService {
         log.info("Login attempt for: {}", request.getEmail());
 
         // Get user from user-service (including password hash)
-        AuthUserResponse user = userServiceClient.getUserForAuth(request.getEmail());
+        Optional<AuthUserResponse> userOp = userServiceClient.getUserForAuth(request.getEmail());
 
-        if (user == null) {
+        if (userOp.isEmpty()) {
             log.warn("User not found or service unavailable: {}", request.getEmail());
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidLoginException("Invalid email or password");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (!passwordEncoder.matches(request.getPassword(), userOp.get().getPasswordHash())) {
+            log.debug("Password hash: {}", userOp.get().getPasswordHash());
+            log.debug("Inputted hash: {}", passwordEncoder.encode(request.getPassword()));
             log.warn("Invalid password for user: {}", request.getEmail());
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidLoginException("Invalid email");
         }
+
+        AuthUserResponse user = userOp.get();
 
         log.info("User authenticated: {} (role: {})", user.getUsername(), user.getRole());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole());

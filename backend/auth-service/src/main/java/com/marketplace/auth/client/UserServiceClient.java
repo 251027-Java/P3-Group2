@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Optional;
+
 /**
  * Feign client for communicating with the User Service.
  * Allows auth-service to create and retrieve users.
@@ -23,8 +25,8 @@ public interface UserServiceClient {
      * @param email the user's email
      * @return the user details including password hash
      */
-    @GetMapping("/api/users/email/{email}")
-    AuthUserResponse getUserForAuth(@PathVariable("email") String email);
+    @GetMapping("/api/users/internal/email/{email}")
+    Optional<AuthUserResponse> getUserForAuth(@PathVariable("email") String email);
 
     /**
      * Creates a new user.

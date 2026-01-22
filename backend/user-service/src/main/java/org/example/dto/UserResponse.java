@@ -30,4 +30,13 @@ public class UserResponse {
         response.setCreatedAt(user.getCreatedAt());
         return response;
     }
+
+    public static UserResponse fromAuthUser(AuthUserResponse authUser) {
+        UserResponse response = new UserResponse();
+        response.setUserId(authUser.getUserId());
+        response.setEmail(authUser.getEmail());
+        response.setUsername(authUser.getUsername());
+        response.setRole(authUser.getRole());
+        return response;
+    }
 }

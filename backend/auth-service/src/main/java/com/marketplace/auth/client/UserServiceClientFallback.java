@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * Fallback implementation for UserServiceClient.
  * Used when the user-service is unavailable.
@@ -17,14 +19,14 @@ public class UserServiceClientFallback implements UserServiceClient {
     private static final Logger log = LoggerFactory.getLogger(UserServiceClientFallback.class);
 
     @Override
-    public AuthUserResponse getUserForAuth(String email) {
-        log.warn("User service unavailable. Cannot retrieve user for auth: {}", email);
-        return null;
+    public Optional<AuthUserResponse> getUserForAuth(String email) {
+        log.warn("User service unavailable or user not found. Cannot retrieve user for auth: {}", email);
+        return Optional.empty();
     }
 
     @Override
     public UserResponse createUser(CreateUserRequest request) {
-        log.error("User service unavailable. Cannot create user: {}", request.getEmail());
+        log.error("User service unavailable or user already exists. Cannot create user: {}", request.getEmail());
         return null;
     }
 }

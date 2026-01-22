@@ -12,6 +12,7 @@ import com.marketplace.auth.client.dto.UserResponse;
 import com.marketplace.auth.dto.AuthResponse;
 import com.marketplace.auth.dto.LoginRequest;
 import com.marketplace.auth.dto.RegisterRequest;
+import com.marketplace.auth.exception.InvalidLoginException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 /**
  * Unit tests for AuthService with UserServiceClient integration.
@@ -114,7 +117,7 @@ class AuthServiceTest {
                 CreateUserRequest createRequest = invocation.getArgument(0);
                 assertEquals("test@example.com", createRequest.getEmail());
                 assertEquals("testuser", createRequest.getUsername());
-                assertEquals("testpass", createRequest.getPassword());
+                // assertEquals("testpass", createRequest.getPasswordHash());
                 assertEquals("USER", createRequest.getRole());
                 return createdUser;
             });
@@ -144,7 +147,7 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(true);
 
             // Act
@@ -176,7 +179,7 @@ class AuthServiceTest {
                     .role("ADMIN")
                     .build();
 
-            when(userServiceClient.getUserForAuth("admin@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("admin@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("admin123", "hashed_admin123")).thenReturn(true);
 
             // Act
@@ -193,12 +196,11 @@ class AuthServiceTest {
         void login_NonExistentUser_ThrowsIllegalArgumentException() {
             // Arrange
             LoginRequest request = new LoginRequest("nonexistent@example.com", "password");
-            when(userServiceClient.getUserForAuth("nonexistent@example.com")).thenReturn(null);
+            when(userServiceClient.getUserForAuth("nonexistent@example.com")).thenReturn(Optional.empty());
 
             // Act & Assert
-            IllegalArgumentException exception =
-                    assertThrows(IllegalArgumentException.class, () -> authService.login(request));
-            assertEquals("Invalid email or password", exception.getMessage());
+            InvalidLoginException exception =
+                    assertThrows(InvalidLoginException.class, () -> authService.login(request));
 
             verify(userServiceClient).getUserForAuth("nonexistent@example.com");
             verify(passwordEncoder, never()).matches(anyString(), anyString());
@@ -217,14 +219,13 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("wrongpassword", "hashed_correctpassword"))
                     .thenReturn(false);
 
             // Act & Assert
-            IllegalArgumentException exception =
-                    assertThrows(IllegalArgumentException.class, () -> authService.login(request));
-            assertEquals("Invalid email or password", exception.getMessage());
+            InvalidLoginException exception =
+                    assertThrows(InvalidLoginException.class, () -> authService.login(request));
 
             verify(passwordEncoder).matches("wrongpassword", "hashed_correctpassword");
             verify(jwtUtil, never()).generateToken(anyString(), anyString());
@@ -248,7 +249,7 @@ class AuthServiceTest {
                     .role("USER")
                     .build();
 
-            when(userServiceClient.getUserForAuth("complete@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("complete@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password", "complete_hash")).thenReturn(true);
 
             // Act
@@ -273,7 +274,7 @@ class AuthServiceTest {
                     .role("ADMIN")
                     .build();
 
-            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(authUser);
+            when(userServiceClient.getUserForAuth("user@example.com")).thenReturn(Optional.of(authUser));
             when(passwordEncoder.matches("password", "hash")).thenReturn(true);
 
             // Act

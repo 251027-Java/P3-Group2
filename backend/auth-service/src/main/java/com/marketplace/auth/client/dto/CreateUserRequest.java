@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CreateUserRequest {
     private String email;
     private String username;
-    private String password;
+    private String passwordHash;
     private Double latitude;
     private Double longitude;
     private String role;
