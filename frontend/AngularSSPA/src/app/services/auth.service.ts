@@ -3,41 +3,55 @@ import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-interface AuthResponse{
-  token: string,
-  expiresIn: number,
-  username: string
+interface AuthResponse {
+  token: string;
+  expiresIn: number;
+  username: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private _isAuthenticated = false;
   private readonly TOKEN_KEY = 'dummy jwt';
+  username: string = '';
+  role: string = '';
 
   constructor(private http: HttpClient) {}
 
-  login(email:string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, {
-      email, password
-    }).pipe(
-      tap(response => {
-        this.setJWT(response.token);
-        this.setAuthentication(true);
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, {
+        email,
+        password,
       })
-    );
+      .pipe(
+        tap((response) => {
+          this.username = response.username;
+          this.setJWT(response.token);
+          this.setAuthentication(true);
+        }),
+      );
   }
 
-  register(email: string, username: string, password: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, {
-      email, username, password
-    }).pipe(
-      tap(response => {
-        this.setJWT(response.token);
-        this.setAuthentication(true);
+  register(
+    email: string,
+    username: string,
+    password: string,
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/api/auth/register`, {
+        email,
+        username,
+        password,
       })
-    );
+      .pipe(
+        tap((response) => {
+          this.setJWT(response.token);
+          this.setAuthentication(true);
+        }),
+      );
   }
 
   setAuthentication(status: boolean): void {

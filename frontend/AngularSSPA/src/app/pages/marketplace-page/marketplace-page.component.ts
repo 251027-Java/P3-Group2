@@ -1,41 +1,82 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth.service';
+
+interface ListingResponse {
+  listingId: number;
+  ownerUserId: number;
+  cardId: number;
+  conditionRating: number;
+  listingStatus: string;
+  createdAt: string;
+}
+
+interface CardResponse {
+  cardId: number;
+  name: string;
+  cleanName: string;
+  imageUrl: string;
+  setId: number;
+  categoryId: number;
+  price: number;
+}
+
+interface ListingCardView {
+  listingId: number;
+  cardId: number;
+  name: string;
+  imageUrl: string;
+  conditionRating: number;
+  price?: number;
+}
+
+interface UserResponse {
+  userId?: number;
+  id?: number;
+  username?: string;
+}
 
 declare const System: any;
 
 @Component({
   selector: 'app-marketplace-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './marketplace-page.component.html',
-  styleUrl: './marketplace-page.component.css'
+  styleUrl: './marketplace-page.component.css',
 })
-export class MarketplacePageComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('reactNavbarContainer', { static: false }) reactNavbarContainer?: ElementRef;
+export class MarketplacePageComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
+  @ViewChild('reactNavbarContainer', { static: false })
+  reactNavbarContainer?: ElementRef;
   private navbarMfe: any;
   private mountedParcel: any;
 
-  cards = [
-    { id: 1, title: 'Charizard', color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)' },
-    { id: 2, title: 'Blastoise', color: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
-    { id: 3, title: 'Venusaur', color: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
-    { id: 4, title: 'Pikachu', color: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)' },
-    { id: 5, title: 'Mewtwo', color: 'linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)' },
-    { id: 6, title: 'Gengar', color: 'linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%)' }
-  ];
-
-  async ngOnInit() {
-    try {
-      // Load the React navbar micro-frontend
-      this.navbarMfe = await System.import('@marketplace/mfe-react-navbar');
-      console.log('React navbar MFE loaded successfully');
-      
-      // Mount immediately after loading if view is ready
-      setTimeout(() => this.mountNavbar(), 0);
-    } catch (error) {
-      console.error('Failed to load React navbar MFE:', error);
-    }
-  }
+  isListModalOpen = false;
+  isLoading = true;
+  loadError = '';
+  listings: ListingCardView[] = [];
+  listingError = '';
+  listingSuccess = '';
+  cardSearchTerm = '';
+  cardSearchResults: CardResponse[] = [];
+  selectedCard: CardResponse | null = null;
+  conditionRating = 8;
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngAfterViewInit() {
     console.log('ngAfterViewInit called');
@@ -47,23 +88,23 @@ export class MarketplacePageComponent implements OnInit, AfterViewInit, OnDestro
     console.log('Attempting to mount navbar');
     console.log('navbarMfe:', this.navbarMfe);
     console.log('reactNavbarContainer:', this.reactNavbarContainer);
-    
+
     if (this.navbarMfe && this.reactNavbarContainer) {
       try {
         const containerElement = this.reactNavbarContainer.nativeElement;
         console.log('Container element:', containerElement);
-        
+
         // Bootstrap the navbar with props
         await this.navbarMfe.bootstrap({
           name: '@marketplace/mfe-react-navbar',
-          domElement: containerElement
+          domElement: containerElement,
         });
         console.log('Bootstrap complete');
-        
+
         // Mount the React navbar with props
         await this.navbarMfe.mount({
           name: '@marketplace/mfe-react-navbar',
-          domElement: containerElement
+          domElement: containerElement,
         });
         console.log('React navbar mounted successfully');
       } catch (error) {
@@ -85,5 +126,198 @@ export class MarketplacePageComponent implements OnInit, AfterViewInit, OnDestro
         console.error('Failed to unmount React navbar:', error);
       }
     }
+  }
+
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
+
+  async ngOnInit() {
+    this.loadListings();
+    try {
+      // Load the React navbar micro-frontend
+      this.navbarMfe = await System.import('@marketplace/mfe-react-navbar');
+      console.log('React navbar MFE loaded successfully');
+
+      // Mount immediately after loading if view is ready
+      setTimeout(() => this.mountNavbar(), 0);
+    } catch (error) {
+      console.error('Failed to load React navbar MFE:', error);
+    }
+  }
+
+  openListModal(): void {
+    this.isListModalOpen = true;
+    this.listingError = '';
+    this.listingSuccess = '';
+  }
+
+  closeListModal(): void {
+    this.isListModalOpen = false;
+    this.cardSearchTerm = '';
+    this.cardSearchResults = [];
+    this.selectedCard = null;
+    this.conditionRating = 8;
+  }
+
+  onCardSearch(value: string): void {
+    this.cardSearchTerm = value;
+    this.listingError = '';
+    this.listingSuccess = '';
+
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+
+    if (value.trim().length < 2) {
+      this.cardSearchResults = [];
+      return;
+    }
+
+    this.searchTimer = setTimeout(() => {
+      this.http
+        .get<CardResponse[]>(
+          `${environment.apiUrl}/api/cards?name=${encodeURIComponent(value.trim())}`,
+          { headers: this.getAuthHeaders() },
+        )
+        .pipe(catchError(() => of([])))
+        .subscribe((results) => {
+          this.cardSearchResults = results.slice(0, 8);
+        });
+    }, 250);
+  }
+
+  selectCard(card: CardResponse): void {
+    this.selectedCard = card;
+    this.cardSearchTerm = card.name;
+    this.cardSearchResults = [];
+  }
+
+  submitListing(): void {
+    if (!this.selectedCard) {
+      this.listingError = 'Select a card before publishing.';
+      return;
+    }
+
+    this.resolveOwnerUserId().subscribe({
+      next: (ownerUserId) => {
+        const payload = {
+          ownerUserId,
+          cardId: this.selectedCard!.cardId,
+          conditionRating: this.conditionRating,
+        };
+
+        this.http
+          .post(`${environment.apiUrl}/api/listings`, payload, {
+            headers: this.getAuthHeaders(),
+          })
+          .subscribe({
+            next: () => {
+              this.listingSuccess = 'Listing published.';
+              this.loadListings();
+              setTimeout(() => this.closeListModal(), 800);
+            },
+            error: () => {
+              this.listingError = 'Unable to publish listing.';
+            },
+          });
+      },
+      error: () => {
+        this.listingError = 'Login required to publish a listing.';
+      },
+    });
+  }
+
+  private loadListings(): void {
+    this.isLoading = true;
+    this.loadError = '';
+
+    this.http
+      .get<ListingResponse[]>(`${environment.apiUrl}/api/listings/active`, {
+        headers: this.getAuthHeaders(),
+      })
+      .pipe(
+        switchMap((listings) => {
+          if (!listings.length) {
+            return of({ listings, cards: [] as (CardResponse | null)[] });
+          }
+          const cardIds = Array.from(
+            new Set(listings.map((listing) => listing.cardId)),
+          );
+          return forkJoin(
+            cardIds.map((cardId) =>
+              this.http
+                .get<CardResponse>(
+                  `${environment.apiUrl}/api/cards/${cardId}`,
+                  { headers: this.getAuthHeaders() },
+                )
+                .pipe(catchError(() => of(null))),
+            ),
+          ).pipe(map((cards) => ({ listings, cards })));
+        }),
+      )
+      .subscribe({
+        next: ({ listings, cards }) => {
+          const cardMap = new Map<number, CardResponse>();
+          cards
+            .filter(Boolean)
+            .forEach((card) => cardMap.set(card!.cardId, card!));
+          this.listings = listings.map((listing) => {
+            const card = cardMap.get(listing.cardId);
+            return {
+              listingId: listing.listingId,
+              cardId: listing.cardId,
+              name: card?.name ?? 'Unknown card',
+              imageUrl: card?.imageUrl ?? '',
+              conditionRating: listing.conditionRating,
+              price: card?.price,
+            };
+          });
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+          this.loadError = 'Unable to load listings right now.';
+        },
+      });
+  }
+
+  private resolveOwnerUserId() {
+    const username = this.auth.username;
+    if (!username) {
+      return of(null).pipe(
+        switchMap(() => {
+          throw new Error('Missing username');
+        }),
+      );
+    }
+
+    return this.http
+      .get<UserResponse>(
+        `${environment.apiUrl}/api/users/username/${encodeURIComponent(username)}`,
+        {
+          headers: this.getAuthHeaders(),
+        },
+      )
+      .pipe(
+        map((user) => user.userId ?? user.id ?? 0),
+        switchMap((id) => {
+          if (!id) {
+            throw new Error('Missing user id');
+          }
+          return of(id);
+        }),
+      );
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.auth.getToken();
+    if (!token) {
+      return new HttpHeaders();
+    }
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
   }
 }
